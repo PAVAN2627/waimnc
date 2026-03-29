@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { isFirebaseConfigured } from "@/lib/firebase";
+import AutoTranslateButton from "@/components/AutoTranslateButton";
 import {
   subscribeToSchemes, createScheme, deleteScheme, updateScheme,
   type SchemeRecord, type SchemeCategory,
@@ -178,51 +179,53 @@ const AdminSchemes = () => {
                 </div>
               </div>
 
-              {/* Row 2: titles */}
+              {/* English fields */}
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">English</p>
+              <div className="grid md:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium block mb-1">Title (English)</label>
+                  <input className={inputCls} value={form.titleEn} onChange={(e) => setForm((f) => ({ ...f, titleEn: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1">Description (English)</label>
+                  <textarea rows={3} className={inputCls + " resize-none"} value={form.descEn} onChange={(e) => setForm((f) => ({ ...f, descEn: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1">Eligibility (English)</label>
+                  <textarea rows={3} className={inputCls + " resize-none"} placeholder="One condition per line" value={form.eligibilityEn} onChange={(e) => setForm((f) => ({ ...f, eligibilityEn: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1">Benefits (English)</label>
+                  <textarea rows={3} className={inputCls + " resize-none"} value={form.benefitsEn} onChange={(e) => setForm((f) => ({ ...f, benefitsEn: e.target.value }))} />
+                </div>
+              </div>
+
+              {/* Translate All */}
+              <AutoTranslateButton fields={[
+                { value: form.titleEn, onTranslated: (v) => setForm((f) => ({ ...f, titleMr: v })) },
+                { value: form.descEn, onTranslated: (v) => setForm((f) => ({ ...f, descMr: v })) },
+                { value: form.eligibilityEn, onTranslated: (v) => setForm((f) => ({ ...f, eligibilityMr: v })) },
+                { value: form.benefitsEn, onTranslated: (v) => setForm((f) => ({ ...f, benefitsMr: v })) },
+              ]} />
+
+              {/* Marathi fields */}
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">मराठी</p>
               <div className="grid md:grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium block mb-1">{t("शीर्षक (मराठी) *", "Title (Marathi) *")}</label>
                   <input required className={inputCls} value={form.titleMr} onChange={(e) => setForm((f) => ({ ...f, titleMr: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("शीर्षक (इंग्रजी)", "Title (English)")}</label>
-                  <input className={inputCls} value={form.titleEn} onChange={(e) => setForm((f) => ({ ...f, titleEn: e.target.value }))} />
-                </div>
-              </div>
-
-              {/* Row 3: descriptions */}
-              <div className="grid md:grid-cols-2 gap-3">
-                <div>
                   <label className="text-sm font-medium block mb-1">{t("वर्णन (मराठी)", "Description (Marathi)")}</label>
                   <textarea rows={3} className={inputCls + " resize-none"} value={form.descMr} onChange={(e) => setForm((f) => ({ ...f, descMr: e.target.value }))} />
                 </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">{t("वर्णन (इंग्रजी)", "Description (English)")}</label>
-                  <textarea rows={3} className={inputCls + " resize-none"} value={form.descEn} onChange={(e) => setForm((f) => ({ ...f, descEn: e.target.value }))} />
-                </div>
-              </div>
-
-              {/* Row 4: eligibility */}
-              <div className="grid md:grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium block mb-1">{t("पात्रता (मराठी)", "Eligibility (Marathi)")}</label>
                   <textarea rows={3} className={inputCls + " resize-none"} placeholder={t("प्रत्येक ओळीत एक अट", "One condition per line")} value={form.eligibilityMr} onChange={(e) => setForm((f) => ({ ...f, eligibilityMr: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("पात्रता (इंग्रजी)", "Eligibility (English)")}</label>
-                  <textarea rows={3} className={inputCls + " resize-none"} placeholder="One condition per line" value={form.eligibilityEn} onChange={(e) => setForm((f) => ({ ...f, eligibilityEn: e.target.value }))} />
-                </div>
-              </div>
-
-              {/* Row 5: benefits */}
-              <div className="grid md:grid-cols-2 gap-3">
-                <div>
                   <label className="text-sm font-medium block mb-1">{t("फायदे (मराठी)", "Benefits (Marathi)")}</label>
                   <textarea rows={3} className={inputCls + " resize-none"} value={form.benefitsMr} onChange={(e) => setForm((f) => ({ ...f, benefitsMr: e.target.value }))} />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">{t("फायदे (इंग्रजी)", "Benefits (English)")}</label>
-                  <textarea rows={3} className={inputCls + " resize-none"} value={form.benefitsEn} onChange={(e) => setForm((f) => ({ ...f, benefitsEn: e.target.value }))} />
                 </div>
               </div>
 

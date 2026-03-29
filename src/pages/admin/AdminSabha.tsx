@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { isFirebaseConfigured } from "@/lib/firebase";
+import AutoTranslateButton from "@/components/AutoTranslateButton";
 import {
   subscribeToSabha, createSabha, deleteSabha, updateSabha,
   type SabhaRecord, type SabhaType,
@@ -154,13 +155,16 @@ const AdminSabha = () => {
               </div>
               <div className="grid md:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("शीर्षक (मराठी) *", "Title (Marathi) *")}</label>
-                  <input required className={inputCls} value={form.titleMr} onChange={(e) => setForm((f) => ({ ...f, titleMr: e.target.value }))} />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">{t("शीर्षक (इंग्रजी)", "Title (English)")}</label>
+                  <label className="text-sm font-medium block mb-1">Title (English)</label>
                   <input className={inputCls} value={form.titleEn} onChange={(e) => setForm((f) => ({ ...f, titleEn: e.target.value }))} />
                 </div>
+              </div>
+              <AutoTranslateButton fields={[
+                { value: form.titleEn, onTranslated: (v) => setForm((f) => ({ ...f, titleMr: v })) },
+              ]} />
+              <div>
+                <label className="text-sm font-medium block mb-1">{t("शीर्षक (मराठी) *", "Title (Marathi) *")}</label>
+                <input required className={inputCls} value={form.titleMr} onChange={(e) => setForm((f) => ({ ...f, titleMr: e.target.value }))} />
               </div>
               <div className="grid md:grid-cols-2 gap-3">
                 <div>
