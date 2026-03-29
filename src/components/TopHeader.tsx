@@ -24,7 +24,8 @@ const TopHeader = () => {
     if (notice.attachmentBase64) {
       window.open(notice.attachmentBase64, "_blank", "noopener,noreferrer");
     } else if (notice.externalUrl) {
-      window.open(notice.externalUrl, "_blank", "noopener,noreferrer");
+      const url = notice.externalUrl.match(/^https?:\/\//) ? notice.externalUrl : `https://${notice.externalUrl}`;
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 

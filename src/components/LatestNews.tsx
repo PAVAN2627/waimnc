@@ -65,30 +65,36 @@ const LatestNews = () => {
             </div>
           ) : (
             <div className="space-y-0 divide-y divide-border">
-              {[...news, ...news].map((item, i) => (
-                <a
-                  key={i}
-                  href={item.externalUrl || "#"}
-                  target={item.externalUrl ? "_blank" : undefined}
-                  rel={item.externalUrl ? "noopener noreferrer" : undefined}
-                  className="flex items-start gap-4 p-4 hover:bg-accent/50 transition-colors group"
-                >
-                  <div className="flex-shrink-0 bg-primary/10 rounded-lg p-2.5">
-                    <CalendarDays className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground mb-1">
-                      {lang === "mr" ? item.date : item.dateEn}
-                    </p>
-                    <p className="text-sm font-medium group-hover:text-primary transition-colors">
-                      {lang === "mr" ? item.title : item.titleEn}
-                    </p>
-                  </div>
-                  <span className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded-full flex-shrink-0">
-                    {lang === "mr" ? item.tag : item.tagEn}
-                  </span>
-                </a>
-              ))}
+              {(news.length >= 4 ? [...news, ...news] : news).map((item, i) => {
+                const url = item.externalUrl
+                  ? item.externalUrl.match(/^https?:\/\//) ? item.externalUrl : `https://${item.externalUrl}`
+                  : null;
+                return (
+                  <a
+                    key={i}
+                    href={url || "#"}
+                    target={url ? "_blank" : undefined}
+                    rel={url ? "noopener noreferrer" : undefined}
+                    onClick={!url ? (e) => e.preventDefault() : undefined}
+                    className="flex items-start gap-4 p-4 hover:bg-accent/50 transition-colors group"
+                  >
+                    <div className="flex-shrink-0 bg-primary/10 rounded-lg p-2.5">
+                      <CalendarDays className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {lang === "mr" ? item.date : item.dateEn}
+                      </p>
+                      <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                        {lang === "mr" ? item.title : item.titleEn}
+                      </p>
+                    </div>
+                    <span className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded-full flex-shrink-0">
+                      {lang === "mr" ? item.tag : item.tagEn}
+                    </span>
+                  </a>
+                );
+              })}
             </div>
           )}
         </div>

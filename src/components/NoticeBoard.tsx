@@ -67,7 +67,7 @@ const NoticeBoard = () => {
                         )}
                         {notice.externalUrl && (
                           <a
-                            href={notice.externalUrl}
+                            href={notice.externalUrl.match(/^https?:\/\//) ? notice.externalUrl : `https://${notice.externalUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-md font-medium hover:bg-primary/20 transition-colors"
@@ -93,8 +93,26 @@ const NoticeBoard = () => {
                       </div>
                     </div>
                     <div className="flex-shrink-0 mt-1">
-                      {notice.attachmentType === "pdf" && <FileText className="w-4 h-4 text-destructive" />}
-                      {notice.externalUrl && <ExternalLink className="w-4 h-4 text-primary" />}
+                      {notice.attachmentType === "pdf" && notice.attachmentBase64 && (
+                        <a href={notice.attachmentBase64} target="_blank" rel="noopener noreferrer" title={t("PDF उघडा", "Open PDF")}>
+                          <FileText className="w-5 h-5 text-destructive hover:opacity-70 transition-opacity" />
+                        </a>
+                      )}
+                      {notice.externalUrl && (
+                        <a
+                          href={notice.externalUrl.match(/^https?:\/\//) ? notice.externalUrl : `https://${notice.externalUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={t("लिंक उघडा", "Open Link")}
+                        >
+                          <ExternalLink className="w-5 h-5 text-primary hover:opacity-70 transition-opacity" />
+                        </a>
+                      )}
+                      {notice.attachmentType === "image" && notice.attachmentBase64 && (
+                        <a href={notice.attachmentBase64} target="_blank" rel="noopener noreferrer" title={t("प्रतिमा पहा", "View Image")}>
+                          <ImageIcon className="w-5 h-5 text-emerald-600 hover:opacity-70 transition-opacity" />
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
