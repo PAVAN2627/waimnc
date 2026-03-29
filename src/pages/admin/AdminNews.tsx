@@ -77,31 +77,24 @@ const AdminNews = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            {/* English fields */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">English</p>
             <div className="grid md:grid-cols-2 gap-3">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-muted-foreground">{t("शीर्षक (मराठी) *", "Title (Marathi) *")}</span>
-                  <AutoTranslateButton sourceValue={form.titleEn} onTranslated={(v) => setForm((f) => ({ ...f, title: v }))} />
-                </div>
-                <input className={inputCls} placeholder={t("शीर्षक (मराठी) *", "Title (Marathi) *")} value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Title (English)</label>
-                <input className={inputCls} placeholder="Title (English)" value={form.titleEn} onChange={(e) => setForm((f) => ({ ...f, titleEn: e.target.value }))} />
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-muted-foreground">{t("टॅग (मराठी)", "Tag (Marathi)")}</span>
-                  <AutoTranslateButton sourceValue={form.tagEn} onTranslated={(v) => setForm((f) => ({ ...f, tag: v }))} />
-                </div>
-                <input className={inputCls} placeholder={t("टॅग (मराठी)", "Tag (Marathi)")} value={form.tag} onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Tag (English)</label>
-                <input className={inputCls} placeholder="Tag (English)" value={form.tagEn} onChange={(e) => setForm((f) => ({ ...f, tagEn: e.target.value }))} />
-              </div>
-              <input className={inputCls} placeholder={t("तारीख (मराठी)", "Date (Marathi)")} value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} />
+              <input className={inputCls} placeholder="Title (English)" value={form.titleEn} onChange={(e) => setForm((f) => ({ ...f, titleEn: e.target.value }))} />
+              <input className={inputCls} placeholder="Tag (English)" value={form.tagEn} onChange={(e) => setForm((f) => ({ ...f, tagEn: e.target.value }))} />
               <input className={inputCls} placeholder="Date (English)" value={form.dateEn} onChange={(e) => setForm((f) => ({ ...f, dateEn: e.target.value }))} />
+            </div>
+            {/* Translate All button */}
+            <AutoTranslateButton fields={[
+              { value: form.titleEn, onTranslated: (v) => setForm((f) => ({ ...f, title: v })) },
+              { value: form.tagEn, onTranslated: (v) => setForm((f) => ({ ...f, tag: v })) },
+            ]} />
+            {/* Marathi fields */}
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">मराठी</p>
+            <div className="grid md:grid-cols-2 gap-3">
+              <input className={inputCls} placeholder={t("शीर्षक (मराठी) *", "Title (Marathi) *")} value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+              <input className={inputCls} placeholder={t("टॅग (मराठी)", "Tag (Marathi)")} value={form.tag} onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value }))} />
+              <input className={inputCls} placeholder={t("तारीख (मराठी)", "Date (Marathi)")} value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} />
             </div>
             <input className={inputCls} placeholder={t("बाह्य लिंक (URL, ऐच्छिक)", "External URL (optional)")} value={form.externalUrl} onChange={(e) => setForm((f) => ({ ...f, externalUrl: e.target.value }))} />
             <div className="flex gap-2">

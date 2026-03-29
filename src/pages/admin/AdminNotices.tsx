@@ -85,45 +85,23 @@ const AdminNotices = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">English</p>
             <div className="grid md:grid-cols-2 gap-3">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-muted-foreground">{t("शीर्षक (मराठी) *", "Title (Marathi) *")}</span>
-                  <AutoTranslateButton sourceValue={form.titleEn} onTranslated={(v) => setForm((f) => ({ ...f, title: v }))} />
-                </div>
-                <Input placeholder={t("शीर्षक (मराठी) *", "Title (Marathi) *")} value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Title (English)</label>
-                <Input placeholder="Title (English)" value={form.titleEn} onChange={(e) => setForm((f) => ({ ...f, titleEn: e.target.value }))} />
-              </div>
+              <Input placeholder="Title (English)" value={form.titleEn} onChange={(e) => setForm((f) => ({ ...f, titleEn: e.target.value }))} />
+              <Input placeholder="Tag (English)" value={form.tagEn} onChange={(e) => setForm((f) => ({ ...f, tagEn: e.target.value }))} />
             </div>
+            <Textarea placeholder="Content (English)" value={form.contentEn} onChange={(e) => setForm((f) => ({ ...f, contentEn: e.target.value }))} rows={3} />
+            <AutoTranslateButton fields={[
+              { value: form.titleEn, onTranslated: (v) => setForm((f) => ({ ...f, title: v })) },
+              { value: form.tagEn, onTranslated: (v) => setForm((f) => ({ ...f, tag: v })) },
+              { value: form.contentEn, onTranslated: (v) => setForm((f) => ({ ...f, content: v })) },
+            ]} />
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">मराठी</p>
             <div className="grid md:grid-cols-2 gap-3">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-muted-foreground">{t("मजकूर (मराठी) *", "Content (Marathi) *")}</span>
-                  <AutoTranslateButton sourceValue={form.contentEn} onTranslated={(v) => setForm((f) => ({ ...f, content: v }))} />
-                </div>
-                <Textarea placeholder={t("मजकूर (मराठी) *", "Content (Marathi) *")} value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} rows={3} />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Content (English)</label>
-                <Textarea placeholder="Content (English)" value={form.contentEn} onChange={(e) => setForm((f) => ({ ...f, contentEn: e.target.value }))} rows={3} />
-              </div>
+              <Input placeholder={t("शीर्षक (मराठी) *", "Title (Marathi) *")} value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+              <Input placeholder={t("टॅग (मराठी)", "Tag (Marathi)")} value={form.tag} onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value }))} />
             </div>
-            <div className="grid md:grid-cols-2 gap-3">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-muted-foreground">{t("टॅग (मराठी)", "Tag (Marathi)")}</span>
-                  <AutoTranslateButton sourceValue={form.tagEn} onTranslated={(v) => setForm((f) => ({ ...f, tag: v }))} />
-                </div>
-                <Input placeholder={t("टॅग (मराठी)", "Tag (Marathi)")} value={form.tag} onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Tag (English)</label>
-                <Input placeholder="Tag (English)" value={form.tagEn} onChange={(e) => setForm((f) => ({ ...f, tagEn: e.target.value }))} />
-              </div>
-            </div>
+            <Textarea placeholder={t("मजकूर (मराठी) *", "Content (Marathi) *")} value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} rows={3} />
             <Input placeholder={t("बाह्य लिंक (URL, ऐच्छिक)", "External URL (optional)")} value={form.externalUrl} onChange={(e) => setForm((f) => ({ ...f, externalUrl: e.target.value }))} />
             {!editingId && (
               <div>

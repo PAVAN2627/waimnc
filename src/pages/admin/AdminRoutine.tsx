@@ -134,28 +134,26 @@ const AdminRoutine = () => {
               </div>
               <div className="grid md:grid-cols-2 gap-3">
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-sm font-medium">{t("शीर्षक (मराठी) *", "Title (Marathi) *")}</label>
-                    <AutoTranslateButton sourceValue={form.titleEn} onTranslated={(v) => setForm((f) => ({ ...f, titleMr: v }))} />
-                  </div>
-                  <input required className={inputCls} value={form.titleMr} onChange={(e) => setForm((f) => ({ ...f, titleMr: e.target.value }))} />
-                </div>
-                <div>
                   <label className="text-sm font-medium block mb-1">{t("शीर्षक (इंग्रजी)", "Title (English)")}</label>
                   <input className={inputCls} value={form.titleEn} onChange={(e) => setForm((f) => ({ ...f, titleEn: e.target.value }))} />
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-3">
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-sm font-medium">{t("वर्णन (मराठी)", "Description (Marathi)")}</label>
-                    <AutoTranslateButton sourceValue={form.descEn} onTranslated={(v) => setForm((f) => ({ ...f, descMr: v }))} />
-                  </div>
-                  <textarea rows={3} className={inputCls + " resize-none"} value={form.descMr} onChange={(e) => setForm((f) => ({ ...f, descMr: e.target.value }))} />
                 </div>
                 <div>
                   <label className="text-sm font-medium block mb-1">{t("वर्णन (इंग्रजी)", "Description (English)")}</label>
                   <textarea rows={3} className={inputCls + " resize-none"} value={form.descEn} onChange={(e) => setForm((f) => ({ ...f, descEn: e.target.value }))} />
+                </div>
+              </div>
+              <AutoTranslateButton fields={[
+                { value: form.titleEn, onTranslated: (v) => setForm((f) => ({ ...f, titleMr: v })) },
+                { value: form.descEn, onTranslated: (v) => setForm((f) => ({ ...f, descMr: v })) },
+              ]} />
+              <div className="grid md:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium block mb-1">{t("शीर्षक (मराठी) *", "Title (Marathi) *")}</label>
+                  <input required className={inputCls} value={form.titleMr} onChange={(e) => setForm((f) => ({ ...f, titleMr: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1">{t("वर्णन (मराठी)", "Description (Marathi)")}</label>
+                  <textarea rows={3} className={inputCls + " resize-none"} value={form.descMr} onChange={(e) => setForm((f) => ({ ...f, descMr: e.target.value }))} />
                 </div>
               </div>
               <div>

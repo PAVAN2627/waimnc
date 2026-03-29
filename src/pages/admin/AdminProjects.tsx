@@ -171,28 +171,18 @@ const AdminProjects = () => {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid md:grid-cols-2 gap-3">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-muted-foreground">{t("प्रकल्प नाव (मराठी) *", "Project Name (Marathi) *")}</span>
-                <AutoTranslateButton sourceValue={newTitleEn} onTranslated={(v) => setNewTitleMr(v)} />
-              </div>
-              <Input placeholder={t("प्रकल्प नाव (मराठी) *", "Project Name (Marathi) *")} value={newTitleMr} onChange={(e) => setNewTitleMr(e.target.value)} />
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground block mb-1">Project Name (English)</label>
-              <Input placeholder="Project Name (English)" value={newTitleEn} onChange={(e) => setNewTitleEn(e.target.value)} />
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-muted-foreground">{t("वर्णन (मराठी)", "Description (Marathi)")}</span>
-                <AutoTranslateButton sourceValue={newDescEn} onTranslated={(v) => setNewDescMr(v)} />
-              </div>
-              <Input placeholder={t("वर्णन (मराठी)", "Description (Marathi)")} value={newDescMr} onChange={(e) => setNewDescMr(e.target.value)} />
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground block mb-1">Description (English)</label>
-              <Input placeholder="Description (English)" value={newDescEn} onChange={(e) => setNewDescEn(e.target.value)} />
-            </div>
+            <p className="col-span-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">English</p>
+            <Input placeholder="Project Name (English)" value={newTitleEn} onChange={(e) => setNewTitleEn(e.target.value)} />
+            <Input placeholder="Description (English)" value={newDescEn} onChange={(e) => setNewDescEn(e.target.value)} />
+          </div>
+          <AutoTranslateButton fields={[
+            { value: newTitleEn, onTranslated: (v) => setNewTitleMr(v) },
+            { value: newDescEn, onTranslated: (v) => setNewDescMr(v) },
+          ]} />
+          <div className="grid md:grid-cols-2 gap-3">
+            <p className="col-span-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">मराठी</p>
+            <Input placeholder={t("प्रकल्प नाव (मराठी) *", "Project Name (Marathi) *")} value={newTitleMr} onChange={(e) => setNewTitleMr(e.target.value)} />
+            <Input placeholder={t("वर्णन (मराठी)", "Description (Marathi)")} value={newDescMr} onChange={(e) => setNewDescMr(e.target.value)} />
           </div>
           <div className="grid md:grid-cols-2 gap-3">
             <div>

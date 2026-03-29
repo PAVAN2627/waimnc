@@ -20,12 +20,36 @@ const TopHeader = () => {
     return () => unsub();
   }, []);
 
-  const marqueeNotices = notices.length > 0
-    ? notices.map((n) => `📢 ${lang === "mr" ? n.title : (n.titleEn || n.title)}`).join("  |  ")
-    : t(
-        "📢 वाई नगर परिषदेत आपले स्वागत आहे",
-        "📢 Welcome to Wai Municipal Council"
-      );
+  const handleNoticeClick = (notice: NoticeRecord) => {
+    if (notice.attachmentBase64) {
+      window.open(notice.attachmentBase64, "_blank", "noopener,noreferrer");
+    } else if (notice.externalUrl) {
+      window.open(notice.externalUrl, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const marqueeContent = notices.length > 0
+    ? notices.map((n, i) => {
+        const title = lang === "mr" ? n.title : (n.titleEn || n.title);
+        const hasLink = n.attachmentBase64 || n.externalUrl;
+        return (
+          <span key={n.id}>
+            {hasLink ? (
+              <button
+                onClick={() => handleNoticeClick(n)}
+                className="hover:underline cursor-pointer font-medium"
+                title={title}
+              >
+                📢 {title}
+              </button>
+            ) : (
+              <span>📢 {title}</span>
+            )}
+            {i < notices.length - 1 && <span className="mx-4 opacity-50">|</span>}
+          </span>
+        );
+      })
+    : <span>{t("📢 वाई नगर परिषदेत आपले स्वागत आहे", "📢 Welcome to Wai Municipal Council")}</span>;
 
   return (
     <div className="gov-gradient text-primary-foreground text-sm">
@@ -46,7 +70,7 @@ const TopHeader = () => {
         <div className="flex items-center gap-3 overflow-hidden flex-1 mx-4">
           <Bell className="w-3.5 h-3.5 flex-shrink-0 animate-pulse" />
           <div className="overflow-hidden whitespace-nowrap flex-1">
-            <span className="marquee inline-block">{marqueeNotices}</span>
+            <span className="marquee inline-block">{marqueeContent}</span>
           </div>
         </div>
 
