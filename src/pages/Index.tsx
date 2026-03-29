@@ -4,7 +4,6 @@ import HeroSection from "@/components/HeroSection";
 import LeadershipSection from "@/components/LeadershipSection";
 import QuickServices from "@/components/QuickServices";
 import MayorRoutine from "@/components/MayorRoutine";
-import Officials from "@/components/Officials";
 import NoticeBoard from "@/components/NoticeBoard";
 import LatestNews from "@/components/LatestNews";
 import Projects from "@/components/Projects";
@@ -20,7 +19,6 @@ const Index = () => {
       <HeroSection />
       <QuickServices />
       <MayorRoutine />
-      <Officials />
       <LeadershipSection />
       <NoticeBoard />
       <LatestNews />
@@ -30,6 +28,7 @@ const Index = () => {
       <Footer />
     </div>
   );
+};
 };
 
 export default Index;

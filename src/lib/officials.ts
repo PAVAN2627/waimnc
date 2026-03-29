@@ -8,8 +8,9 @@ export interface OfficialRecord {
   id: string;
   nameMr: string;
   nameEn: string;
-  titleMr: string;
-  titleEn: string;
+  ward: string;       // e.g. "1" to "17"
+  party: string;      // e.g. "NCP", "BJP"
+  phone: string;
   photoBase64: string;
   order: number;
   status: "active" | "inactive";
@@ -26,8 +27,9 @@ function mapOfficial(id: string, d: Partial<OfficialRecord>): OfficialRecord {
     id,
     nameMr: d.nameMr ?? "",
     nameEn: d.nameEn ?? d.nameMr ?? "",
-    titleMr: d.titleMr ?? "",
-    titleEn: d.titleEn ?? d.titleMr ?? "",
+    ward: d.ward ?? "",
+    party: d.party ?? "",
+    phone: d.phone ?? "",
     photoBase64: d.photoBase64 ?? "",
     order: d.order ?? 99,
     status: d.status ?? "active",

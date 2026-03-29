@@ -2,6 +2,9 @@ import PageLayout from "@/components/PageLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, Users, MapPin, Phone, Award, Landmark, BookOpen } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import React from "react";
+import { isFirebaseConfigured } from "@/lib/firebase";
+import { subscribeToActiveOfficials, type OfficialRecord } from "@/lib/officials";
 
 export const Introduction = () => {
   const { t } = useLanguage();
@@ -375,34 +378,38 @@ export const ChiefOfficer = () => {
 };
 
 export const Corporators = () => {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
+  const [corporators, setCorporators] = React.useState<OfficialRecord[]>([]);
+
+  React.useEffect(() => {
+    if (!isFirebaseConfigured) return;
+    return subscribeToActiveOfficials(setCorporators);
+  }, []);
+
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold text-primary mb-4 text-center">{t("नगरसेवक", "Corporators")}</h1>
         <p className="text-center text-muted-foreground mb-10">{t("वाई नगर परिषदेचे निर्वाचित नगरसेवक", "Elected Corporators of Wai Municipal Council")}</p>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {[
-            { name: t("श्री. विजय जाधव", "Shri. Vijay Jadhav"), ward: t("प्रभाग क्र. १", "Ward No. 1"), party: t("राष्ट्रवादी", "NCP"), phone: "98XX-XXXXXX" },
-            { name: t("श्रीमती सुनीता शिंदे", "Smt. Sunita Shinde"), ward: t("प्रभाग क्र. २", "Ward No. 2"), party: t("शिवसेना", "Shiv Sena"), phone: "97XX-XXXXXX" },
-            { name: t("श्री. अमोल कुलकर्णी", "Shri. Amol Kulkarni"), ward: t("प्रभाग क्र. ३", "Ward No. 3"), party: t("भाजपा", "BJP"), phone: "96XX-XXXXXX" },
-            { name: t("श्रीमती माया पवार", "Smt. Maya Pawar"), ward: t("प्रभाग क्र. ४", "Ward No. 4"), party: t("काँग्रेस", "Congress"), phone: "95XX-XXXXXX" },
-            { name: t("श्री. राजेश मोरे", "Shri. Rajesh More"), ward: t("प्रभाग क्र. ५", "Ward No. 5"), party: t("अपक्ष", "Independent"), phone: "94XX-XXXXXX" },
-            { name: t("श्रीमती अंजली भोसले", "Smt. Anjali Bhosale"), ward: t("प्रभाग क्र. ६", "Ward No. 6"), party: t("राष्ट्रवादी", "NCP"), phone: "93XX-XXXXXX" },
-            { name: t("श्री. प्रकाश गायकवाड", "Shri. Prakash Gaikwad"), ward: t("प्रभाग क्र. ७", "Ward No. 7"), party: t("भाजपा", "BJP"), phone: "92XX-XXXXXX" },
-            { name: t("श्रीमती रेखा साळुंखे", "Smt. Rekha Salunkhe"), ward: t("प्रभाग क्र. ८", "Ward No. 8"), party: t("शिवसेना", "Shiv Sena"), phone: "91XX-XXXXXX" },
-          ].map((c) => (
-            <Card key={c.ward} className="hover:shadow-lg transition-all hover:-translate-y-1 group">
+          {corporators.length === 0 && (
+            <p className="text-sm text-muted-foreground col-span-4 text-center">{t("माहिती उपलब्ध नाही.", "No data available.")}</p>
+          )}
+          {corporators.map((c) => (
+            <Card key={c.id} className="hover:shadow-lg transition-all hover:-translate-y-1 group">
               <CardContent className="p-6 text-center">
-                <div className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-3 flex items-center justify-center text-3xl group-hover:bg-primary/20 transition-colors">
-                  👤
-                </div>
-                <h3 className="font-bold">{c.name}</h3>
-                <p className="text-primary text-sm font-medium">{c.ward}</p>
-                <span className="inline-block bg-accent text-accent-foreground text-xs px-2 py-0.5 rounded-full mt-1">{c.party}</span>
-                <p className="text-xs text-muted-foreground mt-2 flex items-center justify-center gap-1">
-                  <Phone className="w-3 h-3" /> {c.phone}
-                </p>
+                {c.photoBase64
+                  ? <img src={c.photoBase64} alt={c.nameMr} className="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-2 border-primary" />
+                  : <div className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-3 flex items-center justify-center text-3xl group-hover:bg-primary/20 transition-colors">👤</div>
+                }
+                <h3 className="font-bold">{lang === "mr" ? c.nameMr : (c.nameEn || c.nameMr)}</h3>
+                {c.ward && <p className="text-primary text-sm font-medium">{t(`वार्ड ${c.ward}`, `Ward ${c.ward}`)}</p>}
+                {c.party && <span className="inline-block bg-accent text-accent-foreground text-xs px-2 py-0.5 rounded-full mt-1">{c.party}</span>}
+                {c.phone && (
+                  <p className="text-xs text-muted-foreground mt-2 flex items-center justify-center gap-1">
+                    <Phone className="w-3 h-3" /> {c.phone}
+                  </p>
+                )}
               </CardContent>
             </Card>
           ))}

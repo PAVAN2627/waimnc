@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Phone } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { subscribeToActiveOfficials, type OfficialRecord } from "@/lib/officials";
@@ -17,16 +18,25 @@ const Officials = () => {
   return (
     <section className="py-12 bg-card">
       <div className="container mx-auto px-4">
-        <h2 className="text-2xl font-bold text-center mb-8">{t("मान्यवर", "Officials")}</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <h2 className="text-2xl font-bold text-center mb-2">{t("नगरसेवक", "Corporators")}</h2>
+        <p className="text-center text-muted-foreground text-sm mb-8">
+          {t("वाई नगर परिषदेचे निर्वाचित नगरसेवक", "Elected Corporators of Wai Municipal Council")}
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
           {officials.map((o) => (
             <div key={o.id} className="text-center">
               {o.photoBase64
-                ? <img src={o.photoBase64} alt={o.nameMr} className="w-28 h-28 mx-auto mb-3 rounded-lg object-cover border-2 border-gov-gold shadow-md" />
-                : <div className="w-28 h-28 mx-auto mb-3 rounded-lg bg-muted border-2 border-gov-gold flex items-center justify-center text-5xl shadow-md">👤</div>
+                ? <img src={o.photoBase64} alt={o.nameMr} className="w-24 h-24 mx-auto mb-2 rounded-full object-cover border-2 border-primary shadow-md" />
+                : <div className="w-24 h-24 mx-auto mb-2 rounded-full bg-muted border-2 border-primary flex items-center justify-center text-4xl shadow-md">👤</div>
               }
-              <h3 className="font-semibold text-sm">{lang === "mr" ? o.nameMr : (o.nameEn || o.nameMr)}</h3>
-              <p className="text-xs text-muted-foreground">{lang === "mr" ? o.titleMr : (o.titleEn || o.titleMr)}</p>
+              <h3 className="font-semibold text-sm leading-tight">{lang === "mr" ? o.nameMr : (o.nameEn || o.nameMr)}</h3>
+              {o.ward && <p className="text-xs text-primary font-medium mt-0.5">{t(`वार्ड ${o.ward}`, `Ward ${o.ward}`)}</p>}
+              {o.party && <span className="inline-block text-[10px] bg-accent px-2 py-0.5 rounded-full mt-0.5">{o.party}</span>}
+              {o.phone && (
+                <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center justify-center gap-0.5">
+                  <Phone className="h-2.5 w-2.5" />{o.phone}
+                </p>
+              )}
             </div>
           ))}
         </div>

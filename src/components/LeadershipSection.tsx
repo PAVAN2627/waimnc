@@ -1,5 +1,6 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 
+// Update names/photos here directly — fully static, no Firebase needed
 const LEADERS = [
   {
     nameMr: "नगराध्यक्ष नाव",
@@ -64,7 +65,6 @@ const LeadershipSection = () => {
 
             return (
               <div key={i} className="flex flex-col items-center text-center">
-                {/* Photo with colored ring */}
                 <div
                   className="rounded-full p-[3px] shadow-lg mb-3"
                   style={{ background: `linear-gradient(135deg, ${leader.accent}, #ccc)` }}
@@ -81,19 +81,13 @@ const LeadershipSection = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Name */}
                 <h3 className="text-sm font-bold leading-tight">{name}</h3>
-
-                {/* Role badge */}
                 <span
                   className="mt-2 text-[11px] font-semibold px-3 py-0.5 rounded-full text-white"
                   style={{ backgroundColor: leader.accent }}
                 >
                   {role}
                 </span>
-
-                {/* Sub label */}
                 <p className="text-[11px] text-muted-foreground mt-1 leading-tight">{sub}</p>
               </div>
             );

@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, ImageIcon, Pencil, X } from "lucide-react";
+import { Plus, Trash2, ImageIcon, Pencil, X, Phone } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { isFirebaseConfigured } from "@/lib/firebase";
-import {
-  subscribeToOfficials, createOfficial, deleteOfficial, updateOfficial,
-  type OfficialRecord,
-} from "@/lib/officials";
+import AutoTranslateButton from "@/components/AutoTranslateButton";
+import { subscribeToOfficials, createOfficial, deleteOfficial, updateOfficial, type OfficialRecord } from "@/lib/officials";
 
 function imageToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -32,7 +30,8 @@ function imageToBase64(file: File): Promise<string> {
   });
 }
 
-const empty = { nameMr: "", nameEn: "", titleMr: "", titleEn: "", photoBase64: "", order: 1, status: "active" as const };
+const WARDS = Array.from({ length: 17 }, (_, i) => String(i + 1));
+const empty = { nameMr: "", nameEn: "", ward: "", party: "", phone: "", photoBase64: "", order: 1, status: "active" as const };
 
 const AdminOfficials = () => {
   const { t } = useLanguage();
@@ -53,7 +52,6 @@ const AdminOfficials = () => {
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setForm((f) => ({ ...f, photoBase64: "" }));
     const base64 = await imageToBase64(file);
     setForm((f) => ({ ...f, photoBase64: base64 }));
     e.target.value = "";
@@ -61,7 +59,7 @@ const AdminOfficials = () => {
 
   const startEdit = (item: OfficialRecord) => {
     setEditingId(item.id);
-    setForm({ nameMr: item.nameMr, nameEn: item.nameEn, titleMr: item.titleMr, titleEn: item.titleEn, photoBase64: item.photoBase64, order: item.order, status: item.status });
+    setForm({ nameMr: item.nameMr, nameEn: item.nameEn, ward: item.ward, party: item.party, phone: item.phone, photoBase64: item.photoBase64, order: item.order, status: item.status });
     setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   };
 
@@ -69,16 +67,16 @@ const AdminOfficials = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nameMr || !form.titleMr) return;
+    if (!form.nameMr) return;
     try {
       setSaving(true);
       if (editingId) {
         await updateOfficial(editingId, form);
-        toast({ title: t("यशस्वी", "Success"), description: t("अधिकारी अद्यतनित केला.", "Official updated.") });
+        toast({ title: t("यशस्वी", "Success"), description: t("नगरसेवक अद्यतनित केला.", "Corporator updated.") });
         setEditingId(null);
       } else {
         await createOfficial(form);
-        toast({ title: t("यशस्वी", "Success"), description: t("अधिकारी जोडला.", "Official added.") });
+        toast({ title: t("यशस्वी", "Success"), description: t("नगरसेवक जोडला.", "Corporator added.") });
       }
       setForm(empty);
     } catch {
@@ -87,7 +85,7 @@ const AdminOfficials = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t("हे हटवायचे आहे का?", "Delete this official?"))) return;
+    if (!confirm(t("हे हटवायचे आहे का?", "Delete this corporator?"))) return;
     try {
       setDeleting(id);
       await deleteOfficial(id);
@@ -105,14 +103,13 @@ const AdminOfficials = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{t("अधिकारी व्यवस्थापन", "Officials Management")}</h1>
-
+      <h1 className="text-2xl font-bold">{t("नगरसेवक व्यवस्थापन", "Corporators Management")}</h1>
       <div ref={formRef}>
         <Card className={editingId ? "border-primary ring-1 ring-primary" : ""}>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               {editingId ? <Pencil className="h-4 w-4 text-primary" /> : <Plus className="h-4 w-4" />}
-              {editingId ? t("अधिकारी संपादित करा", "Edit Official") : t("नवीन अधिकारी जोडा", "Add Official")}
+              {editingId ? t("नगरसेवक संपादित करा", "Edit Corporator") : t("नवीन नगरसेवक जोडा", "Add Corporator")}
               {editingId && <Button type="button" variant="ghost" size="sm" className="ml-auto" onClick={cancelEdit}><X className="h-4 w-4" /></Button>}
             </CardTitle>
           </CardHeader>
@@ -120,22 +117,32 @@ const AdminOfficials = () => {
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="grid md:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("नाव (मराठी) *", "Name (Marathi) *")}</label>
-                  <input required className={inputCls} value={form.nameMr} onChange={(e) => setForm((f) => ({ ...f, nameMr: e.target.value }))} />
+                  <label className="text-sm font-medium block mb-1">Name (English)</label>
+                  <input className={inputCls} placeholder="Shri. Vijay Jadhav" value={form.nameEn} onChange={(e) => setForm((f) => ({ ...f, nameEn: e.target.value }))} />
                 </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">{t("नाव (इंग्रजी)", "Name (English)")}</label>
-                  <input className={inputCls} value={form.nameEn} onChange={(e) => setForm((f) => ({ ...f, nameEn: e.target.value }))} />
+                <div className="flex items-end pb-0.5">
+                  <AutoTranslateButton fields={[{ value: form.nameEn, onTranslated: (v) => setForm((f) => ({ ...f, nameMr: v })) }]} />
                 </div>
               </div>
-              <div className="grid md:grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium block mb-1">{t("नाव (मराठी) *", "Name (Marathi) *")}</label>
+                <input required className={inputCls} placeholder="श्री. विजय जाधव" value={form.nameMr} onChange={(e) => setForm((f) => ({ ...f, nameMr: e.target.value }))} />
+              </div>
+              <div className="grid md:grid-cols-3 gap-3">
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("पद (मराठी) *", "Title (Marathi) *")}</label>
-                  <input required className={inputCls} value={form.titleMr} onChange={(e) => setForm((f) => ({ ...f, titleMr: e.target.value }))} />
+                  <label className="text-sm font-medium block mb-1">{t("वार्ड क्र.", "Ward No.")}</label>
+                  <select className={inputCls} value={form.ward} onChange={(e) => setForm((f) => ({ ...f, ward: e.target.value }))}>
+                    <option value="">{t("निवडा", "Select")}</option>
+                    {WARDS.map((w) => <option key={w} value={w}>{t(`वार्ड ${w}`, `Ward ${w}`)}</option>)}
+                  </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("पद (इंग्रजी)", "Title (English)")}</label>
-                  <input className={inputCls} value={form.titleEn} onChange={(e) => setForm((f) => ({ ...f, titleEn: e.target.value }))} />
+                  <label className="text-sm font-medium block mb-1">{t("पक्ष", "Party")}</label>
+                  <input className={inputCls} placeholder="NCP / BJP / INC..." value={form.party} onChange={(e) => setForm((f) => ({ ...f, party: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1">{t("मोबाइल", "Phone")}</label>
+                  <input className={inputCls} placeholder="98XXXXXXXX" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-3">
@@ -167,19 +174,20 @@ const AdminOfficials = () => {
       </div>
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {items.length === 0 && <p className="text-sm text-muted-foreground col-span-3">{t("कोणतेही अधिकारी नाहीत.", "No officials yet.")}</p>}
+        {items.length === 0 && <p className="text-sm text-muted-foreground col-span-3">{t("कोणतेही नगरसेवक नाहीत.", "No corporators yet.")}</p>}
         {items.map((item) => (
           <Card key={item.id} className={editingId === item.id ? "border-primary ring-1 ring-primary" : ""}>
-            <CardContent className="p-4 text-center space-y-2">
+            <CardContent className="p-4 text-center space-y-1.5">
               {item.photoBase64
-                ? <img src={item.photoBase64} className="w-20 h-20 object-cover rounded-lg border-2 border-gov-gold mx-auto" />
-                : <div className="w-20 h-20 bg-muted rounded-lg border-2 border-gov-gold mx-auto flex items-center justify-center text-3xl">👤</div>
+                ? <img src={item.photoBase64} className="w-20 h-20 object-cover rounded-full border-2 border-primary mx-auto mb-2" />
+                : <div className="w-20 h-20 bg-muted rounded-full border-2 border-primary mx-auto mb-2 flex items-center justify-center text-3xl">👤</div>
               }
               <p className="font-semibold text-sm">{item.nameMr}</p>
               {item.nameEn && <p className="text-xs text-muted-foreground">{item.nameEn}</p>}
-              <p className="text-xs text-primary">{item.titleMr}</p>
-              <p className="text-xs text-muted-foreground">{t("क्रम", "Order")}: {item.order}</p>
-              <div className="flex items-center justify-center gap-2 flex-wrap">
+              {item.ward && <p className="text-xs text-primary font-medium">{t(`वार्ड ${item.ward}`, `Ward ${item.ward}`)}</p>}
+              {item.party && <span className="inline-block text-xs bg-accent px-2 py-0.5 rounded-full">{item.party}</span>}
+              {item.phone && <p className="text-xs text-muted-foreground flex items-center justify-center gap-1"><Phone className="h-3 w-3" />{item.phone}</p>}
+              <div className="flex items-center justify-center gap-2 pt-1">
                 <button onClick={() => toggleStatus(item)} className={`text-xs px-2 py-0.5 rounded-full ${item.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
                   {item.status === "active" ? t("सक्रिय", "Active") : t("निष्क्रिय", "Inactive")}
                 </button>
