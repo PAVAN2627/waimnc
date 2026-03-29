@@ -22,7 +22,7 @@ export const Introduction = () => {
             {[
               { icon: Landmark, value: "170+", label: t("वर्षे सेवा", "Years of Service") },
               { icon: Users, value: "40,000+", label: t("लोकसंख्या", "Population") },
-              { icon: MapPin, value: "8", label: t("प्रभाग", "Wards") },
+              { icon: MapPin, value: "17", label: t("वार्ड", "Wards") },
             ].map((s) => (
               <Card key={s.label} className="text-center hover:shadow-lg transition-all hover:-translate-y-1">
                 <CardContent className="p-8">
@@ -54,7 +54,7 @@ export const Introduction = () => {
               <div className="grid sm:grid-cols-2 gap-4 pt-4">
                 {[
                   { icon: Phone, label: t("संपर्क", "Contact"), value: "02167-220000" },
-                  { icon: MapPin, label: t("पत्ता", "Address"), value: t("मुख्य बाजारपेठ, वाई 412803", "Main Market, Wai 412803") },
+                  { icon: MapPin, label: t("पत्ता", "Address"), value: t("587b, मोतीबाग रोड, दाणेबाजार, गणपती आळी, वाई 412803", "587b, Motibag Rd, Danebazar, Ganpati Ali, Wai 412803") },
                 ].map((c) => (
                   <div key={c.label} className="flex items-center gap-3 bg-muted rounded-lg p-4">
                     <c.icon className="w-5 h-5 text-primary" />
@@ -75,27 +75,125 @@ export const Introduction = () => {
 
 export const History = () => {
   const { t } = useLanguage();
+
+  const sections = [
+    {
+      era: t("प्राचीन व पौराणिक काळ", "Ancient & Mythological Era"),
+      year: t("इ.स.पू.", "Ancient"),
+      emoji: "🏛️",
+      points: [
+        t("पांडव अज्ञातवासात विराट राजाच्या पदरी राहिले — वाईजवळचा पांडवगड त्याच काळातील मानला जातो. भीमकुंड व कृष्णा नदी परिसर या कथांशी जोडलेला आहे.",
+          "The Pandavas lived incognito at King Virat's court — Pandavgad near Wai is believed to be from that era. The Bhimkund and Krishna river area are linked to these legends."),
+        t("वाईच्या पश्चिमेला डोंगररांगांमध्ये प्राचीन लेणी आहेत — सातवाहन काळात किंवा त्याही आधी बौद्ध धर्माचा प्रभाव येथे होता.",
+          "Ancient caves exist in the hills west of Wai — evidence of Buddhist influence during the Satavahana period or earlier."),
+      ],
+    },
+    {
+      era: t("मध्ययुगीन व सुलतानी राजवट", "Medieval & Sultanate Rule"),
+      year: t("१०वे - १५वे शतक", "10th–15th Century"),
+      emoji: "⚔️",
+      points: [
+        t("१०व्या ते १३व्या शतकात कोल्हापूरच्या शिलाहार राजांचे येथे शासन होते. त्यांनीच पांडवगड व वैराटगड यांसारख्या किल्ल्यांचे बांधकाम सुरू केले.",
+          "The Shilahara kings of Kolhapur ruled here from the 10th to 13th century. They initiated construction of forts like Pandavgad and Vairatgad."),
+        t("१५व्या शतकानंतर वाई आदिलशाहीच्या अधिपत्याखाली आले. अफझल खान वाईचा सुभेदार होता — त्याने शिवाजी महाराजांविरुद्ध मोहिमेत वाईचा मुख्य तळ म्हणून वापर केला. 'अफझल खानाची विहीर' आजही त्या काळाची साक्ष देते.",
+          "After the 15th century, Wai came under the Adilshahi. Afzal Khan was the Subedar of Wai — he used the city as his main base against Shivaji Maharaj. 'Afzal Khan's Well' still stands as a witness to that era."),
+      ],
+    },
+    {
+      era: t("मराठा साम्राज्य व पेशवे काळ (सुवर्णकाळ)", "Maratha Empire & Peshwa Era (Golden Age)"),
+      year: t("१७वे - १८वे शतक", "17th–18th Century"),
+      emoji: "👑",
+      points: [
+        t("पुण्यानंतर वाई हे पेशव्यांचे सर्वात जवळचे व महत्त्वाचे शहर बनले. सरदार रास्ते घराण्याने येथे भव्य वाडे, रस्ते व मंदिरांची निर्मिती केली.",
+          "After Pune, Wai became the most important city for the Peshwas. The Raste family built grand mansions, roads and temples here."),
+        t("पेशवे काळात वाई हे कर्नाटकात जाणाऱ्या सैन्यासाठी महत्त्वाचे विश्रांती स्थान व रसद केंद्र होते.",
+          "During the Peshwa era, Wai was an important rest stop and supply center for armies marching to Karnataka."),
+        t("'दक्षिण काशी' म्हणण्याचे मुख्य कारण — येथील संस्कृत पाठशाळा. वेद, शास्त्र व पुराणांचे गाढे अभ्यासक येथे राहत. आजही 'प्राज्ञ पाठशाला' जगभरात प्रसिद्ध आहे.",
+          "The main reason for calling it 'Dakshin Kashi' — its Sanskrit schools. Deep scholars of Vedas, Shastras and Puranas lived here. The 'Pradnya Pathshala' is still world-famous."),
+      ],
+    },
+    {
+      era: t("नाना फडणवीस आणि मेनवली", "Nana Fadnavis & Menawali"),
+      year: t("१८वे शतक", "18th Century"),
+      emoji: "🏯",
+      points: [
+        t("वाईपासून अवघ्या ५ किमी अंतरावर मेनवली गाव आहे. पेशव्यांचे मुत्सद्दी मंत्री नाना फडणवीस यांनी येथे भव्य वाडा बांधला.",
+          "Menawali village is just 5 km from Wai. Peshwa statesman Nana Fadnavis built his grand mansion here."),
+        t("कृष्णा नदीच्या काठी त्यांनी बांधलेला घाट व दोन मंदिरे (विष्णू व शिव) आजही पर्यटकांना आकर्षित करतात.",
+          "The ghat and two temples (Vishnu and Shiva) he built on the Krishna riverbank still attract tourists."),
+        t("या घाटावर एक भव्य 'घंटा' आहे — जी चिमाजी अप्पांनी पोर्तुगीजांकडून वसईच्या लढाईत जिंकून आणली होती.",
+          "A grand 'bell' on this ghat was won by Chimaji Appa from the Portuguese in the Battle of Vasai."),
+      ],
+    },
+    {
+      era: t("कृष्णा नदीचे घाट", "Ghats of Krishna River"),
+      year: t("ऐतिहासिक", "Historic"),
+      emoji: "🌊",
+      points: [
+        t("वाईचे सर्वात मोठे वैशिष्ट्य म्हणजे येथील ७ मुख्य घाट — संरक्षणात्मक व सामाजिक दृष्टिकोनातून बांधलेले.",
+          "Wai's greatest feature is its 7 main ghats — built from a defensive and social perspective."),
+        t("गणपती घाट: प्रसिद्ध महागणपती मंदिर — मूर्ती १० फूट उंच व ८ फूट रुंद, एकाच काळ्या पाषाणातून (monolithic) घडवलेली.",
+          "Ganpati Ghat: Famous Mahaganpati temple — idol 10 ft tall and 8 ft wide, carved from a single black stone (monolithic)."),
+        t("गंगापुरी घाट: अत्यंत देखणी मंदिरे. ब्रह्मेश्वर घाट: सर्वात जुना व शांत घाट.",
+          "Gangapuri Ghat: Beautiful temples. Brahmeshwar Ghat: Oldest and most peaceful ghat."),
+      ],
+    },
+    {
+      era: t("सामाजिक व शैक्षणिक वारसा", "Social & Educational Heritage"),
+      year: t("आधुनिक काळ", "Modern Era"),
+      emoji: "📚",
+      points: [
+        t("तर्कतीर्थ लक्ष्मणशास्त्री जोशी यांनी मराठी विश्वकोशाचे (Encyclopedia) काम वाईतूनच सुरू केले — वाईचे नाव जगभरात पोहचले.",
+          "Tarkatirath Laxmanshastri Joshi started the Marathi Encyclopedia (Vishwakosh) from Wai — bringing the city global recognition."),
+        t("भारतीय स्वातंत्र्यलढ्यातही वाईच्या तरुणांचे मोठे योगदान होते.",
+          "Wai's youth also made significant contributions to India's freedom struggle."),
+      ],
+    },
+    {
+      era: t("नगरपालिका स्थापना", "Municipality Established"),
+      year: "1852",
+      emoji: "🏛️",
+      points: [
+        t("ब्रिटिश राजवटीत वाई नगरपालिकेची स्थापना — महाराष्ट्रातील सर्वात जुन्या नगरपालिकांपैकी एक.",
+          "Wai Municipality established during British rule — one of the oldest municipalities in Maharashtra."),
+      ],
+    },
+  ];
+
   return (
     <PageLayout>
       <div className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold text-primary mb-8 text-center">{t("वाई शहराचा इतिहास", "History of Wai City")}</h1>
+        {/* Hero */}
+        <div className="gov-gradient rounded-2xl p-8 text-primary-foreground text-center mb-12">
+          <h1 className="text-4xl font-bold mb-3">{t("वाई शहराचा इतिहास", "History of Wai City")}</h1>
+          <p className="text-primary-foreground/90 text-lg max-w-2xl mx-auto">
+            {t(
+              "कृष्णा नदीच्या काठावर वसलेले 'दक्षिण काशी' — एक ऐतिहासिक, धार्मिक व सांस्कृतिक वारसा असलेले शहर",
+              "'Dakshin Kashi' on the banks of the Krishna River — a city with a rich historical, religious and cultural heritage"
+            )}
+          </p>
+        </div>
+
+        {/* Timeline */}
         <div className="max-w-3xl mx-auto space-y-0 relative">
           <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-primary/20" />
-          {[
-            { year: t("इ.स.पू.", "Ancient Era"), title: t("प्राचीन काळ", "Ancient Period"), desc: t("वाई शहराचा उल्लेख प्राचीन ग्रंथांमध्ये आढळतो. कृष्णा नदीच्या तीरावर वसलेले हे शहर धार्मिक महत्त्वासाठी प्रसिद्ध होते.", "Wai city is mentioned in ancient texts. This city, situated on the banks of the Krishna River, was famous for its religious significance.") },
-            { year: t("१७ वे शतक", "17th Century"), title: t("मराठा साम्राज्य", "Maratha Empire"), desc: t("छत्रपती शिवाजी महाराजांच्या काळात वाई एक महत्त्वाचे व्यापारी केंद्र बनले.", "During the era of Chhatrapati Shivaji Maharaj, Wai became an important trading center.") },
-            { year: t("१८ वे शतक", "18th Century"), title: t("पेशवेकालीन वाई", "Wai in Peshwa Era"), desc: t("पेशवेकाळात वाई हे शिक्षण आणि संस्कृतीचे प्रमुख केंद्र बनले. अनेक शैक्षणिक संस्था स्थापन झाल्या.", "During the Peshwa period, Wai became a major center of education and culture. Many educational institutions were established.") },
-            { year: "1852", title: t("नगरपालिका स्थापना", "Municipality Established"), desc: t("ब्रिटिश राजवटीत वाई नगरपालिकेची स्थापना करण्यात आली. महाराष्ट्रातील सर्वात जुन्या नगरपालिकांपैकी एक.", "Wai Municipality was established during British rule. One of the oldest municipalities in Maharashtra.") },
-            { year: "1947", title: t("स्वातंत्र्योत्तर काळ", "Post-Independence Era"), desc: t("स्वातंत्र्यानंतर वाई शहराचा विकास वेगाने झाला. नवीन शाळा, रुग्णालये आणि पायाभूत सुविधा निर्माण झाल्या.", "After independence, Wai city developed rapidly. New schools, hospitals, and infrastructure were built.") },
-            { year: t("आज", "Today"), title: t("आधुनिक वाई", "Modern Wai"), desc: t("आज वाई एक स्मार्ट शहर बनण्याच्या दिशेने वाटचाल करत आहे. डिजिटल सेवा, स्वच्छता मोहीम आणि विकास प्रकल्प सुरू आहेत.", "Today Wai is on its way to becoming a smart city. Digital services, cleanliness drives, and development projects are underway.") },
-          ].map((item, i) => (
-            <div key={i} className="relative pl-16 pb-10 group">
-              <div className="absolute left-3.5 top-1 w-5 h-5 rounded-full bg-primary border-4 border-background z-10 group-hover:scale-125 transition-transform" />
-              <Card className="hover:shadow-lg transition-all hover:-translate-y-0.5">
+          {sections.map((section, i) => (
+            <div key={i} className="relative pl-16 pb-8 group">
+              <div className="absolute left-2 top-2 w-8 h-8 rounded-full bg-primary border-4 border-background z-10 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+                {section.emoji}
+              </div>
+              <Card className="hover:shadow-lg transition-all">
                 <CardContent className="p-6">
-                  <span className="inline-block bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full mb-2">{item.year}</span>
-                  <h3 className="text-lg font-bold mb-1">{item.title}</h3>
-                  <p className="text-muted-foreground">{item.desc}</p>
+                  <span className="inline-block bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full mb-2">{section.year}</span>
+                  <h3 className="text-lg font-bold mb-3">{section.era}</h3>
+                  <ul className="space-y-2">
+                    {section.points.map((pt, j) => (
+                      <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
+                        {pt}
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             </div>

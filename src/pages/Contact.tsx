@@ -22,7 +22,7 @@ const Contact = () => {
                     <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-medium">{t("पत्ता", "Address")}</p>
-                      <p className="text-sm text-muted-foreground">{t("वाई नगर परिषद कार्यालय, मुख्य बाजारपेठ, वाई, जि. सातारा, महाराष्ट्र - 412803", "Wai Municipal Council Office, Main Market, Wai, Dist. Satara, Maharashtra - 412803")}</p>
+                      <p className="text-sm text-muted-foreground">{t("587b, मोतीबाग रोड, दाणेबाजार, गणपती आळी, वाई, महाराष्ट्र - 412803", "587b, Motibag Rd, Danebazar, Ganpati Ali, Wai, Maharashtra 412803")}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -45,7 +45,7 @@ const Contact = () => {
                     <Clock className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-medium">{t("कार्यालयीन वेळ", "Office Hours")}</p>
-                      <p className="text-sm text-muted-foreground">{t("सोमवार - शनिवार: सकाळी 10:00 - संध्याकाळी 5:45", "Monday - Saturday: 10:00 AM - 5:45 PM")}</p>
+                      <p className="text-sm text-muted-foreground">{t("सोमवार - शनिवार: सकाळी 9:45 - संध्याकाळी 6:15", "Monday - Saturday: 9:45 AM - 6:15 PM")}</p>
                       <p className="text-sm text-muted-foreground">{t("रविवार व सार्वजनिक सुट्ट्या: बंद", "Sunday & Public Holidays: Closed")}</p>
                     </div>
                   </div>
@@ -63,7 +63,7 @@ const Contact = () => {
             <Card>
               <CardContent className="p-0">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30468.64!2d73.87!3d17.95!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2610c0000!2sWai%2C+Maharashtra!5e0!3m2!1sen!2sin!4v1"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3793.!2d73.8997!3d17.9558!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc23f5555555555%3A0x0!2sWai+Municipal+Council%2C+Motibag+Rd%2C+Wai%2C+Maharashtra+412803!5e0!3m2!1sen!2sin!4v1"
                   width="100%"
                   height="250"
                   style={{ border: 0 }}

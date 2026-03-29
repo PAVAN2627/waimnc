@@ -9,12 +9,14 @@ import RequireAuth from "@/components/RequireAuth";
 import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import { Introduction, History, Structure, Mayor, ChiefOfficer, Corporators } from "./pages/about/AboutPages";
-import { Construction, Health, Water, Lights, Encroachment, Tax, Registration, Planning } from "./pages/departments/DepartmentPages";
+import { GeneralAdmin, Health, Water, Civil, Planning, Tax, Electrical, Computer, Fire, BirthDeath, Accounts, Records, Disabled, WomenChild } from "./pages/departments/DepartmentPages";
 import { PropertyTax, WaterBill, Complaint, BirthCertificate, DeathCertificate, ConstructionPermit } from "./pages/services/ServicePages";
 import { CentralSchemes, StateSchemes, LocalSchemes, PMAY, SwachhBharat } from "./pages/schemes/SchemePages";
 import SchemesPage from "./pages/schemes/SchemesPage";
 import Tenders from "./pages/Tenders";
 import Tourism from "./pages/Tourism";
+import Acts from "./pages/Acts";
+import LawsPage from "./pages/LawsPage";
 import TrackPage from "./pages/TrackPage";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
@@ -55,14 +57,20 @@ const App = () => (
             <Route path="/about/corporators" element={<Corporators />} />
 
             {/* Departments */}
-            <Route path="/departments/construction" element={<Construction />} />
+            <Route path="/departments/general-admin" element={<GeneralAdmin />} />
             <Route path="/departments/health" element={<Health />} />
             <Route path="/departments/water" element={<Water />} />
-            <Route path="/departments/lights" element={<Lights />} />
-            <Route path="/departments/encroachment" element={<Encroachment />} />
-            <Route path="/departments/tax" element={<Tax />} />
-            <Route path="/departments/registration" element={<Registration />} />
+            <Route path="/departments/civil" element={<Civil />} />
             <Route path="/departments/planning" element={<Planning />} />
+            <Route path="/departments/tax" element={<Tax />} />
+            <Route path="/departments/electrical" element={<Electrical />} />
+            <Route path="/departments/computer" element={<Computer />} />
+            <Route path="/departments/fire" element={<Fire />} />
+            <Route path="/departments/birth-death" element={<BirthDeath />} />
+            <Route path="/departments/accounts" element={<Accounts />} />
+            <Route path="/departments/records" element={<Records />} />
+            <Route path="/departments/disabled" element={<Disabled />} />
+            <Route path="/departments/women" element={<WomenChild />} />
 
             {/* Services */}
             <Route path="/services/property-tax" element={<PropertyTax />} />
@@ -82,6 +90,8 @@ const App = () => (
 
             {/* Others */}
             <Route path="/tenders" element={<Tenders />} />
+            <Route path="/acts" element={<Acts />} />
+            <Route path="/laws" element={<LawsPage />} />
             <Route path="/track" element={<TrackPage />} />
             <Route path="/tourism" element={<Tourism />} />
             <Route path="/gallery" element={<Gallery />} />
