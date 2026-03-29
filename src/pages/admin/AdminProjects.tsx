@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { isFirebaseConfigured } from "@/lib/firebase";
+import AutoTranslateButton from "@/components/AutoTranslateButton";
 import {
   createProject,
   deleteProject,
@@ -170,26 +171,28 @@ const AdminProjects = () => {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid md:grid-cols-2 gap-3">
-            <Input
-              placeholder={t("प्रकल्प नाव (मराठी) *", "Project Name (Marathi) *")}
-              value={newTitleMr}
-              onChange={(e) => setNewTitleMr(e.target.value)}
-            />
-            <Input
-              placeholder={t("प्रकल्प नाव (English)", "Project Name (English)")}
-              value={newTitleEn}
-              onChange={(e) => setNewTitleEn(e.target.value)}
-            />
-            <Input
-              placeholder={t("वर्णन (मराठी)", "Description (Marathi)")}
-              value={newDescMr}
-              onChange={(e) => setNewDescMr(e.target.value)}
-            />
-            <Input
-              placeholder={t("वर्णन (English)", "Description (English)")}
-              value={newDescEn}
-              onChange={(e) => setNewDescEn(e.target.value)}
-            />
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-muted-foreground">{t("प्रकल्प नाव (मराठी) *", "Project Name (Marathi) *")}</span>
+                <AutoTranslateButton sourceValue={newTitleEn} onTranslated={(v) => setNewTitleMr(v)} />
+              </div>
+              <Input placeholder={t("प्रकल्प नाव (मराठी) *", "Project Name (Marathi) *")} value={newTitleMr} onChange={(e) => setNewTitleMr(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Project Name (English)</label>
+              <Input placeholder="Project Name (English)" value={newTitleEn} onChange={(e) => setNewTitleEn(e.target.value)} />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-muted-foreground">{t("वर्णन (मराठी)", "Description (Marathi)")}</span>
+                <AutoTranslateButton sourceValue={newDescEn} onTranslated={(v) => setNewDescMr(v)} />
+              </div>
+              <Input placeholder={t("वर्णन (मराठी)", "Description (Marathi)")} value={newDescMr} onChange={(e) => setNewDescMr(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Description (English)</label>
+              <Input placeholder="Description (English)" value={newDescEn} onChange={(e) => setNewDescEn(e.target.value)} />
+            </div>
           </div>
           <div className="grid md:grid-cols-2 gap-3">
             <div>
