@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -69,6 +69,7 @@ const MainNav = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileDropdown, setMobileDropdown] = useState<string | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { t } = useLanguage();
 
   const menuItems = getMenuItems(t);
@@ -92,9 +93,7 @@ const MainNav = () => {
           {menuItems.map((item) => (
             <div
               key={item.label}
-              className="relative group"
-              onMouseEnter={() => item.children && setOpenDropdown(item.label)}
-              onMouseLeave={() => setOpenDropdown(null)}
+              className="relative"
             >
               {item.href ? (
                 <Link
@@ -105,6 +104,7 @@ const MainNav = () => {
                 </Link>
               ) : (
                 <button
+                  onClick={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
                   className="flex items-center gap-1 px-3 py-5 text-sm font-medium text-foreground hover:text-primary transition-colors"
                 >
                   {item.label}
@@ -112,18 +112,23 @@ const MainNav = () => {
                 </button>
               )}
               {item.children && openDropdown === item.label && (
-                <div className="absolute top-full left-0 bg-card shadow-xl rounded-b-lg border min-w-[240px] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.label}
-                      to={child.href}
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-primary/10 hover:text-primary transition-colors group/item"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover/item:bg-primary transition-colors" />
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
+                <>
+                  {/* invisible overlay to close on outside click */}
+                  <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(null)} />
+                  <div className="absolute top-full left-0 bg-card shadow-xl rounded-b-lg border min-w-[240px] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.label}
+                        to={child.href}
+                        onClick={() => setOpenDropdown(null)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-primary/10 hover:text-primary transition-colors group/item"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover/item:bg-primary transition-colors" />
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           ))}
