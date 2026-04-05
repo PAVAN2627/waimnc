@@ -273,17 +273,17 @@ export const Mayor = () => {
         <div className="max-w-3xl mx-auto">
           <Card className="overflow-hidden">
             <div className="gov-gradient p-8 text-primary-foreground text-center">
-              <div className="w-32 h-32 rounded-full bg-primary-foreground/20 mx-auto mb-4 flex items-center justify-center text-6xl border-4 border-primary-foreground/30">
-                👤
+              <div className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-primary-foreground/30 overflow-hidden">
+                <img src="/nagaradhyaksh.jpeg" alt="नगराध्यक्ष" className="w-full h-full object-cover" />
               </div>
-              <h1 className="text-3xl font-bold">{t("श्री. रामचंद्र पाटील", "Shri. Ramchandra Patil")}</h1>
-              <p className="text-primary-foreground/90 text-lg mt-1">{t("नगराध्यक्ष, वाई नगर परिषद", "Mayor, Wai Municipal Council")}</p>
+              <h1 className="text-3xl font-bold">{t("श्री. अनिल सावंत", "Shri. Anil Sawant")}</h1>
+              <p className="text-primary-foreground/90 text-lg mt-1">{t("नगराध्यक्ष (Mayor), वाई नगर परिषद", "Mayor (Nagaradhyaksha), Wai Municipal Council")}</p>
             </div>
             <CardContent className="p-8 space-y-6">
               <div className="grid sm:grid-cols-3 gap-4">
                 {[
                   { label: t("कार्यकाळ", "Tenure"), value: t("2024 - वर्तमान", "2024 - Present") },
-                  { label: t("पक्ष", "Party"), value: t("राष्ट्रवादी काँग्रेस", "Nationalist Congress Party") },
+                  { label: t("पक्ष", "Party"), value: "BJP" },
                   { label: t("संपर्क", "Contact"), value: "02167-220001" },
                 ].map((i) => (
                   <div key={i.label} className="bg-muted rounded-lg p-4 text-center">

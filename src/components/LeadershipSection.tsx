@@ -3,14 +3,14 @@ import { useLanguage } from "@/contexts/LanguageContext";
 // Update names/photos here directly — fully static, no Firebase needed
 const LEADERS = [
   {
-    nameMr: "नगराध्यक्ष नाव",
-    nameEn: "Nagaradhyaksha Name",
+    nameMr: "श्री. अनिल सावंत",
+    nameEn: "Shri. Anil Sawant",
     roleMr: "नगराध्यक्ष",
-    roleEn: "Nagaradhyaksha",
+    roleEn: "Mayor (Nagaradhyaksha)",
     subMr: "प्रशासकीय प्रमुख (निवडून आलेले)",
     subEn: "Elected President",
     accent: "#b8860b",
-    photo: "",
+    photo: "/nagaradhyaksh.jpeg",
   },
   {
     nameMr: "मुख्याधिकारी नाव",
