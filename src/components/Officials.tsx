@@ -32,11 +32,6 @@ const Officials = () => {
               <h3 className="font-semibold text-sm leading-tight">{lang === "mr" ? o.nameMr : (o.nameEn || o.nameMr)}</h3>
               {o.ward && <p className="text-xs text-primary font-medium mt-0.5">{t(`वार्ड ${o.ward}`, `Ward ${o.ward}`)}</p>}
               {o.party && <span className="inline-block text-[10px] bg-accent px-2 py-0.5 rounded-full mt-0.5">{o.party}</span>}
-              {o.phone && (
-                <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center justify-center gap-0.5">
-                  <Phone className="h-2.5 w-2.5" />{o.phone}
-                </p>
-              )}
             </div>
           ))}
         </div>

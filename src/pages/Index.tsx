@@ -2,6 +2,7 @@ import TopHeader from "@/components/TopHeader";
 import MainNav from "@/components/MainNav";
 import HeroSection from "@/components/HeroSection";
 import LeadershipSection from "@/components/LeadershipSection";
+import Officials from "@/components/Officials";
 import QuickServices from "@/components/QuickServices";
 import MayorRoutine from "@/components/MayorRoutine";
 import NoticeBoard from "@/components/NoticeBoard";
@@ -20,6 +21,7 @@ const Index = () => {
       <QuickServices />
       <MayorRoutine />
       <LeadershipSection />
+      <Officials />
       <NoticeBoard />
       <LatestNews />
       <Projects />

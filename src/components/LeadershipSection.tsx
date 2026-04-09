@@ -57,12 +57,39 @@ const LeadershipSection = () => {
           {lang === "mr" ? "वाई नगर परिषदेचे प्रमुख पदाधिकारी" : "Key officials of Wai Municipal Council"}
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-          {LEADERS.map((leader, i) => {
+        {/* Row 1: Nagaradhyaksha — centered, bigger */}
+        <div className="flex justify-center mb-8">
+          {(() => {
+            const leader = LEADERS[0];
             const name = lang === "mr" ? leader.nameMr : leader.nameEn;
             const role = lang === "mr" ? leader.roleMr : leader.roleEn;
             const sub = lang === "mr" ? leader.subMr : leader.subEn;
+            return (
+              <div className="flex flex-col items-center text-center">
+                <div
+                  className="rounded-full p-[3px] shadow-xl mb-3"
+                  style={{ background: `linear-gradient(135deg, ${leader.accent}, #ccc)` }}
+                >
+                  {leader.photo ? (
+                    <img src={leader.photo} alt={name} className="w-52 h-52 rounded-full object-cover border-4 border-white" />
+                  ) : (
+                    <div className="w-52 h-52 rounded-full bg-white border-4 border-white flex items-center justify-center text-7xl">👤</div>
+                  )}
+                </div>
+                <h3 className="text-lg font-bold leading-tight">{name}</h3>
+                <span className="mt-2 text-xs font-semibold px-4 py-0.5 rounded-full text-white" style={{ backgroundColor: leader.accent }}>{role}</span>
+                <p className="text-xs text-muted-foreground mt-1 leading-tight">{sub}</p>
+              </div>
+            );
+          })()}
+        </div>
 
+        {/* Row 2: remaining 3 */}
+        <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
+          {LEADERS.slice(1).map((leader, i) => {
+            const name = lang === "mr" ? leader.nameMr : leader.nameEn;
+            const role = lang === "mr" ? leader.roleMr : leader.roleEn;
+            const sub = lang === "mr" ? leader.subMr : leader.subEn;
             return (
               <div key={i} className="flex flex-col items-center text-center">
                 <div
@@ -70,24 +97,13 @@ const LeadershipSection = () => {
                   style={{ background: `linear-gradient(135deg, ${leader.accent}, #ccc)` }}
                 >
                   {leader.photo ? (
-                    <img
-                      src={leader.photo}
-                      alt={name}
-                      className="w-28 h-28 rounded-full object-cover border-4 border-white"
-                    />
+                    <img src={leader.photo} alt={name} className="w-28 h-28 rounded-full object-cover border-4 border-white" />
                   ) : (
-                    <div className="w-28 h-28 rounded-full bg-white border-4 border-white flex items-center justify-center text-5xl">
-                      👤
-                    </div>
+                    <div className="w-28 h-28 rounded-full bg-white border-4 border-white flex items-center justify-center text-5xl">👤</div>
                   )}
                 </div>
                 <h3 className="text-sm font-bold leading-tight">{name}</h3>
-                <span
-                  className="mt-2 text-[11px] font-semibold px-3 py-0.5 rounded-full text-white"
-                  style={{ backgroundColor: leader.accent }}
-                >
-                  {role}
-                </span>
+                <span className="mt-2 text-[11px] font-semibold px-3 py-0.5 rounded-full text-white" style={{ backgroundColor: leader.accent }}>{role}</span>
                 <p className="text-[11px] text-muted-foreground mt-1 leading-tight">{sub}</p>
               </div>
             );

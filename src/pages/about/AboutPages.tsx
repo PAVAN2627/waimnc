@@ -405,11 +405,6 @@ export const Corporators = () => {
                 <h3 className="font-bold">{lang === "mr" ? c.nameMr : (c.nameEn || c.nameMr)}</h3>
                 {c.ward && <p className="text-primary text-sm font-medium">{t(`वार्ड ${c.ward}`, `Ward ${c.ward}`)}</p>}
                 {c.party && <span className="inline-block bg-accent text-accent-foreground text-xs px-2 py-0.5 rounded-full mt-1">{c.party}</span>}
-                {c.phone && (
-                  <p className="text-xs text-muted-foreground mt-2 flex items-center justify-center gap-1">
-                    <Phone className="w-3 h-3" /> {c.phone}
-                  </p>
-                )}
               </CardContent>
             </Card>
           ))}
