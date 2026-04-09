@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Phone } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { subscribeToActiveOfficials, type OfficialRecord } from "@/lib/officials";
