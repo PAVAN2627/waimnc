@@ -93,7 +93,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative h-[420px] md:h-[500px] overflow-hidden">
+    <section className="relative h-auto md:h-[500px] overflow-hidden">
       {/* Horizontally scrollable slide strip — native touch scroll */}
       <div
         ref={scrollRef}
@@ -104,10 +104,10 @@ const HeroSection = () => {
         {slides.map((slide, index) => (
           <div
             key={index}
-            className="relative flex-shrink-0 w-full h-full"
+            className="relative flex-shrink-0 w-full"
             style={{ scrollSnapAlign: "start" }}
           >
-            <img src={slide.image} alt={`Wai City ${index + 1}`} className="w-full h-full object-contain md:object-cover" />
+            <img src={slide.image} alt={`Wai City ${index + 1}`} className="w-full h-auto md:h-[500px] object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent" />
             <div className="absolute inset-0 flex items-center">
               <div className="container mx-auto px-4">
