@@ -310,63 +310,80 @@ const Tourism = () => {
         </div>
 
         {/* Spots */}
-        {spots.map((spot, i) => {
-          const isEven = i % 2 === 0;
-          return (
-            <div key={spot.nameEn} className={`flex flex-col ${isEven ? "md:flex-row" : "md:flex-row-reverse"} gap-8 items-center`}>
-              {/* Image */}
-              <div className="w-full md:w-1/2 rounded-2xl overflow-hidden shadow-xl flex-shrink-0 aspect-video">
-                <img
-                  src={spot.image}
-                  alt={lang === "mr" ? spot.nameMr : spot.nameEn}
-                  className={`w-full h-full hover:scale-105 transition-transform duration-500 ${(spot as any).objectFit === "contain" ? "object-contain" : "object-cover"}`}
-                  style={{ objectPosition: (spot as any).objectPosition ?? "center" }}
-                />
-              </div>
-
-              {/* Info */}
-              <div className="w-full md:w-1/2 space-y-4">
-                <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">
-                  {lang === "mr" ? spot.tagMr : spot.tagEn}
-                </span>
-                <h2 className="text-2xl md:text-3xl font-bold">
-                  {lang === "mr" ? spot.nameMr : spot.nameEn}
-                </h2>
-                <p className="text-muted-foreground leading-relaxed text-base">
-                  {lang === "mr" ? spot.descMr : spot.descEn}
-                </p>
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-muted-foreground">{t("वेळ", "Timings")}:</span>
-                    <span className="font-medium">{lang === "mr" ? spot.timeMr : spot.timeEn}</span>
+        <div className="space-y-12">
+          {spots.map((spot, i) => {
+            const isEven = i % 2 === 0;
+            return (
+              <div
+                key={spot.nameEn}
+                className="bg-card rounded-3xl border border-border shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-6 md:p-8 group overflow-hidden relative"
+              >
+                <div className={`flex flex-col ${isEven ? "md:flex-row" : "md:flex-row-reverse"} gap-8 items-center`}>
+                  {/* Image Frame */}
+                  <div className="w-full md:w-1/2 rounded-2xl overflow-hidden shadow-lg flex-shrink-0 aspect-video relative group-hover:scale-[1.02] transition-transform duration-500 border border-border/60">
+                    <img
+                      src={spot.image}
+                      alt={lang === "mr" ? spot.nameMr : spot.nameEn}
+                      className={`w-full h-full transition-transform duration-700 group-hover:scale-105 ${(spot as any).objectFit === "contain" ? "object-contain" : "object-cover"}`}
+                      style={{ objectPosition: (spot as any).objectPosition ?? "center" }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="text-muted-foreground">{t("ठिकाण", "Location")}:</span>
-                    <a
-                      href={spot.locationUrl ? spot.locationUrl : `https://www.google.com/maps/search/${encodeURIComponent(lang === "mr" ? spot.locationMr : spot.locationEn)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium text-primary underline hover:opacity-80"
-                    >
-                      {lang === "mr" ? spot.locationMr : spot.locationEn}
-                    </a>
+
+                  {/* Info */}
+                  <div className="w-full md:w-1/2 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 text-xs font-extrabold px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        {lang === "mr" ? spot.tagMr : spot.tagEn}
+                      </span>
+                    </div>
+
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-foreground group-hover:text-primary transition-colors">
+                      {lang === "mr" ? spot.nameMr : spot.nameEn}
+                    </h2>
+
+                    <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
+                      {lang === "mr" ? spot.descMr : spot.descEn}
+                    </p>
+
+                    <div className="space-y-2.5 pt-3 border-t border-border/60">
+                      <div className="flex items-center gap-2 text-xs md:text-sm">
+                        <Clock className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-muted-foreground">{t("दर्शन वेळ", "Timings")}:</span>
+                        <span className="font-semibold text-foreground">{lang === "mr" ? spot.timeMr : spot.timeEn}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-xs md:text-sm">
+                        <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-muted-foreground">{t("ठिकाण", "Location")}:</span>
+                        <a
+                          href={spot.locationUrl ? spot.locationUrl : `https://www.google.com/maps/search/${encodeURIComponent(lang === "mr" ? spot.locationMr : spot.locationEn)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-primary underline hover:text-primary/80 transition-colors inline-flex items-center gap-1"
+                        >
+                          <span>{lang === "mr" ? spot.locationMr : spot.locationEn}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-primary/10 border border-primary/20">Map ↗</span>
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
 
         {/* How to reach */}
-        <div className="bg-muted rounded-2xl p-8 max-w-3xl mx-auto text-center space-y-3">
-          <MapPin className="h-8 w-8 text-primary mx-auto" />
-          <h3 className="text-xl font-bold">{t("कसे पोहोचाल?", "How to Reach?")}</h3>
-          <p className="text-muted-foreground">
+        <div className="bg-card rounded-3xl p-8 border border-border shadow-xl max-w-3xl mx-auto text-center space-y-3 relative overflow-hidden">
+          <div className="p-4 rounded-2xl bg-primary/10 text-primary w-14 h-14 mx-auto flex items-center justify-center border border-primary/20">
+            <MapPin className="h-7 w-7" />
+          </div>
+          <h3 className="text-2xl font-extrabold text-foreground">{t("वाईला कसे पोहोचाल?", "How to Reach Wai?")}</h3>
+          <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
             {t(
-              "वाई हे पुण्यापासून सुमारे ९५ किमी आणि सातारापासून ३५ किमी अंतरावर आहे. पुणे-बंगलोर महामार्गावरून वाईला सहज पोहोचता येते. बस, खाजगी वाहन आणि टॅक्सी सेवा उपलब्ध आहे.",
-              "Wai is about 95 km from Pune and 35 km from Satara. It is easily accessible from the Pune-Bangalore highway. Bus, private vehicle and taxi services are available."
+              "वाई हे पुण्यापासून सुमारे ९५ किमी आणि सातारापासून ३५ किमी अंतरावर आहे. पुणे-बंगलोर राष्ट्रीय महामार्गावरून वाईला सहज पोहोचता येते. मुबलक बस, खाजगी वाहने व टॅक्सी उपलब्ध आहेत.",
+              "Wai is about 95 km from Pune and 35 km from Satara. Accessible via NH-48 Pune-Bangalore highway with frequent bus and taxi connectivity."
             )}
           </p>
         </div>

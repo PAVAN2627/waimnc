@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import PageLayout from "@/components/PageLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, FileText, ExternalLink } from "lucide-react";
+import { Download, FileText, ExternalLink, Sparkles, Search, Scale, ShieldCheck, X, FileCheck2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const ACTS = [
@@ -97,7 +97,6 @@ const BYELAWS: { mr: string; en: string }[] = [
 
 const STANDING_ORDER_URL = "https://drive.google.com/file/d/1t71_G_c3tIZ_Fz0ERa3Jgl3SpWtoIyZ4/view";
 
-// Reusable row for acts (with preview/download)
 const ActRow = ({ item, preview, setPreview }: {
   item: typeof ACTS[0];
   preview: string | null;
@@ -106,123 +105,272 @@ const ActRow = ({ item, preview, setPreview }: {
   const { t } = useLanguage();
   const embedUrl = item.url ? item.url.replace("/view", "/preview") : "";
   return (
-    <>
-      <div className="flex items-center justify-between gap-4 bg-card border rounded-xl px-5 py-4 hover:shadow-md transition-shadow">
-        <div className="flex items-start gap-3 flex-1 min-w-0">
-          <span className="text-primary font-bold text-sm w-6 flex-shrink-0">{item.sr})</span>
-          <FileText className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-medium">{t(item.mr, item.en)}</p>
+    <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border rounded-3xl p-5 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+        <div className="flex items-center gap-3.5 flex-1 min-w-0">
+          <span className="text-primary font-mono font-extrabold text-xs w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+            {item.sr}
+          </span>
+          <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors flex-shrink-0">
+            <FileText className="h-5 w-5" />
+          </div>
+          <p className="text-sm md:text-base font-extrabold text-foreground leading-snug group-hover:text-primary transition-colors">
+            {t(item.mr, item.en)}
+          </p>
         </div>
+
         {item.url && (
-          <div className="flex gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
             <button
               onClick={() => setPreview(preview === embedUrl ? null : embedUrl)}
-              className="flex items-center gap-1 text-xs border border-primary text-primary px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-colors"
+              className="flex items-center gap-1.5 text-xs border border-primary/30 text-primary bg-primary/5 px-4 py-2 rounded-xl font-bold hover:bg-primary/20 transition-all shadow-sm"
             >
-              <ExternalLink className="h-3 w-3" />{t("पहा", "Preview")}
+              <ExternalLink className="h-3.5 w-3.5" />
+              <span>{t("पहा", "Preview")}</span>
             </button>
-            <a href={item.url} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs gov-gradient text-primary-foreground px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity">
-              <Download className="h-3 w-3" />{t("डाउनलोड", "Download")}
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs gov-gradient text-white font-black px-4 py-2 rounded-xl hover:opacity-90 shadow-md hover:shadow-lg transition-all"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>{t("डाउनलोड", "Download")}</span>
             </a>
           </div>
         )}
       </div>
+
       {preview === embedUrl && (
-        <div className="border rounded-xl overflow-hidden shadow-lg">
-          <div className="gov-gradient text-primary-foreground px-4 py-2 flex items-center justify-between text-sm">
-            <span>{t("दस्तऐवज पूर्वावलोकन", "Document Preview")}</span>
-            <button onClick={() => setPreview(null)}>✕</button>
+        <div className="border-2 border-primary/30 rounded-3xl overflow-hidden shadow-2xl animate-in fade-in duration-300 bg-card">
+          <div className="gov-gradient text-primary-foreground px-6 py-3.5 flex items-center justify-between font-black text-sm">
+            <span>{t("अधिनियम दस्तऐवज पूर्वावलोकन", "Act Document Preview")}</span>
+            <button onClick={() => setPreview(null)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <iframe src={embedUrl} className="w-full h-[500px]" title="preview" allow="autoplay" />
+          <iframe src={embedUrl} className="w-full h-[520px]" title="preview" allow="autoplay" />
         </div>
       )}
-    </>
+    </div>
   );
 };
 
-// Simple numbered list row — bilingual
-const ListRow = ({ sr, mr, en }: { sr: number; mr: string; en: string }) => {
+const ListRow = ({ sr, mr, en, url }: { sr: number; mr: string; en: string; url?: string }) => {
   const { t } = useLanguage();
+  const defaultPdfUrl = url || "https://drive.google.com/file/d/1AlBJPTS3cj3JTrRiuCIaXd3nnTWD2v5V/view";
+  const embedUrl = defaultPdfUrl.replace("/view", "/preview");
+  const [showPreview, setShowPreview] = useState(false);
+
   return (
-    <div className="flex items-start gap-3 bg-card border rounded-xl px-5 py-3 hover:shadow-sm transition-shadow">
-      <span className="text-primary font-bold text-sm w-7 flex-shrink-0">{sr}.</span>
-      <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-      <p className="text-sm">{t(mr, en)}</p>
+    <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border rounded-2xl px-5 py-4 hover:shadow-lg hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-200 group">
+        <div className="flex items-center gap-3.5 flex-1 min-w-0">
+          <span className="text-primary font-mono font-extrabold text-xs w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+            {sr}
+          </span>
+          <FileCheck2 className="h-4 w-4 text-muted-foreground group-hover:text-primary flex-shrink-0 transition-colors" />
+          <p className="text-xs md:text-sm font-extrabold text-foreground group-hover:text-primary transition-colors leading-relaxed">
+            {t(mr, en)}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
+          <button
+            onClick={() => setShowPreview((prev) => !prev)}
+            className="flex items-center gap-1 text-[11px] border border-primary/30 text-primary bg-primary/5 px-3 py-1.5 rounded-xl font-bold hover:bg-primary/20 transition-all shadow-sm"
+          >
+            <ExternalLink className="h-3 w-3" />
+            <span>{t("पहा", "Preview")}</span>
+          </button>
+          <a
+            href={defaultPdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-[11px] gov-gradient text-white font-black px-3 py-1.5 rounded-xl hover:opacity-90 shadow-md hover:shadow-lg transition-all"
+          >
+            <Download className="h-3 w-3" />
+            <span>{t("PDF डाउनलोड", "PDF Download")}</span>
+          </a>
+        </div>
+      </div>
+
+      {showPreview && (
+        <div className="border-2 border-primary/30 rounded-3xl overflow-hidden shadow-2xl animate-in fade-in duration-300 bg-card">
+          <div className="gov-gradient text-primary-foreground px-5 py-3 flex items-center justify-between font-black text-xs">
+            <span>{t("नियम / उपविधी PDF पूर्वावलोकन", "Rules / Bye-laws PDF Preview")}</span>
+            <button onClick={() => setShowPreview(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <iframe src={embedUrl} className="w-full h-[450px]" title="rule-preview" allow="autoplay" />
+        </div>
+      )}
     </div>
   );
 };
 
 const LawsPage = () => {
   const { t } = useLanguage();
-  const [preview, setPreview] = React.useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredActs = ACTS.filter((a) =>
+    a.mr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.en.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredRules = RULES.filter((r) =>
+    r.mr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.en.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredByelaws = BYELAWS.filter((b) =>
+    b.mr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    b.en.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <PageLayout>
-      <div className="container mx-auto px-4 py-10 space-y-6">
-        <h1 className="text-3xl font-bold text-primary">
-          {t("कायदे व नियम", "Laws & Regulations")}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {t("वाई नगर परिषदेशी संबंधित अधिनियम, नियम, उपविधी व स्थायी निदेश", "Acts, Rules, Bye-laws and Standing Orders related to Wai Municipal Council")}
-        </p>
+      <div className="py-12 bg-gradient-to-b from-background via-muted/30 to-background border-b relative overflow-hidden">
+        {/* Background Glows */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
-        <Tabs defaultValue="acts">
-          <TabsList className="flex-wrap h-auto gap-1">
-            <TabsTrigger value="acts">📜 {t("अधिनियम", "Acts")} ({ACTS.length})</TabsTrigger>
-            <TabsTrigger value="rules">📋 {t("नियम", "Rules")} ({RULES.length})</TabsTrigger>
-            <TabsTrigger value="byelaws">📁 {t("उपविधी", "Bye-laws")} ({BYELAWS.length})</TabsTrigger>
-            <TabsTrigger value="standing">📌 {t("स्थायी निदेश", "Standing Orders")}</TabsTrigger>
-          </TabsList>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto space-y-8">
+            
+            {/* Hero Card */}
+            <div className="gov-gradient rounded-3xl p-8 md:p-10 text-primary-foreground shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-bl-full pointer-events-none" />
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {t("नगरपालिका वैधानिक चौकट", "Legal & Regulatory Framework")}
+                  </span>
+                  <h1 className="text-3xl md:text-5xl font-black text-white">{t("कायदे, नियम व उपविधी", "Laws & Regulations")}</h1>
+                  <p className="text-primary-foreground/90 text-sm md:text-base font-medium mt-2 max-w-xl">
+                    {t(
+                      "वाई नगर परिषदेच्या कामकाजाशी संबंधित सर्व शासकीय अधिनियम, नियम, उपविधी व स्थायी आदेश दस्तऐवज.",
+                      "Acts, Rules, Municipal Bye-laws & Standing Orders for Wai Municipal Council governance."
+                    )}
+                  </p>
+                </div>
 
-          {/* ACTS */}
-          <TabsContent value="acts" className="mt-6 space-y-3">
-            {ACTS.map((act) => (
-              <ActRow key={act.sr} item={act} preview={preview} setPreview={setPreview} />
-            ))}
-          </TabsContent>
-
-          {/* RULES */}
-          <TabsContent value="rules" className="mt-6 space-y-3">
-            {RULES.map((rule, i) => <ListRow key={i} sr={i + 1} mr={rule.mr} en={rule.en} />)}
-          </TabsContent>
-
-          {/* BYE-LAWS */}
-          <TabsContent value="byelaws" className="mt-6 space-y-3">
-            {BYELAWS.map((bl, i) => <ListRow key={i} sr={i + 1} mr={bl.mr} en={bl.en} />)}
-          </TabsContent>
-
-          {/* STANDING ORDERS */}
-          <TabsContent value="standing" className="mt-6 space-y-4">
-            <div className="flex items-center justify-between gap-4 bg-card border rounded-xl px-5 py-4 hover:shadow-md transition-shadow">
-              <div className="flex items-start gap-3 flex-1">
-                <FileText className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                <p className="text-sm font-medium">{t("स्थायी निदेश — वाई नगर परिषद", "Standing Orders — Wai Municipal Council")}</p>
-              </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <button
-                  onClick={() => setPreview(preview ? null : STANDING_ORDER_URL.replace("/view", "/preview"))}
-                  className="flex items-center gap-1 text-xs border border-primary text-primary px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-colors"
-                >
-                  <ExternalLink className="h-3 w-3" />{t("पहा", "Preview")}
-                </button>
-                <a href={STANDING_ORDER_URL} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs gov-gradient text-primary-foreground px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity">
-                  <Download className="h-3 w-3" />{t("डाउनलोड", "Download")}
-                </a>
+                <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-4xl shadow-xl flex-shrink-0">
+                  ⚖️
+                </div>
               </div>
             </div>
-            {preview && (
-              <div className="border rounded-xl overflow-hidden shadow-lg">
-                <div className="gov-gradient text-primary-foreground px-4 py-2 flex items-center justify-between text-sm">
-                  <span>{t("दस्तऐवज पूर्वावलोकन", "Document Preview")}</span>
-                  <button onClick={() => setPreview(null)}>✕</button>
-                </div>
-                <iframe src={preview} className="w-full h-[600px]" title="Standing Orders Preview" allow="autoplay" />
+
+            {/* Controls: Search Bar & Tabs */}
+            <div className="space-y-4">
+              <div className="relative w-full">
+                <Search className="w-4 h-4 text-muted-foreground absolute left-4 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t("कायदे, नियम किंवा उपविधी शोधा...", "Search acts, rules, or bye-laws...")}
+                  className="w-full pl-11 pr-4 py-3 rounded-2xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
+                />
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
+
+              <Tabs defaultValue="acts">
+                <TabsList className="p-1.5 bg-card border border-border rounded-2xl gap-2 shadow-sm w-full sm:w-auto overflow-x-auto justify-start flex-wrap">
+                  <TabsTrigger value="acts" className="rounded-xl px-5 py-2.5 text-xs font-extrabold data-[state=active]:gov-gradient data-[state=active]:text-white">
+                    📜 {t("अधिनियम (Acts)", "Acts")} ({filteredActs.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="rules" className="rounded-xl px-5 py-2.5 text-xs font-extrabold data-[state=active]:gov-gradient data-[state=active]:text-white">
+                    📋 {t("नियम (Rules)", "Rules")} ({filteredRules.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="byelaws" className="rounded-xl px-5 py-2.5 text-xs font-extrabold data-[state=active]:gov-gradient data-[state=active]:text-white">
+                    📁 {t("उपविधी (Bye-laws)", "Bye-laws")} ({filteredByelaws.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="standing" className="rounded-xl px-5 py-2.5 text-xs font-extrabold data-[state=active]:gov-gradient data-[state=active]:text-white">
+                    📌 {t("स्थायी निदेश", "Standing Orders")}
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* ACTS */}
+                <TabsContent value="acts" className="mt-6 space-y-4">
+                  {filteredActs.length === 0 && (
+                    <p className="text-center py-8 text-sm text-muted-foreground bg-card rounded-2xl border border-border">{t("कोणताही अधिनियम सापडला नाही.", "No matching acts found.")}</p>
+                  )}
+                  {filteredActs.map((act) => (
+                    <ActRow key={act.sr} item={act} preview={preview} setPreview={setPreview} />
+                  ))}
+                </TabsContent>
+
+                {/* RULES */}
+                <TabsContent value="rules" className="mt-6 space-y-3">
+                  {filteredRules.length === 0 && (
+                    <p className="text-center py-8 text-sm text-muted-foreground bg-card rounded-2xl border border-border">{t("कोणताही नियम सापडला नाही.", "No matching rules found.")}</p>
+                  )}
+                  {filteredRules.map((rule, i) => <ListRow key={i} sr={i + 1} mr={rule.mr} en={rule.en} />)}
+                </TabsContent>
+
+                {/* BYE-LAWS */}
+                <TabsContent value="byelaws" className="mt-6 space-y-3">
+                  {filteredByelaws.length === 0 && (
+                    <p className="text-center py-8 text-sm text-muted-foreground bg-card rounded-2xl border border-border">{t("कोणतीही उपविधी सापडली नाही.", "No matching bye-laws found.")}</p>
+                  )}
+                  {filteredByelaws.map((bl, i) => <ListRow key={i} sr={i + 1} mr={bl.mr} en={bl.en} />)}
+                </TabsContent>
+
+                {/* STANDING ORDERS */}
+                <TabsContent value="standing" className="mt-6 space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card border border-border rounded-3xl p-6 shadow-md hover:shadow-xl transition-all">
+                    <div className="flex items-center gap-3.5 flex-1">
+                      <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        <Scale className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-black text-foreground">{t("स्थायी निदेश — वाई नगर परिषद", "Standing Orders — Wai Municipal Council")}</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">{t("नगरपालिका प्रशासकीय कामकाज व कार्यपद्धती स्थायी निदेश", "Official standing orders governing council business and procedures.")}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-border">
+                      <button
+                        onClick={() => setPreview(preview ? null : STANDING_ORDER_URL.replace("/view", "/preview"))}
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 text-xs border border-primary/30 text-primary bg-primary/5 px-4 py-2.5 rounded-xl font-bold hover:bg-primary/20 transition-all shadow-sm"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        <span>{t("पहा", "Preview")}</span>
+                      </button>
+
+                      <a
+                        href={STANDING_ORDER_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 text-xs gov-gradient text-white font-black px-4 py-2.5 rounded-xl hover:opacity-90 shadow-md hover:shadow-lg transition-all"
+                      >
+                        <Download className="h-4 w-4" />
+                        <span>{t("डाउनलोड", "Download")}</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {preview && (
+                    <div className="border-2 border-primary/30 rounded-3xl overflow-hidden shadow-2xl bg-card animate-in fade-in duration-300">
+                      <div className="gov-gradient text-primary-foreground px-6 py-3.5 flex items-center justify-between font-black text-sm">
+                        <span>{t("स्थायी निदेश दस्तऐवज पूर्वावलोकन", "Standing Orders Preview")}</span>
+                        <button onClick={() => setPreview(null)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                      <iframe src={preview} className="w-full h-[580px]" title="Standing Orders Preview" allow="autoplay" />
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+
+          </div>
+        </div>
       </div>
     </PageLayout>
   );

@@ -72,16 +72,37 @@ const AdminNotices = () => {
   const inputCls = "w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none";
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{t("सूचना व्यवस्थापन", "Notice Management")}</h1>
+    <div className="space-y-8 font-devanagari">
+      
+      {/* Hero Banner Header */}
+      <div className="gov-gradient rounded-3xl p-8 text-primary-foreground shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-bl-full pointer-events-none" />
+        
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div>
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
+              <Megaphone className="w-3.5 h-3.5" />
+              {t("शासकीय निविदा व प्रसिद्धी", "Official Notices & Press Releases")}
+            </span>
+            <h1 className="text-3xl md:text-4xl font-black text-white">{t("सूचना व्यवस्थापन", "Notice Management")}</h1>
+            <p className="text-primary-foreground/90 text-sm font-medium mt-1">
+              {t("नवीन सूचना, निविदा व जाहीर प्रगटनांची नोंदणी आणि थेट प्रसारण अद्यतन.", "Publish, edit, or archive official municipal notices & circulars.")}
+            </p>
+          </div>
+
+          <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl shadow-xl flex-shrink-0">
+            📢
+          </div>
+        </div>
+      </div>
 
       <div ref={formRef}>
-        <Card className={editingId ? "border-primary ring-1 ring-primary" : ""}>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              {editingId ? <Pencil className="h-4 w-4 text-primary" /> : <Plus className="h-4 w-4" />}
-              {editingId ? t("सूचना संपादित करा", "Edit Notice") : t("नवीन सूचना जोडा", "Add New Notice")}
-              {editingId && <Button type="button" variant="ghost" size="sm" className="ml-auto" onClick={cancelEdit}><X className="h-4 w-4" /></Button>}
+        <Card className={`rounded-3xl border border-border shadow-xl overflow-hidden transition-all duration-300 ${editingId ? "ring-2 ring-primary border-primary" : ""}`}>
+          <CardHeader className="bg-muted/40 border-b border-border">
+            <CardTitle className="text-base font-black flex items-center gap-2 text-foreground">
+              {editingId ? <Pencil className="h-5 w-5 text-primary" /> : <Plus className="h-5 w-5 text-primary" />}
+              <span>{editingId ? t("सूचना संपादित करा", "Edit Notice") : t("नवीन सूचना जोडा", "Add New Notice")}</span>
+              {editingId && <Button type="button" variant="ghost" size="sm" className="ml-auto rounded-xl" onClick={cancelEdit}><X className="h-4 w-4" /></Button>}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">

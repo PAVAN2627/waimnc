@@ -147,10 +147,29 @@ const AdminProjects = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">
-        {t("प्रकल्प व्यवस्थापन", "Project Management")}
-      </h1>
+    <div className="space-y-8 font-devanagari">
+      
+      {/* Hero Banner Header */}
+      <div className="gov-gradient rounded-3xl p-8 text-primary-foreground shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-bl-full pointer-events-none" />
+        
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div>
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
+              <FolderOpen className="w-3.5 h-3.5" />
+              {t("नगरपालिका विकास कामे", "Infrastructure & Urban Projects")}
+            </span>
+            <h1 className="text-3xl md:text-4xl font-black text-white">{t("प्रकल्प व्यवस्थापन", "Project Management")}</h1>
+            <p className="text-primary-foreground/90 text-sm font-medium mt-1">
+              {t("शहरातील चालू व प्रस्तावित विकास प्रकल्पांची प्रगती, निधी आणि स्थिती अपडेट करा.", "Monitor, edit progress percentages, and manage city development projects.")}
+            </p>
+          </div>
+
+          <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl shadow-xl flex-shrink-0">
+            🏗️
+          </div>
+        </div>
+      </div>
 
       {!isFirebaseConfigured && (
         <p className="text-sm text-muted-foreground">

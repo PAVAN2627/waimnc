@@ -89,8 +89,29 @@ const AdminComplaints = () => {
   });
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{t("तक्रार व्यवस्थापन", "Complaint Management")}</h1>
+    <div className="space-y-8 font-devanagari">
+      
+      {/* Hero Banner Header */}
+      <div className="gov-gradient rounded-3xl p-8 text-primary-foreground shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-bl-full pointer-events-none" />
+        
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div>
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
+              <Clock className="w-3.5 h-3.5" />
+              {t("नागरी निवारण कक्ष", "Civic Grievance Redressal")}
+            </span>
+            <h1 className="text-3xl md:text-4xl font-black text-white">{t("तक्रार व्यवस्थापन", "Complaint Management")}</h1>
+            <p className="text-primary-foreground/90 text-sm font-medium mt-1">
+              {t("नागरिकांच्या तक्रारींचे प्रभागवार निवारण, थेट स्थिती अद्यतन व पाठपुरावा.", "Track, assign, and resolve citizen grievances in real-time.")}
+            </p>
+          </div>
+
+          <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl shadow-xl flex-shrink-0">
+            📝
+          </div>
+        </div>
+      </div>
 
       {!isFirebaseConfigured && (
         <p className="text-sm text-muted-foreground">

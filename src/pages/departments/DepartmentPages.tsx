@@ -1,9 +1,10 @@
 import PageLayout from "@/components/PageLayout";
-import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Users, ClipboardList, Clock } from "lucide-react";
+import { Phone, Users, ClipboardList, Clock, Mail, CheckCircle2, ShieldCheck, Sparkles, Building2, ArrowRight, ExternalLink, X, FileText, HelpCircle, CheckSquare } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Building2, HeartPulse, Droplets, Map, Receipt, Zap, Monitor, Flame, FileCheck, Baby, Accessibility, Wallet, Archive, HardHat, BookOpen } from "lucide-react";
+import { HeartPulse, Droplets, Map, Receipt, Zap, Monitor, Flame, FileCheck, Baby, Accessibility, Wallet, Archive, HardHat, BookOpen } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 interface DeptData {
   icon: LucideIcon;
@@ -15,57 +16,281 @@ interface DeptData {
   hours: string; hoursEn: string;
 }
 
+interface ServiceInfoModalProps {
+  serviceTitle: string;
+  serviceTitleEn: string;
+  deptTitle: string;
+  deptTitleEn: string;
+  deptPhone: string;
+  hours: string;
+  hoursEn: string;
+  onClose: () => void;
+}
+
+const ServiceInfoModal = ({
+  serviceTitle,
+  serviceTitleEn,
+  deptTitle,
+  deptTitleEn,
+  deptPhone,
+  hours,
+  hoursEn,
+  onClose,
+}: ServiceInfoModalProps) => {
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+      <div className="bg-card text-card-foreground rounded-3xl max-w-lg w-full border border-border shadow-2xl overflow-hidden relative my-auto">
+        {/* Header Ribbon */}
+        <div className="gov-gradient text-primary-foreground p-6 pr-14 relative">
+          <button
+            onClick={onClose}
+            aria-label="Close Modal"
+            className="absolute top-5 right-5 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all hover:scale-110 shadow-lg border border-white/30"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-2 border border-white/30">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{t(deptTitle, deptTitleEn)}</span>
+          </div>
+
+          <h2 className="text-2xl font-black text-white leading-snug">{t(serviceTitle, serviceTitleEn)}</h2>
+          <p className="text-xs text-primary-foreground/90 mt-1 font-medium">{t("वाई नगरपरिषद नागरी सेवा माहिती", "Wai Municipal Civic Service Detail")}</p>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+          {/* Service Overview */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
+              <FileText className="w-4 h-4 text-primary" />
+              <span>{t("सेवेची माहिती व प्रक्रिया", "Service Overview & Procedure")}</span>
+            </h3>
+            <p className="text-xs md:text-sm text-muted-foreground leading-relaxed bg-muted/50 p-4 rounded-2xl border border-border">
+              {t(
+                `ह्या सेवेअंतर्गत वाई नगरपरिषदेच्या ${serviceTitle} या कामासाठी अर्ज सादर करता येतो. अर्जदार ऑनलाइन किंवा प्रत्यक्ष सेतू केंद्रावर जाऊन आवश्यक कागदपत्रांसह नोंदणी करू शकतात.`,
+                `Under this service, citizens can apply for ${serviceTitleEn} provided by Wai Municipal Council online or at the civic centre.`
+              )}
+            </p>
+          </div>
+
+          {/* Required Documents */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
+              <CheckSquare className="w-4 h-4 text-emerald-500" />
+              <span>{t("आवश्यक कागदपत्रे", "Required Documents")}</span>
+            </h3>
+            <div className="space-y-1.5 text-xs text-muted-foreground">
+              {[
+                t("आधार कार्ड / ओळखपत्र (Aadhar Card)", "Aadhar Card / Photo ID"),
+                t("रहिवासी दाखला / मालमत्ता कर पावती", "Residence Proof / Property Tax Receipt"),
+                t("विहित नमुन्यातील भरलेला अर्ज", "Duly filled application form"),
+                t("पाणीपट्टी / ना-हरकत प्रमाणपत्र (लागू असल्यास)", "Water receipt / No Objection Certificate"),
+              ].map((doc, idx) => (
+                <div key={idx} className="flex items-center gap-2 p-2 rounded-xl bg-card border border-border/70">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                  <span className="font-medium text-foreground">{doc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Timings & Contact */}
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="p-3 rounded-2xl bg-muted/60 border border-border text-xs">
+              <div className="text-muted-foreground font-semibold mb-0.5">{t("कार्यालयीन वेळ", "Office Hours")}</div>
+              <div className="font-bold text-foreground">{t(hours, hoursEn)}</div>
+            </div>
+            <div className="p-3 rounded-2xl bg-muted/60 border border-border text-xs">
+              <div className="text-muted-foreground font-semibold mb-0.5">{t("विभाग संपर्क", "Helpline")}</div>
+              <div className="font-bold text-primary font-mono">{deptPhone}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer Actions */}
+        <div className="p-4 border-t border-border bg-muted/30 flex items-center justify-between gap-3">
+          <Link
+            to="/services/complaint"
+            onClick={onClose}
+            className="flex-1 py-2.5 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs text-center transition-all shadow-md flex items-center justify-center gap-1.5"
+          >
+            <span>{t("अर्ज / तक्रार नोंदवा", "Apply / File Request")}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          
+          <button
+            onClick={onClose}
+            className="py-2.5 px-4 rounded-xl bg-card border border-border hover:bg-accent text-foreground font-semibold text-xs transition-colors"
+          >
+            {t("बंद करा", "Close")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const DeptPage = ({ data }: { data: DeptData }) => {
   const { t } = useLanguage();
+  const Icon = data.icon;
+  const [selectedService, setSelectedService] = useState<{ title: string; titleEn: string } | null>(null);
+
   return (
     <PageLayout>
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="gov-gradient rounded-2xl p-8 text-primary-foreground">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 rounded-xl bg-primary-foreground/20 flex items-center justify-center">
-                <data.icon className="w-8 h-8" />
+      <div className="py-12 bg-gradient-to-b from-background via-muted/30 to-background border-b relative overflow-hidden">
+        {/* Service Info Pop-up Modal */}
+        {selectedService && (
+          <ServiceInfoModal
+            serviceTitle={selectedService.title}
+            serviceTitleEn={selectedService.titleEn}
+            deptTitle={data.title}
+            deptTitleEn={data.titleEn}
+            deptPhone={data.phone}
+            hours={data.hours}
+            hoursEn={data.hoursEn}
+            onClose={() => setSelectedService(null)}
+          />
+        )}
+
+        {/* Background Glows */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* Department Hero Card */}
+            <div className="gov-gradient rounded-3xl p-8 md:p-10 text-primary-foreground shadow-2xl relative overflow-hidden animate-in fade-in duration-500">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-bl-full pointer-events-none" />
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-6">
+                <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                  <Icon className="w-10 h-10 text-white" />
+                </div>
+                <div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-2 backdrop-blur-sm border border-white/30">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {t("वाई नगरपरिषद विभाग", "Wai Council Department")}
+                  </span>
+                  <h1 className="text-3xl md:text-4xl font-black text-white">{t(data.title, data.titleEn)}</h1>
+                  <p className="text-primary-foreground/90 text-sm font-medium mt-1">
+                    {t("सातारा जिल्हा, महाराष्ट्र शासन", "Satara District, Govt of Maharashtra")}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold">{t(data.title, data.titleEn)}</h1>
-                <p className="text-primary-foreground/80">{t("वाई नगर परिषद, जि. सातारा", "Wai Municipal Council, Dist. Satara")}</p>
+
+              <p className="text-primary-foreground/90 leading-relaxed text-sm md:text-base border-t border-white/20 pt-4">
+                {t(data.desc, data.descEn)}
+              </p>
+            </div>
+
+            {/* Split Section: Department Head & Office Hours */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              {/* Department Head Card (5 Cols) */}
+              <div className="md:col-span-5 bg-card rounded-3xl p-6 border border-border shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <h2 className="text-lg font-black text-foreground flex items-center gap-2">
+                      <Users className="w-5 h-5 text-primary" />
+                      <span>{t("विभाग प्रमुख", "Department Head")}</span>
+                    </h2>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      OFFICIAL
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-4 pt-1">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-3xl shadow-inner group-hover:scale-105 transition-transform">
+                      👤
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-base text-foreground">{t(data.head, data.headEn)}</h3>
+                      <p className="text-xs text-muted-foreground font-semibold mt-0.5">{t("विभागीय अधिकारी", "Departmental Officer")}</p>
+                    </div>
+                  </div>
+
+                  {/* Contact Links */}
+                  <div className="space-y-2 pt-2 text-xs">
+                    <a
+                      href={`tel:${data.phone}`}
+                      className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 hover:bg-primary/10 hover:text-primary transition-colors border border-border font-semibold text-foreground"
+                    >
+                      <Phone className="w-4 h-4 text-primary" />
+                      <span>{data.phone}</span>
+                    </a>
+                    {data.email && (
+                      <a
+                        href={`mailto:${data.email}`}
+                        className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 hover:bg-primary/10 hover:text-primary transition-colors border border-border font-semibold text-foreground truncate"
+                      >
+                        <Mail className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span className="truncate">{data.email}</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Office Hours Badge */}
+                <div className="mt-4 pt-3 border-t border-border flex items-center gap-2 text-xs text-muted-foreground font-medium">
+                  <Clock className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span>{t("वेळ", "Hours")}: {t(data.hours, data.hoursEn)}</span>
+                </div>
+              </div>
+
+              {/* Services & Duties Card (7 Cols) */}
+              <div className="md:col-span-7 bg-card rounded-3xl p-6 border border-border shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
+                    <h2 className="text-lg font-black text-foreground flex items-center gap-2">
+                      <ClipboardList className="w-5 h-5 text-primary" />
+                      <span>{t("कामे, सेवा व जबाबदाऱ्या", "Duties & Services")}</span>
+                    </h2>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                      {data.services.length} {t("सेवा", "Services")}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2.5 max-h-[380px] overflow-y-auto pr-1">
+                    {data.services.map((s, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => setSelectedService({ title: s, titleEn: data.servicesEn[idx] })}
+                        className="flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-primary/10 border border-border/60 hover:border-primary/30 transition-all duration-200 group/service cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                          <span className="text-xs md:text-sm font-semibold text-foreground group-hover/service:text-primary transition-colors">
+                            {t(s, data.servicesEn[idx])}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedService({ title: s, titleEn: data.servicesEn[idx] });
+                          }}
+                          className="text-xs font-bold text-primary px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary hover:text-primary-foreground border border-primary/20 transition-all flex items-center gap-1 shadow-sm"
+                        >
+                          <span>{t("माहिती", "Info")}</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-            <p className="text-primary-foreground/90 leading-relaxed">{t(data.desc, data.descEn)}</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardContent className="p-6 space-y-4">
-                <h2 className="text-xl font-bold text-primary flex items-center gap-2">
-                  <Users className="w-5 h-5" /> {t("विभाग प्रमुख", "Department Head")}
-                </h2>
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl">👤</div>
-                  <div>
-                    <p className="font-bold">{t(data.head, data.headEn)}</p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {data.phone}</p>
-                    {data.email && <a href={`mailto:${data.email}`} className="text-xs text-primary hover:underline">{data.email}</a>}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted rounded-lg p-3">
-                  <Clock className="w-4 h-4" />
-                  <span>{t("कार्यालयीन वेळ", "Office Hours")}: {t(data.hours, data.hoursEn)}</span>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6 space-y-3">
-                <h2 className="text-xl font-bold text-primary flex items-center gap-2">
-                  <ClipboardList className="w-5 h-5" /> {t("कामे व सेवा", "Duties & Services")}
-                </h2>
-                {data.services.map((s, i) => (
-                  <div key={i} className="flex items-start gap-2 bg-primary/5 rounded-lg p-3 hover:bg-primary/10 transition-colors">
-                    <span className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                    <span className="text-sm">{t(s, data.servicesEn[i])}</span>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
@@ -216,3 +441,4 @@ export const Accounts = () => <DeptPage data={depts.accounts} />;
 export const Records = () => <DeptPage data={depts.records} />;
 export const Disabled = () => <DeptPage data={depts.disabled} />;
 export const WomenChild = () => <DeptPage data={depts.women} />;
+

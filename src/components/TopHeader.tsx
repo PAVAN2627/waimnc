@@ -1,4 +1,4 @@
-import { Phone, Mail, Bell, Moon, Sun } from "lucide-react";
+import { Phone, Mail, Bell, Moon, Sun, Sparkles, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isFirebaseConfigured } from "@/lib/firebase";
@@ -76,21 +76,29 @@ const TopHeader = () => {
         </div>
 
         {/* Right controls */}
-        <div className="flex items-center gap-3">
-          {/* Notification bell with dropdown */}
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+          {/* Quick Search Launcher */}
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("open-quick-search"))}
+            className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 transition-all border border-white/20"
+          >
+            <Search className="w-3 h-3 text-white" />
+            <span className="hidden sm:inline font-medium">{t("शोध (Ctrl+K)", "Search (Ctrl+K)")}</span>
+          </button>
+
           {/* Language toggle */}
           <div className="flex gap-1 text-xs">
-            <button onClick={() => setLang("mr")} className={`px-2 py-0.5 rounded ${lang === "mr" ? "bg-primary-foreground text-primary" : "hover:underline"}`}>
+            <button onClick={() => setLang("mr")} className={`px-2 py-0.5 rounded transition-colors ${lang === "mr" ? "bg-primary-foreground text-primary font-bold shadow-sm" : "hover:underline"}`}>
               मराठी
             </button>
-            <button onClick={() => setLang("en")} className={`px-2 py-0.5 rounded ${lang === "en" ? "bg-primary-foreground text-primary" : "hover:underline"}`}>
+            <button onClick={() => setLang("en")} className={`px-2 py-0.5 rounded transition-colors ${lang === "en" ? "bg-primary-foreground text-primary font-bold shadow-sm" : "hover:underline"}`}>
               English
             </button>
           </div>
 
           {/* Dark mode */}
-          <button onClick={toggleDark} className="p-1 rounded hover:bg-primary-foreground/20">
-            {dark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+          <button onClick={toggleDark} className="p-1 rounded hover:bg-primary-foreground/20 transition-colors" title={t("थीम बदला", "Toggle theme")}>
+            {dark ? <Sun className="w-3.5 h-3.5 text-amber-300" /> : <Moon className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>

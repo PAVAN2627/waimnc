@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import PageLayout from "@/components/PageLayout";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Video, Calendar, FileText, Download, Play, Clock, ExternalLink } from "lucide-react";
+import { Video, Calendar, FileText, Download, Play, Clock, ExternalLink, Sparkles, Radio, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { subscribeToActiveSabha, type SabhaRecord } from "@/lib/sabha";
@@ -13,24 +10,19 @@ function toEmbedUrl(url: string): string | null {
   if (!url) return null;
   try {
     const u = new URL(url);
-    // already an embed URL
     if (u.pathname.startsWith("/embed/")) return url;
-    // youtu.be/VIDEO_ID
     if (u.hostname === "youtu.be") {
       const id = u.pathname.slice(1);
       return `https://www.youtube.com/embed/${id}`;
     }
-    // youtube.com/watch?v=VIDEO_ID
     const v = u.searchParams.get("v");
     if (v) return `https://www.youtube.com/embed/${v}`;
-    // youtube.com/live/VIDEO_ID
     const liveMatch = u.pathname.match(/\/live\/([^/?]+)/);
     if (liveMatch) return `https://www.youtube.com/embed/${liveMatch[1]}`;
-    // youtube.com/shorts/VIDEO_ID
     const shortsMatch = u.pathname.match(/\/shorts\/([^/?]+)/);
     if (shortsMatch) return `https://www.youtube.com/embed/${shortsMatch[1]}`;
   } catch {
-    // not a valid URL — return null
+    // Return null if invalid URL
   }
   return null;
 }
@@ -40,14 +32,15 @@ const VideoEmbed = ({ url, title }: { url: string; title: string }) => {
   if (!embedUrl) {
     return (
       <a href={url} target="_blank" rel="noopener noreferrer">
-        <Button variant="outline" size="sm">
-          <ExternalLink className="w-4 h-4 mr-1" /> {title}
-        </Button>
+        <button className="px-4 py-2 rounded-xl gov-gradient text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5">
+          <ExternalLink className="w-4 h-4" />
+          <span>{title}</span>
+        </button>
       </a>
     );
   }
   return (
-    <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+    <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 border border-white/20 shadow-2xl">
       <iframe
         src={embedUrl}
         title={title}
@@ -76,112 +69,165 @@ const LiveSabhaPage = () => {
 
   return (
     <PageLayout>
-      <div className="container mx-auto px-4 py-10 space-y-8">
-        <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
-          <Video className="w-8 h-8" /> {t("लाईव्ह सभा प्रसारण", "Live Sabha Broadcast")}
-        </h1>
+      <div className="py-12 bg-gradient-to-b from-background via-muted/30 to-background border-b relative overflow-hidden">
+        {/* Background Glows */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Live player */}
-        <Card className="border-2 border-destructive bg-destructive/5">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
-              <Badge variant="destructive">LIVE</Badge>
-              <span className="font-bold">
-                {liveNow ? title(liveNow) : t("सध्या कोणतीही सभा सुरू नाही", "No meeting currently in progress")}
-              </span>
-            </div>
-            {liveNow?.videoUrl ? (
-              <VideoEmbed url={liveNow.videoUrl} title={title(liveNow)} />
-            ) : (
-              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                <div className="text-center space-y-2">
-                  <Video className="w-16 h-16 text-muted-foreground/40 mx-auto" />
-                  <p className="text-muted-foreground text-sm">
-                    {t("पुढील सभा सुरू झाल्यावर येथे लाईव्ह प्रसारण पाहता येईल", "Live broadcast will appear here when the next meeting starts")}
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto space-y-10">
+
+            {/* Header Title */}
+            <div className="gov-gradient rounded-3xl p-8 md:p-10 text-primary-foreground shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-bl-full pointer-events-none" />
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
+                    <Radio className="w-3.5 h-3.5 text-red-300 animate-pulse" />
+                    {t("सार्वजनिक लोकशाही सभा", "Democratic Live Council Broadcast")}
+                  </span>
+                  <h1 className="text-3xl md:text-5xl font-black text-white flex items-center gap-3">
+                    <span>{t("लाईव्ह सभा व अजेंडा", "Live Sabha Broadcast")}</span>
+                  </h1>
+                  <p className="text-primary-foreground/90 text-sm md:text-base font-medium mt-2 max-w-xl">
+                    {t(
+                      "वाई नगरपरिषदेच्या सर्वसाधारण सभांचे थेट थेट व्हिडिओ प्रसारण, अजेंडा व इतिवृत्त दस्तऐवज.",
+                      "Official live streaming of Wai Municipal Council General Meetings, agenda PDFs & minutes."
+                    )}
                   </p>
+                </div>
+
+                <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-4xl shadow-xl flex-shrink-0">
+                  🏛️
+                </div>
+              </div>
+            </div>
+
+            {/* Live Broadcast Stream Card */}
+            <div className="bg-card rounded-3xl border-2 border-red-500/40 p-6 md:p-8 shadow-2xl relative overflow-hidden space-y-6">
+              <div className="flex items-center justify-between flex-wrap gap-3 border-b border-border pb-4">
+                <div className="flex items-center gap-3">
+                  <span className="relative flex h-3.5 w-3.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-600" />
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-red-500 text-white font-extrabold text-xs tracking-wider shadow-md">
+                    LIVE BROADCAST
+                  </span>
+                  <h2 className="font-extrabold text-base md:text-lg text-foreground">
+                    {liveNow ? title(liveNow) : t("सर्वसाधारण सभा - थेट प्रसारण", "General Body Council Meeting")}
+                  </h2>
+                </div>
+
+                <span className="text-xs font-bold text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border">
+                  {liveNow ? t("थेट प्रक्षेपण सुरू आहे", "Streaming Live") : t("सध्या कोणतीही सभा सुरू नाही", "No active live session")}
+                </span>
+              </div>
+
+              {/* Player Container */}
+              {liveNow?.videoUrl ? (
+                <VideoEmbed url={liveNow.videoUrl} title={title(liveNow)} />
+              ) : (
+                <div className="aspect-video bg-slate-950 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden p-6 shadow-inner">
+                  <div className="text-center space-y-3 max-w-md">
+                    <div className="w-16 h-16 rounded-2xl bg-white/10 text-white/60 mx-auto flex items-center justify-center text-3xl border border-white/20">
+                      📹
+                    </div>
+                    <h3 className="text-lg font-bold text-white">{t("पुढील सभेचे थेट प्रसारण", "Next Live Meeting Stream")}</h3>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      {t(
+                        "नगरपालिकेची सर्वसाधारण सभा सुरू झाल्यावर येथे यूट्यूबवर थेट डिजिटल प्रसारण दिसेल.",
+                        "Live stream will automatically appear here when the council meeting is convened."
+                      )}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Upcoming Meetings Section */}
+            {upcoming.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-black text-foreground flex items-center gap-2">
+                  <Calendar className="w-6 h-6 text-primary" />
+                  <span>{t("आगामी सभा व अजेंडा", "Upcoming Council Meetings")}</span>
+                </h2>
+
+                <div className="grid md:grid-cols-2 gap-5">
+                  {upcoming.map((s) => (
+                    <div key={s.id} className="bg-card rounded-3xl p-6 border border-border shadow-md hover:shadow-xl transition-all duration-300 space-y-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                          {title(s)}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground font-mono">
+                          <Calendar className="w-3.5 h-3.5 text-primary" />
+                          <span>{s.date}</span>
+                        </div>
+                      </div>
+
+                      {s.time && (
+                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground bg-muted/60 p-2.5 rounded-xl border border-border">
+                          <Clock className="w-4 h-4 text-primary" />
+                          <span>{t("सभेची वेळ", "Meeting Time")}: {s.time}</span>
+                        </div>
+                      )}
+
+                      {s.minutesBase64 && (
+                        <a href={s.minutesBase64} download={s.minutesName || "agenda.pdf"} className="block">
+                          <button className="w-full py-2.5 rounded-xl bg-card hover:bg-muted border border-border text-foreground font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                            <FileText className="w-4 h-4 text-primary" />
+                            <span>{t("विषयपत्रिका (अजेंडा) डाउनलोड", "Download Agenda PDF")}</span>
+                          </button>
+                        </a>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
 
-        {/* Upcoming */}
-        {upcoming.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-2xl font-bold">{t("आगामी सभा", "Upcoming Meetings")}</h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {upcoming.map((s) => (
-                <Card key={s.id}>
-                  <CardContent className="p-5 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Badge>{title(s)}</Badge>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Calendar className="w-4 h-4" /> {s.date}
+            {/* Previous Meetings Section */}
+            {previous.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-black text-foreground flex items-center gap-2">
+                  <FileText className="w-6 h-6 text-primary" />
+                  <span>{t("मागील सभांचे रेकॉर्डिंग व इतिवृत्त", "Past Meeting Archives & Minutes")}</span>
+                </h2>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  {previous.map((s) => (
+                    <div key={s.id} className="bg-card rounded-3xl border border-border shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                      {s.videoUrl && <VideoEmbed url={s.videoUrl} title={title(s)} />}
+                      <div className="p-5 flex items-center justify-between gap-3">
+                        <div>
+                          <h3 className="font-extrabold text-sm text-foreground group-hover:text-primary transition-colors">{title(s)}</h3>
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1 font-mono">
+                            <Calendar className="w-3.5 h-3.5 text-primary" />
+                            <span>{s.date}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {s.minutesBase64 && (
+                            <a href={s.minutesBase64} download={s.minutesName || "minutes.pdf"}>
+                              <button className="px-3.5 py-2 rounded-xl gov-gradient text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1">
+                                <Download className="w-3.5 h-3.5" />
+                                <span>{t("इतिवृत्त PDF", "Minutes")}</span>
+                              </button>
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    {s.time && (
-                      <div className="flex items-center gap-1 text-sm">
-                        <Clock className="w-4 h-4 text-primary" /> {t("वेळ", "Time")}: {s.time}
-                      </div>
-                    )}
-                    {s.minutesBase64 && (
-                      <a href={s.minutesBase64} download={s.minutesName || "agenda.pdf"}>
-                        <Button variant="outline" size="sm" className="w-full">
-                          <FileText className="w-4 h-4 mr-1" /> {t("विषयपत्रिका डाउनलोड", "Download Agenda")}
-                        </Button>
-                      </a>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-        )}
+                  ))}
+                </div>
+              </div>
+            )}
 
-        {/* Previous */}
-        {previous.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-2xl font-bold">{t("मागील सभा रेकॉर्डिंग", "Past Meeting Recordings")}</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {previous.map((s) => (
-                <Card key={s.id} className="overflow-hidden">
-                  <CardContent className="p-0">
-                    {s.videoUrl && <VideoEmbed url={s.videoUrl} title={title(s)} />}
-                    <div className="p-4 flex items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-sm">{title(s)}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <Calendar className="w-3 h-3" /> {s.date}
-                        </p>
-                      </div>
-                      <div className="flex gap-2 flex-shrink-0">
-                        {s.videoUrl && !toEmbedUrl(s.videoUrl) && (
-                          <a href={s.videoUrl} target="_blank" rel="noopener noreferrer">
-                            <Button size="sm" variant="outline">
-                              <Play className="w-4 h-4 mr-1" /> {t("पहा", "Watch")}
-                            </Button>
-                          </a>
-                        )}
-                        {s.minutesBase64 && (
-                          <a href={s.minutesBase64} download={s.minutesName || "minutes.pdf"}>
-                            <Button size="sm" variant="outline">
-                              <Download className="w-4 h-4 mr-1" /> {t("इतिवृत्त", "Minutes")}
-                            </Button>
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {items.length === 0 && isFirebaseConfigured && (
-          <p className="text-sm text-muted-foreground">{t("कोणतीही सभा माहिती उपलब्ध नाही.", "No sabha information available.")}</p>
-        )}
+          </div>
+        </div>
       </div>
     </PageLayout>
   );

@@ -1,15 +1,10 @@
-import TopHeader from "@/components/TopHeader";
-import MainNav from "@/components/MainNav";
+import PageLayout from "@/components/PageLayout";
 import TrackApplication from "@/components/TrackApplication";
-import Footer from "@/components/Footer";
 
 const TrackPage = () => (
-  <div className="min-h-screen bg-background font-devanagari">
-    <TopHeader />
-    <MainNav />
+  <PageLayout>
     <TrackApplication />
-    <Footer />
-  </div>
+  </PageLayout>
 );
 
 export default TrackPage;
