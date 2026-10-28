@@ -83,8 +83,8 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-sm text-foreground">{t("अधिकृत ई-मेल", "Official Email")}</h3>
-                  <p className="text-xs font-bold text-foreground mt-1 truncate">info@wainagarpalika.gov.in</p>
-                  <p className="text-[11px] text-muted-foreground truncate">complaints@wainagarpalika.gov.in</p>
+                  <p className="text-xs font-bold text-foreground mt-1 truncate">info@waimunicipalcouncil.org</p>
+                  <p className="text-[11px] text-muted-foreground truncate">complaints@waimunicipalcouncil.org</p>
                 </div>
               </div>
 

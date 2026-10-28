@@ -1,24 +1,18 @@
 import { Phone, Mail, Bell, Moon, Sun, Sparkles, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { isFirebaseConfigured } from "@/lib/firebase";
-import { subscribeToActiveNotices, type NoticeRecord } from "@/lib/notices";
+import { useNotices } from "@/contexts/NoticeContext";
+import type { NoticeRecord } from "@/lib/notices";
 
 const TopHeader = () => {
   const [dark, setDark] = useState(false);
-  const [notices, setNotices] = useState<NoticeRecord[]>([]);
+  const { notices } = useNotices();
   const { lang, setLang, t } = useLanguage();
 
   const toggleDark = () => {
     setDark(!dark);
     document.documentElement.classList.toggle("dark");
   };
-
-  useEffect(() => {
-    if (!isFirebaseConfigured) return;
-    const unsub = subscribeToActiveNotices(setNotices);
-    return () => unsub();
-  }, []);
 
   const handleNoticeClick = (notice: NoticeRecord) => {
     if (notice.attachmentBase64) {
@@ -61,9 +55,9 @@ const TopHeader = () => {
             <Phone className="w-3.5 h-3.5" />
             <span>{t("हेल्पलाइन: 1800-123-4567", "Helpline: 1800-123-4567")}</span>
           </a>
-          <a href="mailto:info@wainagarpalika.gov.in" className="flex items-center gap-1 hover:underline">
+          <a href="mailto:info@waimunicipalcouncil.org" className="flex items-center gap-1 hover:underline">
             <Mail className="w-3.5 h-3.5" />
-            <span>info@wainagarpalika.gov.in</span>
+            <span>info@waimunicipalcouncil.org</span>
           </a>
         </div>
 

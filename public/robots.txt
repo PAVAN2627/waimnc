@@ -1,14 +1,64 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# robots.txt for Wai Municipal Council (वाई नगर परिषद) - Nagari Seva Setu
+# Official Municipal E-Governance Citizen Portal
 
 User-agent: *
 Allow: /
+Allow: /about/
+Allow: /departments/
+Allow: /services/
+Allow: /schemes/
+Allow: /tenders
+Allow: /acts
+Allow: /laws
+Allow: /track
+Allow: /tourism
+Allow: /gallery
+Allow: /contact
+Allow: /live-sabha
+Allow: /assets/
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.svg$
+Allow: /*.webp$
+
+# Disallow admin portal and private management routes from indexing
+Disallow: /admin
+Disallow: /admin/
+Disallow: /admin/*
+
+# AI Search Engine and LLM Crawlers
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+
+User-agent: Applebot
+Allow: /
+Disallow: /admin/
+
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin/
+
+# XML Sitemap
+Sitemap: https://www.waimunicipalcouncil.org/sitemap.xml

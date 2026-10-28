@@ -2,11 +2,13 @@ import {
   collection,
   doc,
   getDocs,
+  limit,
   onSnapshot,
   orderBy,
   query,
   setDoc,
   updateDoc,
+  where,
   type Unsubscribe,
 } from "firebase/firestore";
 import { assertFirebaseConfigured } from "@/lib/firebase";
@@ -23,6 +25,7 @@ export interface ComplaintAttachment {
 
 export interface ComplaintRecord {
   id: string;
+  trackingId?: string;
   name: string;
   mobile: string;
   ward: string;
@@ -112,6 +115,7 @@ async function processFile(file: File): Promise<string> {
 function mapComplaint(id: string, data: Partial<ComplaintRecord>): ComplaintRecord {
   return {
     id,
+    trackingId: data.trackingId ?? `TK-${id.slice(-6).toUpperCase()}`,
     name: data.name ?? "",
     mobile: data.mobile ?? "",
     ward: data.ward ?? "",
@@ -130,6 +134,7 @@ export async function createComplaint(input: CreateComplaintInput): Promise<Comp
     globalThis.crypto?.randomUUID?.() ??
     `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const now = Date.now();
+  const trackingId = `TK-${id.slice(-6).toUpperCase()}`;
   const attachments: ComplaintAttachment[] = [];
 
   if (input.files?.length) {
@@ -145,6 +150,7 @@ export async function createComplaint(input: CreateComplaintInput): Promise<Comp
   }
 
   const payload = mapComplaint(id, {
+    trackingId,
     name: input.name.trim(),
     mobile: input.mobile.trim(),
     ward: input.ward.trim(),
@@ -190,14 +196,36 @@ export async function getComplaintByTrackingId(
   trackingId: string,
   mobile: string
 ): Promise<ComplaintRecord | null> {
-  // trackingId format: "TK-XXXXXX" = last 6 chars of doc id (uppercase)
-  const suffix = trackingId.replace(/^TK-/i, "").toLowerCase();
-  const q = query(collectionRef(), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-  const match = snap.docs.find(
-    (d) =>
-      d.id.slice(-6).toLowerCase() === suffix &&
-      (d.data() as ComplaintRecord).mobile === mobile.trim()
+  const normTrackingId = trackingId.trim().toUpperCase();
+  const normMobile = mobile.trim();
+  const suffix = normTrackingId.replace(/^TK-/i, "").toLowerCase();
+
+  // 1. Direct query by trackingId and mobile (targeted O(1) query, eliminates database scraping)
+  try {
+    const qDirect = query(
+      collectionRef(),
+      where("trackingId", "==", normTrackingId),
+      where("mobile", "==", normMobile),
+      limit(1)
+    );
+    const snapDirect = await getDocs(qDirect);
+    if (!snapDirect.empty) {
+      const matchedDoc = snapDirect.docs[0];
+      return mapComplaint(matchedDoc.id, matchedDoc.data() as Partial<ComplaintRecord>);
+    }
+  } catch (err) {
+    // If trackingId index is still building or absent on legacy documents, proceed to mobile query
+    console.warn("Direct trackingId query fallback:", err);
+  }
+
+  // 2. Query scoped strictly to the user's mobile number ONLY (never downloads all city records)
+  const qByMobile = query(
+    collectionRef(),
+    where("mobile", "==", normMobile)
+  );
+  const snapMobile = await getDocs(qByMobile);
+  const match = snapMobile.docs.find(
+    (d) => d.id.slice(-6).toLowerCase() === suffix
   );
   if (!match) return null;
   return mapComplaint(match.id, match.data() as Partial<ComplaintRecord>);

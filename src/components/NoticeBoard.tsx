@@ -1,18 +1,12 @@
-import { useEffect, useState } from "react";
 import { Download, ExternalLink, FileText, Image as ImageIcon, Megaphone, Bell, Calendar, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNotices } from "@/contexts/NoticeContext";
 import { isFirebaseConfigured } from "@/lib/firebase";
-import { formatNoticeDate, subscribeToActiveNotices, type NoticeRecord } from "@/lib/notices";
+import { formatNoticeDate, type NoticeRecord } from "@/lib/notices";
 
 const NoticeBoard = () => {
   const { lang, t } = useLanguage();
-  const [notices, setNotices] = useState<NoticeRecord[]>([]);
-
-  useEffect(() => {
-    if (!isFirebaseConfigured) return;
-    const unsubscribe = subscribeToActiveNotices(setNotices);
-    return () => unsubscribe();
-  }, []);
+  const { notices, isLoading } = useNotices();
 
   return (
     <section id="notices" className="py-14 bg-gradient-to-b from-background to-muted/30 border-b">

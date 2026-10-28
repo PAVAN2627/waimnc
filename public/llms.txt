@@ -1,0 +1,64 @@
+# Wai Municipal Council (वाई नगर परिषद) - Nagari Seva Setu
+
+> Official e-Governance portal of Wai Municipal Council, Satara District, Maharashtra, India. Established in 1852 AD.
+
+Welcome to the LLM index for the Wai Municipal Council (वाई नगर परिषद) official citizen portal. This document is optimized for AI assistants, search bots, and LLM reasoning engines to answer queries regarding citizen services, municipal governance, public welfare schemes, property taxes, water billing, grievance redressal, and tourism in Wai.
+
+## Key Facts
+- **Entity**: Wai Municipal Council (वाई नगर परिषद)
+- **District**: Satara, Maharashtra, India (Postal Code: 412803)
+- **Establishment**: 1852 AD (one of the oldest municipal councils in Maharashtra)
+- **Helpline**: 1800-123-4567
+- **Official Email**: info@waimunicipalcouncil.org / complaints@waimunicipalcouncil.org
+- **Website**: https://www.waimunicipalcouncil.org
+- **Supported Languages**: Marathi (मराठी), English
+
+## Core Citizen Services
+- [Property Tax Payment](https://www.waimunicipalcouncil.org/services/property-tax): Online calculation, assessment, and direct digital payment of property and municipal taxes in Wai.
+- [Water Bill Payment](https://www.waimunicipalcouncil.org/services/water-bill): Consumer connection lookup, tariff slabs, and municipal water charge bill payment.
+- [Grievance Complaint Portal](https://www.waimunicipalcouncil.org/services/complaint): Register complaints across municipal departments with image/document attachments and instant `TK-XXXXXX` tracking ID generation.
+- [Track Complaint / Application](https://www.waimunicipalcouncil.org/track): Real-time tracking of filed complaints and civic applications using Tracking ID and 10-digit mobile number.
+- [Birth Certificate](https://www.waimunicipalcouncil.org/services/birth-certificate): Official birth registration guidelines, required documents, and issuance procedures.
+- [Death Certificate](https://www.waimunicipalcouncil.org/services/death-certificate): Vital statistics record verification and certificate application guidance.
+- [Construction Permit](https://www.waimunicipalcouncil.org/services/construction-permit): Town planning department approvals, building layout sanctions, and building permissions.
+
+## Tenders & Official Notices
+- [Active Tenders & Contracts](https://www.waimunicipalcouncil.org/tenders): Active and archived civil tenders, bidding deadlines, tender documents, and e-procurement notifications.
+- [Live General Body Sabha](https://www.waimunicipalcouncil.org/live-sabha): Live streaming and recordings of municipal council legislative sessions (नगरपरिषद सर्वसाधारण सभा).
+- [Official Notice Board](https://www.waimunicipalcouncil.org/#notices): Real-time public announcements, government resolutions (GRs), and circulars.
+
+## Administration & Leadership
+- [Council History & Profile](https://www.waimunicipalcouncil.org/about/history): Heritage of Wai as the cultural and religious center on the banks of Krishna River ('Dakshin Kashi').
+- [Administrative Structure](https://www.waimunicipalcouncil.org/about/structure): Hierarchy of municipal officials, administrative committees, and organizational chart.
+- [Mayor & Office](https://www.waimunicipalcouncil.org/about/mayor): Profile and vision of the Mayor (नगराध्यक्ष).
+- [Chief Officer (मुख्याधिकारी)](https://www.waimunicipalcouncil.org/about/chief-officer): Administrative leadership, official responsibilities, and executive oversight.
+- [Elected Corporators (नगरसेवक)](https://www.waimunicipalcouncil.org/about/corporators): Ward-wise elected municipal representatives.
+
+## Welfare & Development Schemes
+- [All Schemes Overview](https://www.waimunicipalcouncil.org/schemes/all): Central, state, and local social welfare schemes available to Wai residents.
+- [Pradhan Mantri Awas Yojana (PMAY)](https://www.waimunicipalcouncil.org/schemes/pmay): Affordable urban housing subsidies, eligibility norms, and beneficiary tracking.
+- [Swachh Bharat Urban Mission](https://www.waimunicipalcouncil.org/schemes/swachh-bharat): Citywide cleanliness initiatives, solid waste management, and individual household latrine subsidies.
+- [Central Government Schemes](https://www.waimunicipalcouncil.org/schemes/central): Centrally sponsored municipal infrastructure programs.
+- [State Government Schemes](https://www.waimunicipalcouncil.org/schemes/state): Government of Maharashtra civic and social development welfare initiatives.
+
+## Tourism & Heritage in Wai
+- [Wai Tourism Guide](https://www.waimunicipalcouncil.org/tourism): Comprehensive guide to Wai's heritage sites, temples, forts, and Bollywood filming locations:
+  - *Mahaganpati Temple (महागणपती मंदिर)*: Built in 1762 by Sardar Ganpatrao Bhikaji Raste; famous 6ft tall monolithic idol.
+  - *Krishna River Ghats & Menavali (कृष्णा घाट)*: Nana Phadnavis Wada and historic ghats.
+  - *Dhom Dam (धोम धरण)*: Scenic watersports and reservoir destination.
+  - *Mandhardevi Kalubai Temple (मांढरदेवी)*: Historic hill shrine at 4,650 ft altitude.
+  - *Kamalgad & Pandavgad Forts (कमळगड, पांडवगड)*: Historical forts and trekking trails.
+  - *Kashi Vishweshwar Temple (काशी विश्वेश्वर मंदिर)*: Hemadpanthi stone temple architecture.
+
+## Municipal Departments
+- [General Administration](https://www.waimunicipalcouncil.org/departments/general-admin)
+- [Health & Sanitation](https://www.waimunicipalcouncil.org/departments/health)
+- [Water Supply](https://www.waimunicipalcouncil.org/departments/water)
+- [Civil Engineering / PWD](https://www.waimunicipalcouncil.org/departments/civil)
+- [Town Planning](https://www.waimunicipalcouncil.org/departments/planning)
+- [Tax & Assessment](https://www.waimunicipalcouncil.org/departments/tax)
+- [Electrical Department](https://www.waimunicipalcouncil.org/departments/electrical)
+- [Fire & Disaster Response](https://www.waimunicipalcouncil.org/departments/fire)
+- [Birth & Death Registration](https://www.waimunicipalcouncil.org/departments/birth-death)
+- [Women & Child Welfare](https://www.waimunicipalcouncil.org/departments/women)
+- [Differently-Abled (Divyang) Welfare](https://www.waimunicipalcouncil.org/departments/disabled)

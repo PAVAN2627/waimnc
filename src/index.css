@@ -124,6 +124,10 @@
   .marquee {
     animation: marquee 30s linear infinite;
     font-size: 0.75rem;
+    will-change: transform;
+  }
+  .marquee:hover {
+    animation-play-state: paused;
   }
   @media (min-width: 768px) {
     .marquee {

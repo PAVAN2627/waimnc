@@ -37,9 +37,9 @@ const Gallery = () => {
   useEffect(() => {
     if (!lightbox) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") prev();
-      else if (e.key === "ArrowRight") next();
-      else if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") setLightbox((l) => l ? { ...l, index: (l.index - 1 + l.list.length) % l.list.length } : null);
+      else if (e.key === "ArrowRight") setLightbox((l) => l ? { ...l, index: (l.index + 1) % l.list.length } : null);
+      else if (e.key === "Escape") setLightbox(null);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);

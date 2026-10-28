@@ -9,7 +9,25 @@ const heroImages = [
   { src: "/Kamalgad.jpg", labelMr: "कमळगड किल्ला", labelEn: "Kamalgad Fort" },
 ];
 
-const spots = [
+interface TouristSpotItem {
+  image: string;
+  nameMr: string;
+  nameEn: string;
+  tagMr: string;
+  tagEn: string;
+  icon: typeof Camera;
+  descMr: string;
+  descEn: string;
+  timeMr: string;
+  timeEn: string;
+  locationMr: string;
+  locationEn: string;
+  locationUrl?: string;
+  objectFit?: "contain" | "cover";
+  objectPosition?: string;
+}
+
+const spots: TouristSpotItem[] = [
   {
     image: "/wai-temple.jpg",
     nameMr: "वाई महागणपती मंदिर",
@@ -235,7 +253,6 @@ const Tourism = () => {
   useEffect(() => {
     startTimer();
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const goTo = (index: number) => {
@@ -324,8 +341,8 @@ const Tourism = () => {
                     <img
                       src={spot.image}
                       alt={lang === "mr" ? spot.nameMr : spot.nameEn}
-                      className={`w-full h-full transition-transform duration-700 group-hover:scale-105 ${(spot as any).objectFit === "contain" ? "object-contain" : "object-cover"}`}
-                      style={{ objectPosition: (spot as any).objectPosition ?? "center" }}
+                      className={`w-full h-full transition-transform duration-700 group-hover:scale-105 ${spot.objectFit === "contain" ? "object-contain" : "object-cover"}`}
+                      style={{ objectPosition: spot.objectPosition ?? "center" }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
                   </div>

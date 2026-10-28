@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Sparkles, ArrowRight, ShieldCheck, Landmark } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -15,6 +15,15 @@ export const WelcomeOpeningAnimation: React.FC<WelcomeOpeningAnimationProps> = (
   const [isClosing, setIsClosing] = useState(false);
   const [progress, setProgress] = useState(0);
   const { t } = useLanguage();
+
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    sessionStorage.setItem("wai_intro_seen", "true");
+    setTimeout(() => {
+      setIsVisible(false);
+      if (onComplete) onComplete();
+    }, 700);
+  }, [onComplete]);
 
   useEffect(() => {
     // Check session storage if already shown in current session
@@ -43,7 +52,7 @@ export const WelcomeOpeningAnimation: React.FC<WelcomeOpeningAnimationProps> = (
 
       return () => clearInterval(timer);
     }
-  }, [forceShow]);
+  }, [forceShow, handleClose]);
 
   // Listen to custom replay event
   useEffect(() => {
@@ -69,16 +78,7 @@ export const WelcomeOpeningAnimation: React.FC<WelcomeOpeningAnimationProps> = (
 
     window.addEventListener("replay-opening-intro", handleReplay);
     return () => window.removeEventListener("replay-opening-intro", handleReplay);
-  }, []);
-
-  const handleClose = () => {
-    setIsClosing(true);
-    sessionStorage.setItem("wai_intro_seen", "true");
-    setTimeout(() => {
-      setIsVisible(false);
-      if (onComplete) onComplete();
-    }, 700);
-  };
+  }, [handleClose]);
 
   if (!isVisible) return null;
 

@@ -47,7 +47,7 @@ export const Footer = () => {
             </div>
             <div>
               <div className="text-xs text-white/80 font-medium">{t("ई-मेल संपर्क", "Official Email")}</div>
-              <div className="text-xs font-bold text-white">info@wainagarpalika.gov.in</div>
+              <div className="text-xs font-bold text-white">info@waimunicipalcouncil.org</div>
             </div>
           </div>
 
