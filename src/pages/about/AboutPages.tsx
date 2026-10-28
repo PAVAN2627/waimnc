@@ -2,7 +2,7 @@ import PageLayout from "@/components/PageLayout";
 import { Building2, Users, MapPin, Phone, Award, Landmark, BookOpen, Crown, Shield, UserCheck, Calendar, ArrowRight, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import React from "react";
-import { subscribeToActiveOfficials, DEFAULT_OFFICIALS, type OfficialRecord } from "@/lib/officials";
+import { COUNCILLORS_LIST } from "@/data/councillorsData";
 
 export const Introduction = () => {
   const { t } = useLanguage();
@@ -368,52 +368,61 @@ export const ChiefOfficer = () => {
 
 export const Corporators = () => {
   const { lang, t } = useLanguage();
-  const [corporators, setCorporators] = React.useState<OfficialRecord[]>(DEFAULT_OFFICIALS);
-  const [selectedCategory, setSelectedCategory] = React.useState<"all" | "president" | "councillor" | "nominated">("all");
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedCategory, setSelectedCategory] = React.useState<"all" | "president" | "councillor" | "nominated">("all");
 
-  React.useEffect(() => {
-    return subscribeToActiveOfficials((items) => {
-      if (items && items.length > 0) {
-        setCorporators(items);
-      }
-    });
-  }, []);
+  const allMembers = COUNCILLORS_LIST;
 
   const filteredMembers = React.useMemo(() => {
-    return corporators.filter((c) => {
+    return allMembers.filter((c) => {
       const matchesCategory = selectedCategory === "all" || c.category === selectedCategory;
       if (!matchesCategory) return false;
       if (!searchTerm.trim()) return true;
 
       const q = searchTerm.toLowerCase();
+      const nameMr = c.nameMr?.toLowerCase() || "";
+      const nameEn = c.nameEn?.toLowerCase() || "";
+      const ward = c.ward?.toLowerCase() || "";
+      const wardMr = c.wardMr?.toLowerCase() || "";
+      const wardEn = c.wardEn?.toLowerCase() || "";
+      const addressMr = c.addressMr?.toLowerCase() || "";
+      const addressEn = c.addressEn?.toLowerCase() || "";
+      const party = c.party?.toLowerCase() || "";
+      const partyMr = c.partyMr?.toLowerCase() || "";
+      const partyEn = c.partyEn?.toLowerCase() || "";
+      const phone = c.phone?.toLowerCase() || "";
+
       return (
-        c.nameMr.toLowerCase().includes(q) ||
-        c.nameEn.toLowerCase().includes(q) ||
-        c.ward.toLowerCase().includes(q) ||
-        (c.addressMr && c.addressMr.toLowerCase().includes(q)) ||
-        (c.addressEn && c.addressEn.toLowerCase().includes(q)) ||
-        c.party.toLowerCase().includes(q) ||
-        c.phone.toLowerCase().includes(q)
+        nameMr.includes(q) ||
+        nameEn.includes(q) ||
+        ward.includes(q) ||
+        wardMr.includes(q) ||
+        wardEn.includes(q) ||
+        addressMr.includes(q) ||
+        addressEn.includes(q) ||
+        party.includes(q) ||
+        partyMr.includes(q) ||
+        partyEn.includes(q) ||
+        phone.includes(q)
       );
     });
-  }, [corporators, selectedCategory, searchTerm]);
+  }, [allMembers, selectedCategory, searchTerm]);
 
   const presidents = filteredMembers.filter((c) => c.category === "president");
-  const councillors = filteredMembers.filter((c) => c.category === "councillor" || (!c.category && c.order > 2 && c.order <= 24));
-  const nominated = filteredMembers.filter((c) => c.category === "nominated" || (!c.category && c.order > 24));
+  const councillors = filteredMembers.filter((c) => c.category === "councillor");
+  const nominated = filteredMembers.filter((c) => c.category === "nominated");
 
-  const renderMemberCard = (c: OfficialRecord) => {
-    const isBjp = c.party.includes("भारतीय जनता पार्टी") || c.party.includes("BJP") || c.partyCode === "BJP";
-    const isNcp = c.party.includes("नॅशनलिस्ट") || c.party.includes("Nationalist") || c.partyCode === "NCP";
+  const renderMemberCard = (c: (typeof COUNCILLORS_LIST)[0]) => {
+    const isBjp = c.partyCode === "BJP" || (c.party && (c.party.includes("भाजप") || c.party.includes("BJP")));
+    const isNcp = c.partyCode === "NCP" || (c.party && (c.party.includes("राष्ट्रवादी") || c.party.includes("NCP") || c.party.includes("नॅशनलिस्ट")));
 
     const partyBadgeStyle = isBjp
-      ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30"
+      ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/40"
       : isNcp
-      ? "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30"
-      : "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/30";
+      ? "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/40"
+      : "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/40";
 
-    const designationDisplay = lang === "mr" ? (c.designationMr || c.ward) : (c.designationEn || c.ward);
+    const designationDisplay = lang === "mr" ? (c.designationMr || c.wardMr || c.ward) : (c.designationEn || c.wardEn || c.ward);
     const wardDisplay = lang === "mr" ? (c.wardMr || c.ward) : (c.wardEn || c.ward);
     const addressDisplay = lang === "mr" ? (c.addressMr || c.addressEn) : (c.addressEn || c.addressMr);
     const partyDisplay = lang === "mr" ? (c.partyMr || c.party) : (c.partyEn || c.party);
@@ -476,7 +485,7 @@ export const Corporators = () => {
             </a>
           ) : (
             <span className="text-[11px] text-muted-foreground italic">
-              {t("मूळ यादीत स्पष्टपणे दिलेला नाही", "Not clearly listed")}
+              {t("मूळ यादीत उपलब्ध नाही", "Not listed")}
             </span>
           )}
         </div>
@@ -493,7 +502,7 @@ export const Corporators = () => {
           
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            {t("अध्यक्ष व नगरसेवक २०२५–२६", "President & Councillors 2025–26")}
+            {t("लोकप्रतिनिधी मंडळ २०२५–२६", "Elected Representatives 2025–26")}
           </span>
           
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground mb-3 tracking-tight">
@@ -501,8 +510,8 @@ export const Corporators = () => {
           </h1>
           <p className="text-xs md:text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             {t(
-              "खालील यादीमध्ये नावे, प्रभाग क्रमांक, पत्ते, राजकीय पक्ष आणि मोबाइल नंबर मराठी व इंग्रजीमध्ये दिले आहेत.",
-              "The following list provides names, ward numbers, addresses, political party affiliations, and mobile numbers in Marathi and English."
+              "वाई शहराच्या सर्वांगीण विकासासाठी व नागरी समस्या निवारणासाठी कटिबद्ध असलेले लोकप्रतिनिधी.",
+              "Elected and nominated municipal leaders dedicated to the development and public service of Wai city."
             )}
           </p>
         </div>
@@ -547,56 +556,81 @@ export const Corporators = () => {
 
         {/* Content Sections */}
         <div className="max-w-5xl mx-auto space-y-10">
-          {/* Section 1: President & Deputy President */}
-          {(selectedCategory === "all" || selectedCategory === "president") && presidents.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 border-b border-border pb-2">
-                <Crown className="w-5 h-5 text-amber-500" />
-                <h2 className="text-lg md:text-xl font-black text-foreground">
-                  {t("१. अध्यक्ष व उपाध्यक्ष", "1. President and Deputy President")}
-                </h2>
-                <span className="text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold px-2 py-0.5 rounded-full ml-auto">
-                  {presidents.length} {t("सदस्य", "Members")}
-                </span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {presidents.map(renderMemberCard)}
-              </div>
-            </div>
-          )}
+          {/* If viewing All category, show clean grouped sections */}
+          {selectedCategory === "all" ? (
+            <>
+              {/* Section 1: President & Deputy President */}
+              {presidents.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 border-b border-border pb-2">
+                    <Crown className="w-5 h-5 text-amber-500" />
+                    <h2 className="text-lg md:text-xl font-black text-foreground">
+                      {t("१. अध्यक्ष व उपाध्यक्ष", "1. President and Deputy President")}
+                    </h2>
+                    <span className="text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold px-2 py-0.5 rounded-full ml-auto">
+                      {presidents.length} {t("सदस्य", "Members")}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {presidents.map(renderMemberCard)}
+                  </div>
+                </div>
+              )}
 
-          {/* Section 2: Councillors List */}
-          {(selectedCategory === "all" || selectedCategory === "councillor") && councillors.length > 0 && (
+              {/* Section 2: Councillors List */}
+              {councillors.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 border-b border-border pb-2">
+                    <Users className="w-5 h-5 text-primary" />
+                    <h2 className="text-lg md:text-xl font-black text-foreground">
+                      {t("२. नगरसेवक यादी", "2. Councillors List")}
+                    </h2>
+                    <span className="text-xs bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full ml-auto">
+                      {councillors.length} {t("नगरसेवक", "Councillors")}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {councillors.map(renderMemberCard)}
+                  </div>
+                </div>
+              )}
+
+              {/* Section 3: Nominated Members */}
+              {nominated.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 border-b border-border pb-2">
+                    <Shield className="w-5 h-5 text-purple-500" />
+                    <h2 className="text-lg md:text-xl font-black text-foreground">
+                      {t("३. नामनिर्देशित सदस्य", "3. Nominated Members")}
+                    </h2>
+                    <span className="text-xs bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold px-2 py-0.5 rounded-full ml-auto">
+                      {nominated.length} {t("सदस्य", "Members")}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {nominated.map(renderMemberCard)}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            /* Specific Category View */
             <div className="space-y-4">
               <div className="flex items-center gap-2 border-b border-border pb-2">
                 <Users className="w-5 h-5 text-primary" />
                 <h2 className="text-lg md:text-xl font-black text-foreground">
-                  {t("२. नगरसेवक यादी", "2. Councillors List")}
+                  {selectedCategory === "president"
+                    ? t("अध्यक्ष व उपाध्यक्ष", "President and Deputy President")
+                    : selectedCategory === "councillor"
+                    ? t("नगरसेवक यादी", "Councillors List")
+                    : t("नामनिर्देशित सदस्य", "Nominated Members")}
                 </h2>
                 <span className="text-xs bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full ml-auto">
-                  {councillors.length} {t("नगरसेवक", "Councillors")}
+                  {filteredMembers.length} {t("सदस्य", "Members")}
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {councillors.map(renderMemberCard)}
-              </div>
-            </div>
-          )}
-
-          {/* Section 3: Nominated Members */}
-          {(selectedCategory === "all" || selectedCategory === "nominated") && nominated.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 border-b border-border pb-2">
-                <Shield className="w-5 h-5 text-purple-500" />
-                <h2 className="text-lg md:text-xl font-black text-foreground">
-                  {t("३. नामनिर्देशित सदस्य", "3. Nominated Members")}
-                </h2>
-                <span className="text-xs bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold px-2 py-0.5 rounded-full ml-auto">
-                  {nominated.length} {t("सदस्य", "Members")}
-                </span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {nominated.map(renderMemberCard)}
+                {filteredMembers.map(renderMemberCard)}
               </div>
             </div>
           )}
