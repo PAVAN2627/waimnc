@@ -47,7 +47,7 @@ const LEADERS = [
     subEn: "Municipal Secretary, Wai Municipal Council",
     accent: "from-purple-500 to-pink-600",
     badgeBg: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30",
-    photo: "",
+    photo: "/abhishekkrushna.png",
     icon: Shield,
   },
 ];
@@ -129,7 +129,19 @@ const LeadershipSection = () => {
                 {/* Image */}
                 <div className={`w-28 h-28 rounded-2xl bg-gradient-to-tr ${leader.accent} p-1 shadow-md mb-4 group-hover:scale-105 transition-transform`}>
                   {leader.photo ? (
-                    <img src={leader.photo} alt={name} className="w-full h-full rounded-xl object-cover" />
+                    <>
+                      <img
+                        src={leader.photo}
+                        alt={name}
+                        className="w-full h-full rounded-xl object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          const fallback = e.currentTarget.parentElement?.querySelector(".fallback-avatar") as HTMLElement | null;
+                          if (fallback) fallback.classList.remove("hidden");
+                        }}
+                      />
+                      <div className="fallback-avatar hidden w-full h-full rounded-xl bg-card flex items-center justify-center text-4xl">👤</div>
+                    </>
                   ) : (
                     <div className="w-full h-full rounded-xl bg-card flex items-center justify-center text-4xl">👤</div>
                   )}
