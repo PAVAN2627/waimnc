@@ -7,9 +7,9 @@ Welcome to the LLM index for the Wai Municipal Council (वाई नगर प�
 ## Key Facts
 - **Entity**: Wai Municipal Council (वाई नगर परिषद)
 - **District**: Satara, Maharashtra, India (Postal Code: 412803)
-- **Establishment**: 1852 AD (one of the oldest municipal councils in Maharashtra)
-- **Helpline**: 1800-123-4567
-- **Official Email**: info@waimunicipalcouncil.org / complaints@waimunicipalcouncil.org
+- **Address**: 443, Madhli Aali, Ganpati Aali, Wai, Dist. Satara, 412803 (४४३, मधली आळी, गणपती आळी, वाई, जिल्हा सातारा - ४१२८०३)
+- **Helpline / Office**: 02167-220022 (०२१६७-२२००२२) | Toll Free: 1800233221 (१८००२३३२२१)
+- **Official Email**: waimunicipalcouncil@gmail.com / info@waimunicipalcouncil.org
 - **Website**: https://www.waimunicipalcouncil.org
 - **Supported Languages**: Marathi (मराठी), English
 
@@ -30,8 +30,8 @@ Welcome to the LLM index for the Wai Municipal Council (वाई नगर प�
 ## Administration & Leadership
 - [Council History & Profile](https://www.waimunicipalcouncil.org/about/history): Heritage of Wai as the cultural and religious center on the banks of Krishna River ('Dakshin Kashi').
 - [Administrative Structure](https://www.waimunicipalcouncil.org/about/structure): Hierarchy of municipal officials, administrative committees, and organizational chart.
-- [Mayor & Office](https://www.waimunicipalcouncil.org/about/mayor): Profile and vision of the Mayor (नगराध्यक्ष).
-- [Chief Officer (मुख्याधिकारी)](https://www.waimunicipalcouncil.org/about/chief-officer): Administrative leadership, official responsibilities, and executive oversight.
+- [Directly Elected Mayor (लोकनियुक्त नगराध्यक्ष)](https://www.waimunicipalcouncil.org/about/mayor): Profile and vision of the Directly Elected Mayor (मा. लोकनियुक्त नगराध्यक्ष - श्री. अनिल सावंत).
+- [Chief Officer (मुख्याधिकारी)](https://www.waimunicipalcouncil.org/about/chief-officer): Chief Executive Officer श्रीमती संजीवनी दळवी (Smt. Sanjivani Dalvi), administrative leadership, and executive oversight.
 - [Elected Corporators (नगरसेवक)](https://www.waimunicipalcouncil.org/about/corporators): Ward-wise elected municipal representatives.
 
 ## Welfare & Development Schemes

@@ -61,7 +61,7 @@ const Contact = () => {
                 <div>
                   <h3 className="font-extrabold text-sm text-foreground">{t("मुख्य कार्यालय पत्ता", "Office Address")}</h3>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    {t("५८७b, मोतीबाग रोड, दाणेबाजार, गणपती आळी, वाई ४१२८०३", "587b, Motibag Rd, Danebazar, Ganpati Ali, Wai 412803")}
+                    {t("४४३, मधली आळी, गणपती आळी, वाई, जिल्हा सातारा - ४१२८०३", "443, Madhli Aali, Ganpati Aali, Wai, Dist. Satara, 412803")}
                   </p>
                 </div>
               </div>
@@ -72,8 +72,8 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-sm text-foreground">{t("दूरध्वनी व हेल्पलाईन", "Telephone & Helpline")}</h3>
-                  <p className="text-xs font-mono font-bold text-foreground mt-1">02167-220000 / 220001</p>
-                  <p className="text-[11px] text-amber-600 dark:text-amber-400 font-bold mt-0.5">Toll Free: 1800-123-4567</p>
+                  <p className="text-xs font-mono font-bold text-foreground mt-1">०२१६७-२२००२२ / 02167-220022</p>
+                  <p className="text-[11px] text-amber-600 dark:text-amber-400 font-bold mt-0.5">{t("टोल फ्री क्र. १८००२३३२२१", "Toll Free: 1800233221")}</p>
                 </div>
               </div>
 
@@ -83,8 +83,10 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-sm text-foreground">{t("अधिकृत ई-मेल", "Official Email")}</h3>
-                  <p className="text-xs font-bold text-foreground mt-1 truncate">info@waimunicipalcouncil.org</p>
-                  <p className="text-[11px] text-muted-foreground truncate">complaints@waimunicipalcouncil.org</p>
+                  <a href="mailto:waimunicipalcouncil@gmail.com" className="text-xs font-bold text-primary hover:underline mt-1 block truncate">
+                    waimunicipalcouncil@gmail.com
+                  </a>
+                  <p className="text-[11px] text-muted-foreground truncate">info@waimunicipalcouncil.org</p>
                 </div>
               </div>
 

@@ -122,7 +122,7 @@ const ComplaintForm = () => {
                     <li>{t("तक्रारीची सद्यस्थिती जाणून घ्या", "Know the current status of your complaint")}</li>
                   </ol>
                   <p className="text-xs text-muted-foreground pt-1">
-                    📞 {t("हेल्पलाइन: 1800-123-4567", "Helpline: 1800-123-4567")}
+                    📞 {t("ऑफिस: ०२१६७-२२००२२ / टोल फ्री: १८००२३३२२१", "Office: 02167-220022 / Toll Free: 1800233221")}
                   </p>
                 </div>
               </>

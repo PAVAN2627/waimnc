@@ -68,8 +68,8 @@ export const Introduction = () => {
 
             <div className="grid sm:grid-cols-2 gap-4 pt-4">
               {[
-                { icon: Phone, label: t("२४x७ मदत कक्ष", "24x7 Helpline"), value: "02167-220000" },
-                { icon: MapPin, label: t("मुख्य कार्यालय पत्ता", "Main Office Address"), value: t("५८७b, मोतीबाग रोड, दाणेबाजार, वाई ४१२८०३", "587b, Motibag Rd, Danebazar, Wai 412803") },
+                { icon: Phone, label: t("कार्यालय / हेल्पलाईन", "Office / Helpline"), value: "०२१६७-२२००२२ / १८००२३३२२१" },
+                { icon: MapPin, label: t("मुख्य कार्यालय पत्ता", "Main Office Address"), value: t("४४३, मधली आळी, गणपती आळी, वाई, जिल्हा सातारा - ४१२८०३", "443, Madhli Aali, Ganpati Aali, Wai, Dist. Satara, 412803") },
               ].map((c, i) => {
                 const Icon = c.icon;
                 return (
@@ -216,8 +216,8 @@ export const Structure = () => {
               <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 mx-auto mb-3 flex items-center justify-center border border-amber-500/30">
                 <Crown className="w-7 h-7" />
               </div>
-              <h3 className="font-extrabold text-lg text-foreground">{t("मा. नगराध्यक्ष", "Mayor")}</h3>
-              <p className="text-xs text-muted-foreground font-medium mt-0.5">{t("लोकप्रतिनिधी प्रमुख", "Elected President")}</p>
+              <h3 className="font-extrabold text-lg text-foreground">{t("मा. लोकनियुक्त नगराध्यक्ष", "Hon. Directly Elected Mayor")}</h3>
+              <p className="text-xs text-muted-foreground font-medium mt-0.5">{t("लोकनियुक्त नगराध्यक्ष, वाई नगरपरिषद", "Directly Elected Mayor, Wai Municipal Council")}</p>
             </div>
           </div>
 
@@ -227,7 +227,7 @@ export const Structure = () => {
           <div className="grid md:grid-cols-2 gap-5 max-w-2xl mx-auto">
             {[
               { icon: Users, title: t("सर्वसाधारण सभा", "General Body"), desc: t("सर्व निर्वाचित नगरसेवक — सर्वोच्च धोरणात्मक संस्था", "Elected representatives - Main decision body") },
-              { icon: Shield, title: t("मुख्याधिकारी", "Chief Officer"), desc: t("प्रशासकीय प्रमुख — कार्यकारी प्रशासकीय अधिकारी", "Chief Executive Administrative Officer") },
+              { icon: Shield, title: t("मुख्याधिकारी", "Chief Officer"), desc: t("श्रीमती संजीवनी दळवी — मुख्य कार्यकारी अधिकारी", "Smt. Sanjivani Dalvi — Chief Executive Officer") },
             ].map((item, idx) => {
               const Icon = item.icon;
               return (
@@ -274,22 +274,22 @@ export const Mayor = () => {
             {/* Header Banner */}
             <div className="gov-gradient p-8 text-primary-foreground text-center relative">
               <div className="w-36 h-36 rounded-2xl mx-auto mb-4 border-4 border-white/30 overflow-hidden shadow-2xl">
-                <img src="/nagaradhyaksh.jpeg" alt="नगराध्यक्ष" className="w-full h-full object-cover" />
+                <img src="/nagaradhyaksh.jpeg" alt="लोकनियुक्त नगराध्यक्ष" className="w-full h-full object-cover" />
               </div>
               <h1 className="text-3xl font-black">{t("श्री. अनिल सावंत", "Shri. Anil Sawant")}</h1>
-              <p className="text-primary-foreground/90 font-medium text-base mt-1">{t("मा. नगराध्यक्ष, वाई नगर परिषद", "Hon. Mayor, Wai Municipal Council")}</p>
+              <p className="text-primary-foreground/90 font-medium text-base mt-1">{t("मा. लोकनियुक्त नगराध्यक्ष, वाई नगर परिषद", "Hon. Directly Elected Mayor, Wai Municipal Council")}</p>
             </div>
 
             <div className="p-8 space-y-6">
               <div className="grid sm:grid-cols-3 gap-4">
                 {[
-                  { label: t("पदभार", "Designation"), value: t("मा. नगराध्यक्ष", "Hon. Mayor") },
+                  { label: t("पदभार", "Designation"), value: t("मा. लोकनियुक्त नगराध्यक्ष", "Hon. Directly Elected Mayor") },
                   { label: t("कार्यालय", "Office"), value: t("मुख्य प्रशासकीय इमारत", "Main Admin Building") },
-                  { label: t("संपर्क", "Helpline"), value: "02167-220000" },
+                  { label: t("ऑफिस फोन / हेल्पलाईन", "Office / Helpline"), value: "०२१६७-२२००२२ / १८००२३३२२१" },
                 ].map((i, idx) => (
                   <div key={idx} className="bg-muted/60 rounded-2xl p-4 text-center border border-border">
                     <p className="text-xs font-semibold text-muted-foreground">{i.label}</p>
-                    <p className="font-bold text-sm text-foreground mt-0.5">{i.value}</p>
+                    <p className="font-bold text-xs sm:text-sm text-foreground mt-0.5">{i.value}</p>
                   </div>
                 ))}
               </div>
@@ -297,7 +297,7 @@ export const Mayor = () => {
               <div>
                 <h2 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
                   <Crown className="w-5 h-5 text-amber-500" />
-                  <span>{t("नगराध्यक्षांचा संदेश", "Mayor's Message")}</span>
+                  <span>{t("लोकनियुक्त नगराध्यक्षांचा संदेश", "Mayor's Message")}</span>
                 </h2>
                 <p className="text-muted-foreground leading-relaxed italic border-l-4 border-primary pl-4 text-sm md:text-base">
                   {t(
@@ -322,23 +322,23 @@ export const ChiefOfficer = () => {
         <div className="max-w-3xl mx-auto">
           <div className="bg-card rounded-3xl border border-border shadow-2xl overflow-hidden">
             <div className="gov-gradient p-8 text-primary-foreground text-center">
-              <div className="w-32 h-32 rounded-2xl bg-white/20 mx-auto mb-4 flex items-center justify-center border-4 border-white/30 text-5xl">
-                👤
+              <div className="w-36 h-36 rounded-2xl mx-auto mb-4 border-4 border-white/30 overflow-hidden shadow-2xl">
+                <img src="/sanjivani_dalvi.png" alt="श्रीमती संजीवनी दळवी" className="w-full h-full object-cover object-top" />
               </div>
-              <h1 className="text-3xl font-black">{t("मुख्याधिकारी", "Chief Officer")}</h1>
-              <p className="text-primary-foreground/90 font-medium text-base mt-1">{t("मुख्य कार्यकारी अधिकारी, वाई नगर परिषद", "Chief Executive Officer, Wai Municipal Council")}</p>
+              <h1 className="text-3xl font-black">{t("श्रीमती संजीवनी दळवी", "Smt. Sanjivani Dalvi")}</h1>
+              <p className="text-primary-foreground/90 font-medium text-base mt-1">{t("मुख्याधिकारी, वाई नगर परिषद", "Chief Officer, Wai Municipal Council")}</p>
             </div>
 
             <div className="p-8 space-y-6">
               <div className="grid sm:grid-cols-3 gap-4">
                 {[
-                  { label: t("पद", "Position"), value: t("प्रशासकीय प्रमुख", "Executive Officer") },
+                  { label: t("पद", "Position"), value: t("मुख्याधिकारी", "Chief Officer") },
                   { label: t("कार्यालय", "Office Desk"), value: t("मुख्याधिकारी कक्ष", "CO Office Desk") },
-                  { label: t("संपर्क", "Helpline"), value: "02167-220000" },
+                  { label: t("ऑफिस फोन / हेल्पलाईन", "Office / Helpline"), value: "०२१६७-२२००२२ / १८००२३३२२१" },
                 ].map((i, idx) => (
                   <div key={idx} className="bg-muted/60 rounded-2xl p-4 text-center border border-border">
                     <p className="text-xs font-semibold text-muted-foreground">{i.label}</p>
-                    <p className="font-bold text-sm text-foreground mt-0.5">{i.value}</p>
+                    <p className="font-bold text-xs sm:text-sm text-foreground mt-0.5">{i.value}</p>
                   </div>
                 ))}
               </div>

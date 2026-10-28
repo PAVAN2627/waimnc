@@ -11,7 +11,7 @@ const getMenuItems = (t: (mr: string, en: string) => string) => [
       { label: t("नगरपालिकेचा परिचय", "Introduction"), href: "/about/introduction" },
       { label: t("इतिहास", "History"), href: "/about/history" },
       { label: t("प्रशासकीय रचना", "Administrative Structure"), href: "/about/structure" },
-      { label: t("नगराध्यक्ष", "Mayor"), href: "/about/mayor" },
+      { label: t("लोकनियुक्त नगराध्यक्ष", "Directly Elected Mayor"), href: "/about/mayor" },
       { label: t("मुख्याधिकारी", "Chief Officer"), href: "/about/chief-officer" },
       { label: t("नगरसेवक", "Corporators"), href: "/about/corporators" },
       { label: t("⚖️ कायदे व नियम", "⚖️ Laws & Rules"), href: "/laws" },

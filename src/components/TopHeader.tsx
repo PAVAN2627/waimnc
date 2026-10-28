@@ -50,14 +50,17 @@ const TopHeader = () => {
     <div className="gov-gradient text-primary-foreground text-sm">
       <div className="container mx-auto flex flex-wrap items-center justify-between py-1.5 px-4 gap-2">
         {/* Contact */}
-        <div className="flex items-center gap-4 flex-wrap">
-          <a href="tel:18001234567" className="flex items-center gap-1 hover:underline">
+        <div className="flex items-center gap-3 md:gap-4 flex-wrap text-xs md:text-sm">
+          <a href="tel:02167220022" className="flex items-center gap-1 hover:underline">
             <Phone className="w-3.5 h-3.5" />
-            <span>{t("हेल्पलाइन: 1800-123-4567", "Helpline: 1800-123-4567")}</span>
+            <span>{t("ऑफिस: ०२१६७-२२००२२", "Office: 02167-220022")}</span>
           </a>
-          <a href="mailto:info@waimunicipalcouncil.org" className="flex items-center gap-1 hover:underline">
+          <a href="tel:1800233221" className="flex items-center gap-1 hover:underline hidden sm:flex">
+            <span>{t("टोल फ्री: १८००२३३२२१", "Toll-Free: 1800233221")}</span>
+          </a>
+          <a href="mailto:waimunicipalcouncil@gmail.com" className="flex items-center gap-1 hover:underline hidden md:flex">
             <Mail className="w-3.5 h-3.5" />
-            <span>info@waimunicipalcouncil.org</span>
+            <span>waimunicipalcouncil@gmail.com</span>
           </a>
         </div>
 

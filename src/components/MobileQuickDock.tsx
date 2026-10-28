@@ -12,7 +12,8 @@ export const MobileQuickDock: React.FC<MobileQuickDockProps> = ({ onOpenSearch }
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
   const emergencyContacts = [
-    { label: t("नगरपरिषद हेल्पलाईन", "Wai Council Helpline"), number: "02167-220000", desc: "24x7 नागरी मदत", color: "bg-amber-500" },
+    { label: t("नगरपरिषद कार्यालय", "Wai Council Office"), number: "02167-220022", desc: "ऑफिस / हेल्पलाईन", color: "bg-amber-500" },
+    { label: t("टोल फ्री हेल्पलाईन", "Toll Free Helpline"), number: "1800233221", desc: "टोल फ्री मदत कक्ष", color: "bg-emerald-500" },
     { label: t("अग्निशमन दल", "Fire Brigade"), number: "101", desc: "आणीबाणी संपर्क", color: "bg-red-600" },
     { label: t("अ‍ॅम्ब्युलन्स", "Ambulance"), number: "108", desc: "वैद्यकीय मदत", color: "bg-emerald-600" },
     { label: t("पोलीस नियंत्रण", "Police Control"), number: "112", desc: "सुरक्षा नियंत्रण कक्ष", color: "bg-blue-600" },

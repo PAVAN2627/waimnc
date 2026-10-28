@@ -26,8 +26,8 @@ export const Footer = () => {
               <Phone className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-xs text-white/80 font-medium">{t("नगरपरिषद हेल्पलाईन", "Council Helpline")}</div>
-              <div className="text-sm font-black text-white font-mono">02167-220000</div>
+              <div className="text-xs text-white/80 font-medium">{t("ऑफिस / टोल फ्री क्र.", "Office / Toll-Free")}</div>
+              <div className="text-xs font-black text-white font-mono">02167-220022 / 1800233221</div>
             </div>
           </div>
 
@@ -47,7 +47,7 @@ export const Footer = () => {
             </div>
             <div>
               <div className="text-xs text-white/80 font-medium">{t("ई-मेल संपर्क", "Official Email")}</div>
-              <div className="text-xs font-bold text-white">info@waimunicipalcouncil.org</div>
+              <div className="text-xs font-bold text-white break-all">waimunicipalcouncil@gmail.com</div>
             </div>
           </div>
 
@@ -86,7 +86,7 @@ export const Footer = () => {
             <div className="flex items-center gap-2 pt-1">
               <MapPin className="w-4 h-4 text-amber-200 flex-shrink-0" />
               <span className="text-xs text-white/90 font-medium">
-                {t("मुख्य कार्यालय, स्टेशन रोड, वाई, जिल्हा सातारा - ४१२८०३", "Main Office, Station Road, Wai, Satara - 412803")}
+                {t("४४३, मधली आळी, गणपती आळी, वाई, जिल्हा सातारा - ४१२८०३", "443, Madhli Aali, Ganpati Aali, Wai, Dist. Satara, 412803")}
               </span>
             </div>
           </div>
