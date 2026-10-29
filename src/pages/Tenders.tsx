@@ -1,6 +1,7 @@
 import PageLayout from "@/components/PageLayout";
 import { Download, FileText, Calendar, Building2, Search, ArrowRight, CheckCircle2, AlertCircle, FileCheck2, ExternalLink, X, Eye } from "lucide-react";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TenderItem {
@@ -86,7 +87,7 @@ const tenders: TenderItem[] = [
 ];
 
 const Tenders = () => {
-  const { t, language } = useLanguage();
+  const { t, lang } = useLanguage();
   const [activeTab, setActiveTab] = useState<"all" | "active" | "closed">("active");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTender, setSelectedTender] = useState<TenderItem | null>(null);
@@ -97,9 +98,9 @@ const Tenders = () => {
       (activeTab === "active" && td.status === "चालू") ||
       (activeTab === "closed" && td.status === "बंद");
 
-    const title = (language === "mr" ? td.title : td.titleEn).toLowerCase();
+    const title = (lang === "mr" ? td.title : td.titleEn).toLowerCase();
     const id = td.id.toLowerCase();
-    const dept = (language === "mr" ? td.dept : td.deptEn).toLowerCase();
+    const dept = (lang === "mr" ? td.dept : td.deptEn).toLowerCase();
     const matchesSearch =
       title.includes(searchQuery.toLowerCase()) ||
       id.includes(searchQuery.toLowerCase()) ||
@@ -125,7 +126,7 @@ const Tenders = () => {
             {selectedTender && (
               <TenderDetailModal
                 tender={selectedTender}
-                language={language}
+                lang={lang}
                 t={t}
                 onClose={() => setSelectedTender(null)}
               />
@@ -279,22 +280,20 @@ const Tenders = () => {
   );
 };
 
-import { createPortal } from "react-dom";
-
 function TenderDetailModal({
   tender,
-  language,
+  lang,
   t,
   onClose,
 }: {
   tender: TenderItem;
-  language: string;
+  lang: "mr" | "en";
   t: (mr: string, en: string) => string;
   onClose: () => void;
 }) {
-  const title = language === "mr" ? tender.title : tender.titleEn;
-  const desc = language === "mr" ? tender.desc : tender.descEn;
-  const dept = language === "mr" ? tender.dept : tender.deptEn;
+  const title = lang === "mr" ? tender.title : tender.titleEn;
+  const desc = lang === "mr" ? tender.desc : tender.descEn;
+  const dept = lang === "mr" ? tender.dept : tender.deptEn;
 
   return createPortal(
     <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 md:p-10 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto pt-24 md:pt-28 pb-10">
