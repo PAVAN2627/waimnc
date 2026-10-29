@@ -1,5 +1,5 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Sparkles, UserCheck, Shield, Crown } from "lucide-react";
+import { UserCheck, Shield, Crown } from "lucide-react";
 
 const LEADERS = [
   {
@@ -39,12 +39,12 @@ const LEADERS = [
     icon: UserCheck,
   },
   {
-    nameMr: "श्री. अभिषेक कृष्ण",
-    nameEn: "Shri. Abhishek Krishna",
-    roleMr: "मा. नगरसचिव",
-    roleEn: "Hon. Municipal Secretary",
-    subMr: "नगरसचिव, वाई नगरपरिषद",
-    subEn: "Municipal Secretary, Wai Municipal Council",
+    nameMr: "श्री. अभिषेक कृष्णा, (भा.प्र.से.)",
+    nameEn: "Shri. Abhishek Krishna, (I.A.S.)",
+    roleMr: "आयुक्त तथा संचालक (न.प्र.सं.)",
+    roleEn: "Commissioner & Director (DMA)",
+    subMr: "आयुक्त तथा संचालक (न.प्र.सं.)",
+    subEn: "Commissioner & Director, Directorate of Municipal Administration",
     accent: "from-purple-500 to-pink-600",
     badgeBg: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30",
     photo: "/abhishekkrushna.png",
@@ -64,7 +64,7 @@ const LeadershipSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
+            <Crown className="w-3.5 h-3.5" />
             <span>{t("नगरपरिषद नेतृत्व", "Municipal Leadership")}</span>
           </div>
           <h2 className="text-3xl font-extrabold text-foreground tracking-tight">

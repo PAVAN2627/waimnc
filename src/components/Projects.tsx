@@ -8,7 +8,6 @@ import {
   Lightbulb,
   Zap,
   CheckCircle2,
-  Sparkles,
   TrendingUp
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -41,7 +40,7 @@ export const Projects = () => {
         {/* Section Header */}
         <div className="text-center max-w-xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
+            <Building2 className="w-3.5 h-3.5" />
             <span>{t("नागरी विकास उपक्रम", "Civic Development Initiatives")}</span>
           </div>
           <h2 className="text-3xl font-extrabold text-foreground tracking-tight">

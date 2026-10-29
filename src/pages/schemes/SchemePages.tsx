@@ -1,6 +1,6 @@
 import PageLayout from "@/components/PageLayout";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Users, Calendar, ExternalLink, ArrowRight, Sparkles, Gift, ShieldCheck, FileText, Send, X } from "lucide-react";
+import { CheckCircle2, Users, Calendar, ExternalLink, ArrowRight, Gift, ShieldCheck, FileText, Send, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 
@@ -99,7 +99,7 @@ const SchemePage = ({ data }: { data: SchemeData }) => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-4">
                 <div>
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Gift className="w-3.5 h-3.5" />
                     {t("प्रमुख शासन योजना", "Flagship Scheme")}
                   </span>
                   <h1 className="text-3xl md:text-4xl font-black text-white">{t(data.title, data.titleEn)}</h1>
@@ -180,7 +180,7 @@ const SchemePage = ({ data }: { data: SchemeData }) => {
               {/* Benefits Card */}
               <div className="bg-card rounded-3xl p-6 border border-border shadow-xl space-y-4">
                 <h2 className="text-lg font-black text-foreground flex items-center gap-2 border-b border-border pb-3">
-                  <Sparkles className="w-5 h-5 text-amber-500" />
+                  <Gift className="w-5 h-5 text-amber-500" />
                   <span>{t("प्रमुख लाभ व अनुदान", "Key Benefits & Grants")}</span>
                 </h2>
                 <div className="space-y-2.5">

@@ -1,7 +1,7 @@
 import PageLayout from "@/components/PageLayout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Phone, Mail, Clock, Globe, Send, Sparkles, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Globe, Send, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 
@@ -34,7 +34,7 @@ const Contact = () => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                 <div>
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Phone className="w-3.5 h-3.5" />
                     {t("नागरी संपर्क व मदत कक्ष", "Citizen Contact Desk")}
                   </span>
                   <h1 className="text-3xl md:text-5xl font-black text-white">{t("संपर्क व मुख्य कार्यालय", "Contact Us")}</h1>

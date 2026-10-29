@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PageLayout from "@/components/PageLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, FileText, ExternalLink, Sparkles, Search, Scale, ShieldCheck, X, FileCheck2 } from "lucide-react";
+import { Download, FileText, ExternalLink, Search, Scale, ShieldCheck, X, FileCheck2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const ACTS = [
@@ -247,13 +247,13 @@ const LawsPage = () => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                 <div>
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Scale className="w-3.5 h-3.5" />
                     {t("नगरपालिका वैधानिक चौकट", "Legal & Regulatory Framework")}
                   </span>
                   <h1 className="text-3xl md:text-5xl font-black text-white">{t("कायदे, नियम व उपविधी", "Laws & Regulations")}</h1>
                   <p className="text-primary-foreground/90 text-sm md:text-base font-medium mt-2 max-w-xl">
                     {t(
-                      "वाई नगर परिषदेच्या कामकाजाशी संबंधित सर्व शासकीय अधिनियम, नियम, उपविधी व स्थायी आदेश दस्तऐवज.",
+                      "वाई नगरपरिषदेच्या कामकाजाशी संबंधित सर्व शासकीय अधिनियम, नियम, उपविधी व स्थायी आदेश दस्तऐवज.",
                       "Acts, Rules, Municipal Bye-laws & Standing Orders for Wai Municipal Council governance."
                     )}
                   </p>
@@ -328,7 +328,7 @@ const LawsPage = () => {
                         <Scale className="h-6 w-6" />
                       </div>
                       <div>
-                        <h3 className="text-base font-black text-foreground">{t("स्थायी निदेश — वाई नगर परिषद", "Standing Orders — Wai Municipal Council")}</h3>
+                        <h3 className="text-base font-black text-foreground">{t("स्थायी निदेश — वाई नगरपरिषद", "Standing Orders — Wai Municipal Council")}</h3>
                         <p className="text-xs text-muted-foreground mt-0.5">{t("नगरपालिका प्रशासकीय कामकाज व कार्यपद्धती स्थायी निदेश", "Official standing orders governing council business and procedures.")}</p>
                       </div>
                     </div>

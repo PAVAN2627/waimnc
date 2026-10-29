@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Home, Droplets, MessageSquare, FileText, Skull, HardHat,
-  ArrowRight, CheckCircle2, Clock, AlertCircle, Upload, Sparkles, ShieldCheck, CheckCircle, Send
+  ArrowRight, CheckCircle2, Clock, AlertCircle, Upload, ShieldCheck, CheckCircle, Send
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -54,12 +54,12 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
                 </div>
                 <div>
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-2 border border-white/30">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <ShieldCheck className="w-3.5 h-3.5" />
                     {t("डिजिटल नागरी सेवा सेतू", "Digital Citizen Service Portal")}
                   </span>
                   <h1 className="text-3xl md:text-4xl font-black text-white">{t(data.title, data.titleEn)}</h1>
                   <p className="text-primary-foreground/90 text-sm font-medium mt-1">
-                    {t("वाई नगर परिषद, जिल्हा सातारा", "Wai Municipal Council, Satara")}
+                    {t("वाई नगरपरिषद, जिल्हा सातारा", "Wai Municipal Council, Satara")}
                   </p>
                 </div>
               </div>
@@ -123,7 +123,7 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
               {/* Workflow Steps Card */}
               <div className="bg-card rounded-3xl p-6 border border-border shadow-xl space-y-4">
                 <h2 className="text-lg font-black text-foreground flex items-center gap-2 border-b border-border pb-3">
-                  <Sparkles className="w-5 h-5 text-primary" />
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
                   <span>{t("टप्प्याटप्प्याने अर्ज प्रक्रिया", "Application Workflow Steps")}</span>
                 </h2>
                 <div className="space-y-3">

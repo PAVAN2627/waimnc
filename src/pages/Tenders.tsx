@@ -1,5 +1,5 @@
 import PageLayout from "@/components/PageLayout";
-import { Download, FileText, Calendar, Sparkles, Building2, Search, ArrowRight, CheckCircle2, AlertCircle, FileCheck2, ExternalLink, X, Eye } from "lucide-react";
+import { Download, FileText, Calendar, Building2, Search, ArrowRight, CheckCircle2, AlertCircle, FileCheck2, ExternalLink, X, Eye } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -138,7 +138,7 @@ const Tenders = () => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                 <div>
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <FileCheck2 className="w-3.5 h-3.5" />
                     {t("ई-प्रोक्युर्मेन्ट व निविदा दालन", "E-Procurement Portal")}
                   </span>
                   <h1 className="text-3xl md:text-5xl font-black text-white">{t("ई-निविदा / टेंडर्स", "Municipal Tenders")}</h1>
@@ -355,7 +355,7 @@ function TenderDetailModal({
               <span>{t("निविदा सादर करण्याचा पत्ता", "Submission Address")}</span>
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed pl-5">
-              {t("मुख्य अधिकारी कक्ष, वाई नगर परिषद, मोतीबाग रोड, वाई - ४१२८०३ (ई-प्रोक्युर्मेन्ट पोर्टलद्वारे ऑनलाइन सादर करणे आवश्यक).", "Chief Officer Desk, Wai Municipal Council, Motibag Road, Wai - 412803 (Must submit online via e-Procurement portal).")}
+              {t("मुख्य अधिकारी कक्ष, वाई नगरपरिषद, मोतीबाग रोड, वाई - ४१२८०३ (ई-प्रोक्युर्मेन्ट पोर्टलद्वारे ऑनलाइन सादर करणे आवश्यक).", "Chief Officer Desk, Wai Municipal Council, Motibag Road, Wai - 412803 (Must submit online via e-Procurement portal).")}
             </p>
           </div>
         </div>

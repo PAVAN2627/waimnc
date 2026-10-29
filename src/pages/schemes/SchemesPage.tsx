@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ExternalLink, BookOpen, Sparkles, CheckCircle2, ShieldCheck, ArrowRight, Search, FileText, Gift, Award, Info, X, Send } from "lucide-react";
+import { ExternalLink, BookOpen, CheckCircle2, ShieldCheck, ArrowRight, Search, FileText, Gift, Award, Info, X, Send } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { subscribeToActiveSchemes, type SchemeRecord, type SchemeCategory } from "@/lib/schemes";
@@ -55,7 +55,7 @@ const SchemesPage = () => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                 <div>
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Gift className="w-3.5 h-3.5" />
                     {t("शासकीय जनकल्याण उपक्रम", "Welfare & Governance Portal")}
                   </span>
                   <h1 className="text-3xl md:text-5xl font-black text-white">{t("सरकारी योजना व उपक्रम", "Government Schemes")}</h1>

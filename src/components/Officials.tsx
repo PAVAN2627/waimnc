@@ -19,7 +19,7 @@ const Officials = () => {
       <div className="container mx-auto px-4">
         <h2 className="text-2xl font-bold text-center mb-2">{t("नगरसेवक", "Corporators")}</h2>
         <p className="text-center text-muted-foreground text-sm mb-8">
-          {t("वाई नगर परिषदेचे निर्वाचित नगरसेवक", "Elected Corporators of Wai Municipal Council")}
+          {t("वाई नगरपरिषदेचे निर्वाचित नगरसेवक", "Elected Corporators of Wai Municipal Council")}
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
           {officials.map((o) => (

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Droplets, Home, AlertTriangle, Baby, HeartPulse, HardHat, FileSearch, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import { Droplets, Home, AlertTriangle, Baby, HeartPulse, HardHat, FileSearch, ArrowRight, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -107,7 +107,7 @@ export const QuickServices = () => {
         {/* Header Title */}
         <div className="text-center max-w-2xl mx-auto mb-8">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
+            <ShieldCheck className="w-3.5 h-3.5" />
             <span>{t("नागरी सेवा सेतू पोर्टल", "Nagari Seva Setu Portal")}</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">

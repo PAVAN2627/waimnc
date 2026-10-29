@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Play, ImageIcon, X, ChevronLeft, ChevronRight, Calendar, Sparkles } from "lucide-react";
+import { Play, ImageIcon, X, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageLayout from "@/components/PageLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -76,7 +76,7 @@ const Gallery = () => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                 <div>
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <ImageIcon className="w-3.5 h-3.5" />
                     {t("छायाचित्र व चित्रीकरण दालन", "Photo & Video Gallery")}
                   </span>
                   <h1 className="text-3xl md:text-5xl font-black text-white">{t("नगरपरिषद गॅलरी", "Official Gallery")}</h1>

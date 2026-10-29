@@ -1,4 +1,4 @@
-import { Phone, Mail, Bell, Moon, Sun, Sparkles, Search } from "lucide-react";
+import { Phone, Mail, Bell, Moon, Sun, Search } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotices } from "@/contexts/NoticeContext";
@@ -44,7 +44,7 @@ const TopHeader = () => {
           </span>
         );
       })
-    : <span>{t("📢 वाई नगर परिषदेत आपले स्वागत आहे", "📢 Welcome to Wai Municipal Council")}</span>;
+    : <span>{t("📢 वाई नगरपरिषदेत आपले स्वागत आहे", "📢 Welcome to Wai Municipal Council")}</span>;
 
   return (
     <div className="gov-gradient text-primary-foreground text-sm">

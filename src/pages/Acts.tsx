@@ -65,7 +65,7 @@ const Acts = () => {
           {t("अधिनियम", "Acts & Regulations")}
         </h1>
         <p className="text-muted-foreground text-sm">
-          {t("वाई नगर परिषदेशी संबंधित महत्त्वाचे अधिनियम", "Important acts related to Wai Municipal Council")}
+          {t("वाई नगरपरिषदेशी संबंधित महत्त्वाचे अधिनियम", "Important acts related to Wai Municipal Council")}
         </p>
 
         <div className="space-y-3">

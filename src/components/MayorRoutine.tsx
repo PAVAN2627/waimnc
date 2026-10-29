@@ -57,7 +57,7 @@ const RoutineModal = ({ item, onClose, lang }: { item: RoutineRecord; onClose: (
 
           <div className="flex items-center gap-2 pt-2 border-t border-border text-xs text-muted-foreground">
             <MapPin className="h-3 w-3" />
-            <span>वाई नगर परिषद · Wai Municipal Council</span>
+            <span>वाई नगरपरिषद · Wai Municipal Council</span>
           </div>
         </div>
       </div>

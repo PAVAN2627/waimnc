@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, FileText, Users, Megaphone, FolderOpen, 
-  Settings, Video, Calendar, ImageIcon, MessageSquare, LogOut, Building2, BookOpen, Sparkles
+  Settings, Video, Calendar, ImageIcon, MessageSquare, LogOut, Building2, BookOpen
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -58,10 +58,10 @@ export function AdminSidebar() {
         {!collapsed && (
           <div className="overflow-hidden">
             <div className="flex items-center gap-1">
-              <span className="font-black text-sm text-foreground truncate">{t("वाई नगर परिषद", "Wai Municipal Council")}</span>
+              <span className="font-black text-sm text-foreground truncate">{t("वाई नगरपरिषद", "Wai Municipal Council")}</span>
             </div>
             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 mt-0.5">
-              <Sparkles className="w-2.5 h-2.5" />
+              <Settings className="w-2.5 h-2.5" />
               {t("प्रशासन पॅनेल", "Admin Control Panel")}
             </span>
           </div>

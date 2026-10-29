@@ -1,5 +1,5 @@
 import PageLayout from "@/components/PageLayout";
-import { Phone, Users, ClipboardList, Clock, Mail, CheckCircle2, ShieldCheck, Sparkles, Building2, ArrowRight, ExternalLink, X, FileText, HelpCircle, CheckSquare } from "lucide-react";
+import { Phone, Users, ClipboardList, Clock, Mail, CheckCircle2, ShieldCheck, Building2, ArrowRight, ExternalLink, X, FileText, HelpCircle, CheckSquare } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { HeartPulse, Droplets, Map, Receipt, Zap, Monitor, Flame, FileCheck, Baby, Accessibility, Wallet, Archive, HardHat, BookOpen } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -61,7 +61,7 @@ const ServiceInfoModal = ({
           </button>
           
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-2 border border-white/30">
-            <Sparkles className="w-3.5 h-3.5" />
+            <ShieldCheck className="w-3.5 h-3.5" />
             <span>{t(deptTitle, deptTitleEn)}</span>
           </div>
 
@@ -180,7 +180,7 @@ const DeptPage = ({ data }: { data: DeptData }) => {
                 </div>
                 <div>
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-2 backdrop-blur-sm border border-white/30">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Building2 className="w-3.5 h-3.5" />
                     {t("वाई नगरपरिषद विभाग", "Wai Council Department")}
                   </span>
                   <h1 className="text-3xl md:text-4xl font-black text-white">{t(data.title, data.titleEn)}</h1>

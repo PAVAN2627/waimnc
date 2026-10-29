@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Lock, Mail, ArrowLeft, LoaderCircle, ShieldCheck, Sparkles } from "lucide-react";
+import { Lock, Mail, ArrowLeft, LoaderCircle, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { Input } from "@/components/ui/input";
@@ -68,13 +68,13 @@ const AdminLogin = () => {
             </div>
             
             <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-extrabold uppercase tracking-wider mb-2 border border-white/30">
-              <Sparkles className="w-3 h-3 text-amber-200" />
+              <Lock className="w-3 h-3 text-amber-200" />
               {t("सुरक्षित पोर्टल", "Secure Administrative Portal")}
             </span>
             
             <h1 className="text-2xl md:text-3xl font-black text-white">{t("प्रशासन लॉगिन", "Admin Portal Login")}</h1>
             <p className="text-primary-foreground/90 text-xs font-semibold mt-1">
-              {t("वाई नगर परिषद प्रशासकीय पॅनेल", "Wai Municipal Council Admin Control Desk")}
+              {t("वाई नगरपरिषद प्रशासकीय पॅनेल", "Wai Municipal Council Admin Control Desk")}
             </p>
           </div>
 

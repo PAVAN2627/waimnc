@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Sparkles, ArrowRight, ShieldCheck, Landmark } from "lucide-react";
+import { ArrowRight, ShieldCheck, Landmark } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface WelcomeOpeningAnimationProps {
@@ -100,7 +100,7 @@ export const WelcomeOpeningAnimation: React.FC<WelcomeOpeningAnimationProps> = (
       <div className="relative z-10 max-w-xl mx-auto px-6 text-center flex flex-col items-center">
         {/* Top Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-6 animate-bounce-gentle backdrop-blur-md">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <Landmark className="w-3.5 h-3.5 text-amber-400" />
           <span>{t("डिजिटल वाई नगरपरिषद पोर्टल", "Digital Wai Municipal Portal")}</span>
         </div>
 

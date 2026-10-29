@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import PageLayout from "@/components/PageLayout";
-import { Video, Calendar, FileText, Download, Play, Clock, ExternalLink, Sparkles, Radio, CheckCircle2 } from "lucide-react";
+import { Video, Calendar, FileText, Download, Play, Clock, ExternalLink, Radio, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { subscribeToActiveSabha, type SabhaRecord } from "@/lib/sabha";

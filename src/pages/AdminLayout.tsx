@@ -28,7 +28,7 @@ const AdminLayout = () => {
               <SidebarTrigger className="hover:bg-muted p-2 rounded-xl" />
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-primary" />
-                <span className="font-extrabold text-sm text-foreground">{t("वाई नगर परिषद — प्रशासकीय पॅनेल", "Wai Municipal Council Admin Panel")}</span>
+                <span className="font-extrabold text-sm text-foreground">{t("वाई नगरपरिषद — प्रशासकीय पॅनेल", "Wai Municipal Council Admin Panel")}</span>
               </div>
             </div>
 

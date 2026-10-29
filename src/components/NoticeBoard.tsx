@@ -1,4 +1,4 @@
-import { Download, ExternalLink, FileText, Image as ImageIcon, Megaphone, Bell, Calendar, Sparkles } from "lucide-react";
+import { Download, ExternalLink, FileText, Image as ImageIcon, Megaphone, Bell, Calendar } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotices } from "@/contexts/NoticeContext";
 import { isFirebaseConfigured } from "@/lib/firebase";
@@ -14,7 +14,7 @@ const NoticeBoard = () => {
         {/* Header */}
         <div className="text-center max-w-xl mx-auto mb-8">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
+            <Bell className="w-3.5 h-3.5" />
             <span>{t("अधिकृत सूचना व जाहीर प्रगटन", "Official Notices")}</span>
           </div>
           <h2 className="text-3xl font-extrabold text-foreground tracking-tight flex items-center justify-center gap-2">

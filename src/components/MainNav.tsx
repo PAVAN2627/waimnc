@@ -80,11 +80,11 @@ const MainNav = () => {
         <Link to="/" className="flex items-center gap-3 py-2">
           <img
             src="/wai-logo-withoutbg.png"
-            alt="वाई नगर परिषद"
+            alt="वाई नगरपरिषद"
             className="w-14 h-14 object-contain"
           />
           <div>
-            <h1 className="text-lg font-bold text-primary leading-tight">{t("वाई नगर परिषद", "Wai Municipal Council")}</h1>
+            <h1 className="text-lg font-bold text-primary leading-tight">{t("वाई नगरपरिषद", "Wai Municipal Council")}</h1>
             <p className="text-xs text-muted-foreground">{t("जिल्हा सातारा, महाराष्ट्र", "District Satara, Maharashtra")}</p>
           </div>
         </Link>

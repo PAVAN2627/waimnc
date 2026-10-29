@@ -1,5 +1,5 @@
 import PageLayout from "@/components/PageLayout";
-import { Building2, Users, MapPin, Phone, Award, Landmark, BookOpen, Crown, Shield, UserCheck, Calendar, ArrowRight, Sparkles } from "lucide-react";
+import { Building2, Users, MapPin, Phone, Award, Landmark, BookOpen, Crown, Shield, UserCheck, Calendar, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import React from "react";
 import { COUNCILLORS_LIST } from "@/data/councillorsData";
@@ -17,10 +17,10 @@ export const Introduction = () => {
               <Building2 className="w-10 h-10 text-white" />
             </div>
             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
+              <Landmark className="w-3.5 h-3.5" />
               {t("नगरपालिका परिचय", "Municipal Introduction")}
             </span>
-            <h1 className="text-3xl md:text-5xl font-black text-foreground mb-2">{t("वाई नगर परिषद", "Wai Municipal Council")}</h1>
+            <h1 className="text-3xl md:text-5xl font-black text-foreground mb-2">{t("वाई नगरपरिषद", "Wai Municipal Council")}</h1>
             <p className="text-sm md:text-base text-muted-foreground font-medium">{t("जिल्हा सातारा, महाराष्ट्र | स्थापना: इ.स. १८५२ (१८५२ सालापासून कार्यरत)", "District Satara, Maharashtra | Est: 1852 AD")}</p>
           </div>
 
@@ -53,7 +53,7 @@ export const Introduction = () => {
             
             <p className="text-muted-foreground leading-relaxed text-base">
               {t(
-                'वाई नगर परिषद ही महाराष्ट्र राज्यातील सातारा जिल्ह्यातील एक प्रमुख व ऐतिहासिक नगरपालिका आहे. कृष्णा नदीच्या तीरावर वसलेले हे शहर आपल्या विपुल मंदिरांमुळे व संस्कृतीमुळे "दक्षिण काशी" म्हणून ओळखले जाते.',
+                'वाई नगरपरिषद ही महाराष्ट्र राज्यातील सातारा जिल्ह्यातील एक प्रमुख व ऐतिहासिक नगरपालिका आहे. कृष्णा नदीच्या तीरावर वसलेले हे शहर आपल्या विपुल मंदिरांमुळे व संस्कृतीमुळे "दक्षिण काशी" म्हणून ओळखले जाते.',
                 'Wai Municipal Council is a historic municipality in Satara district of Maharashtra. Situated on the banks of the Krishna River, the city is widely celebrated as "Dakshin Kashi" (Southern Kashi).'
               )}
             </p>
@@ -205,7 +205,7 @@ export const Structure = () => {
             {t("प्रशासकीय आराखडा", "Administrative Hierarchy")}
           </span>
           <h1 className="text-3xl md:text-4xl font-black text-foreground">{t("प्रशासकीय रचना", "Administrative Structure")}</h1>
-          <p className="text-muted-foreground text-xs md:text-sm mt-1">{t("वाई नगर परिषदेचे प्रशासकीय कामकाज लोकशाही व पारदर्शक तत्त्वांवर चालते.", "Democratic & transparent administrative structure of Wai Council")}</p>
+          <p className="text-muted-foreground text-xs md:text-sm mt-1">{t("वाई नगरपरिषदेचे प्रशासकीय कामकाज लोकशाही व पारदर्शक तत्त्वांवर चालते.", "Democratic & transparent administrative structure of Wai Council")}</p>
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
@@ -276,7 +276,7 @@ export const Mayor = () => {
                 <img src="/nagaradhyaksh.jpeg" alt="लोकनियुक्त नगराध्यक्ष" className="w-full h-full object-cover" />
               </div>
               <h1 className="text-3xl font-black">{t("श्री. अनिल सावंत", "Shri. Anil Sawant")}</h1>
-              <p className="text-primary-foreground/90 font-medium text-base mt-1">{t("मा. लोकनियुक्त नगराध्यक्ष, वाई नगर परिषद", "Hon. Directly Elected Mayor, Wai Municipal Council")}</p>
+              <p className="text-primary-foreground/90 font-medium text-base mt-1">{t("मा. लोकनियुक्त नगराध्यक्ष, वाई नगरपरिषद", "Hon. Directly Elected Mayor, Wai Municipal Council")}</p>
             </div>
 
             <div className="p-8 space-y-6">
@@ -325,7 +325,7 @@ export const ChiefOfficer = () => {
                 <img src="/sanjivani_dalvi.png" alt="श्रीमती संजीवनी दळवी" className="w-full h-full object-cover object-top" />
               </div>
               <h1 className="text-3xl font-black">{t("श्रीमती संजीवनी दळवी", "Smt. Sanjivani Dalvi")}</h1>
-              <p className="text-primary-foreground/90 font-medium text-base mt-1">{t("मुख्याधिकारी, वाई नगर परिषद", "Chief Officer, Wai Municipal Council")}</p>
+              <p className="text-primary-foreground/90 font-medium text-base mt-1">{t("मुख्याधिकारी, वाई नगरपरिषद", "Chief Officer, Wai Municipal Council")}</p>
             </div>
 
             <div className="p-8 space-y-6">
@@ -501,12 +501,12 @@ export const Corporators = () => {
           <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/10 rounded-bl-full pointer-events-none" />
           
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
+            <Users className="w-3.5 h-3.5" />
             {t("लोकप्रतिनिधी मंडळ २०२५–२६", "Elected Representatives 2025–26")}
           </span>
           
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground mb-3 tracking-tight">
-            {t("वाई नगर परिषद – अध्यक्ष व नगरसेवकांची यादी २०२५–२६", "Wai Municipal Council – President and Councillors List 2025–26")}
+            {t("वाई नगरपरिषद – अध्यक्ष व नगरसेवकांची यादी २०२५–२६", "Wai Municipal Council – President and Councillors List 2025–26")}
           </h1>
           <p className="text-xs md:text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             {t(

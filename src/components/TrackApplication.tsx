@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, CheckCircle2, Clock, AlertCircle, LoaderCircle, Sparkles, ShieldCheck, FileText, ArrowRight } from "lucide-react";
+import { Search, CheckCircle2, Clock, AlertCircle, LoaderCircle, ShieldCheck, FileText, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { getComplaintByTrackingId, formatComplaintDate, type ComplaintRecord } from "@/lib/complaints";
@@ -102,7 +102,7 @@ const TrackApplication = () => {
               🎯
             </div>
             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-2 backdrop-blur-sm border border-white/30">
-              <Sparkles className="w-3.5 h-3.5" />
+              <ShieldCheck className="w-3.5 h-3.5" />
               {t("डिजिटल पारदर्शक शासन", "Transparent Civic Tracking")}
             </span>
             <h2 className="text-3xl font-black text-white">{t("अर्ज व तक्रार स्थिती ट्रॅक करा", "Track Application Status")}</h2>

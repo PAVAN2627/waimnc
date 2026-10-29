@@ -7,7 +7,6 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
-  Sparkles,
   ShieldCheck,
   Building2,
 } from "lucide-react";
@@ -80,12 +79,12 @@ const AdminDashboard = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div>
             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
-              <Sparkles className="w-3.5 h-3.5" />
+              <ShieldCheck className="w-3.5 h-3.5" />
               {t("प्रशासकीय विहंगावलोकन", "Administrative Overview")}
             </span>
             <h1 className="text-3xl md:text-4xl font-black text-white">{t("प्रशासकीय डॅशबोर्ड", "Admin Control Dashboard")}</h1>
             <p className="text-primary-foreground/90 text-sm font-medium mt-1">
-              {t("वाई नगर परिषद — तक्रारी, सूचना व विकास प्रकल्प थेट व्यवस्थापन.", "Real-time control desk for complaints, notices, council schemes & city projects.")}
+              {t("वाई नगरपरिषद — तक्रारी, सूचना व विकास प्रकल्प थेट व्यवस्थापन.", "Real-time control desk for complaints, notices, council schemes & city projects.")}
             </p>
           </div>
 

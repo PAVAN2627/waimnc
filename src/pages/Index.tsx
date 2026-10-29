@@ -7,15 +7,11 @@ import LatestNews from "@/components/LatestNews";
 import Projects from "@/components/Projects";
 import ComplaintForm from "@/components/ComplaintForm";
 import TrackApplication from "@/components/TrackApplication";
-import WelcomeOpeningAnimation from "@/components/WelcomeOpeningAnimation";
 import CivicStatsCounter from "@/components/CivicStatsCounter";
 
 const Index = () => {
   return (
     <>
-      {/* Website Opening Entrance Animation */}
-      <WelcomeOpeningAnimation />
-
       {/* Hero Section */}
       <HeroSection />
 

@@ -8,7 +8,6 @@ import {
   Home,
   AlertTriangle,
   FileSearch,
-  Sparkles,
   ShieldCheck,
   Building2,
   ExternalLink,
@@ -103,7 +102,7 @@ export const HeroSection = () => {
           {/* Left Column: Portal Tagline, Hero Search & Core Action Launchers */}
           <div className="lg:col-span-6 space-y-5">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <Building2 className="w-3.5 h-3.5 text-amber-500" />
               <span>{t("नागरी सेवा सेतू डिजिटल व्यासपीठ", "Nagari Seva Setu Portal")}</span>
             </div>
 
