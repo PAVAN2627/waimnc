@@ -495,32 +495,46 @@ export const Corporators = () => {
 
   return (
     <PageLayout>
-      <div className="container mx-auto px-4 py-10 md:py-14">
-        {/* Main Title Banner */}
-        <div className="max-w-4xl mx-auto text-center mb-8 bg-card rounded-3xl p-6 md:p-8 border border-border shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/10 rounded-bl-full pointer-events-none" />
-          
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-3">
-            <Users className="w-3.5 h-3.5" />
-            {t("लोकप्रतिनिधी मंडळ २०२५–२६", "Elected Representatives 2025–26")}
-          </span>
-          
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground mb-3 tracking-tight">
-            {t("वाई नगरपरिषद – अध्यक्ष व नगरसेवकांची यादी २०२५–२६", "Wai Municipal Council – President and Councillors List 2025–26")}
-          </h1>
-          <p className="text-xs md:text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            {t(
-              "वाई शहराच्या सर्वांगीण विकासासाठी व नागरी समस्या निवारणासाठी कटिबद्ध असलेले लोकप्रतिनिधी.",
-              "Elected and nominated municipal leaders dedicated to the development and public service of Wai city."
-            )}
-          </p>
-        </div>
+      <div className="py-12 bg-gradient-to-b from-background via-muted/30 to-background border-b relative overflow-hidden">
+        {/* Background Glows */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Filter Tabs & Search Controls */}
-        <div className="max-w-5xl mx-auto mb-8 space-y-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-muted/40 p-3 rounded-2xl border border-border">
-            {/* Category Tabs */}
-            <div className="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto space-y-8">
+            
+            {/* Hero Card */}
+            <div className="gov-gradient rounded-3xl p-8 md:p-10 text-primary-foreground shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-bl-full pointer-events-none" />
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
+                    <Users className="w-3.5 h-3.5" />
+                    {t("लोकप्रतिनिधी मंडळ २०२५–२६", "Elected Representatives 2025–26")}
+                  </span>
+                  <h1 className="text-3xl md:text-5xl font-black text-white">
+                    {t("अध्यक्ष व नगरसेवकांची यादी", "President & Councillors List")}
+                  </h1>
+                  <p className="text-primary-foreground/90 text-sm md:text-base font-medium mt-2 max-w-xl">
+                    {t(
+                      "वाई नगरपरिषद २०२५–२६ — वाई शहराच्या सर्वांगीण विकासासाठी व नागरी समस्या निवारणासाठी कटिबद्ध असलेले लोकप्रतिनिधी.",
+                      "Wai Municipal Council 2025–26 — Elected & nominated representatives serving the citizens of Wai."
+                    )}
+                  </p>
+                </div>
+
+                <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-4xl shadow-xl flex-shrink-0">
+                  👥
+                </div>
+              </div>
+            </div>
+
+            {/* Filter Tabs & Search Controls */}
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card p-3 rounded-2xl border border-border shadow-sm">
+                {/* Category Tabs */}
+                <div className="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
               {[
                 { id: "all" as const, label: t("सर्व सदस्य (२६)", "All Members (26)") },
                 { id: "president" as const, label: t("१. अध्यक्ष व उपाध्यक्ष (२)", "1. President & VP (2)") },
@@ -555,7 +569,7 @@ export const Corporators = () => {
         </div>
 
         {/* Content Sections */}
-        <div className="max-w-5xl mx-auto space-y-10">
+        <div className="space-y-10">
           {/* If viewing All category, show clean grouped sections */}
           {selectedCategory === "all" ? (
             <>
@@ -644,6 +658,8 @@ export const Corporators = () => {
           )}
         </div>
       </div>
-    </PageLayout>
+    </div>
+  </div>
+</PageLayout>
   );
 };
