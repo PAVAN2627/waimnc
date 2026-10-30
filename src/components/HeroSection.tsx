@@ -103,7 +103,7 @@ export const HeroSection = () => {
           <div className="lg:col-span-6 space-y-5">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
               <Building2 className="w-3.5 h-3.5 text-amber-500" />
-              <span>{t("नागरी सेवा सेतू डिजिटल व्यासपीठ", "Nagari Seva Setu Portal")}</span>
+              <span>{t("वाई नगरपरिषद अधिकृत संकेतस्थळ", "Official Website of Wai Municipal Council")}</span>
             </div>
 
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-[1.15]">
@@ -116,7 +116,7 @@ export const HeroSection = () => {
             <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
               {t(
                 "कृष्णा काठावरील ऐतिहासिक 'दक्षिण काशी' वाई शहरातील नागरिकांसाठी ऑनलाइन कर भरणा, दाखले व तक्रार निवारण सेवा एकाच क्लिकवर.",
-                "Online tax payments, certificates, and grievance redressal for citizens of historic Wai city."
+                "Official website of Wai Municipal Council (वाई नगरपरिषद). Online tax payments, civic certificates, and grievance redressal for citizens of Wai."
               )}
             </p>
 

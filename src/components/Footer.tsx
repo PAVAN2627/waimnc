@@ -79,7 +79,7 @@ export const Footer = () => {
             <p className="text-xs text-white/90 leading-relaxed max-w-sm">
               {t(
                 "कृष्णा नदीच्या काठावर वसलेले ऐतिहासिक 'दक्षिण काशी' वाई शहर. नागरिकांच्या सेवा व शहराच्या शाश्वत विकासासाठी सदैव तत्पर.",
-                "Historic Wai city on Krishna banks. Dedicated to sustainable development & citizen services."
+                "Official website of Wai Municipal Council (वाई नगरपरिषद), Satara. Dedicated to civic services and development."
               )}
             </p>
 
