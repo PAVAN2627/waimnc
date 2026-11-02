@@ -2,6 +2,14 @@ import { Injectable, Logger, BadRequestException, NotFoundException } from '@nes
 import { ConfigService } from '@nestjs/config';
 import { put, del, head, list, get } from '@vercel/blob';
 import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3';
+import { Readable } from 'stream';
 
 export type StorageFolder = 'tenders' | 'officials' | 'notices' | 'grievances' | 'gallery' | 'sabha' | 'routine' | 'schemes' | 'general';
 
@@ -10,21 +18,50 @@ export class StorageService {
   private readonly logger = new Logger(StorageService.name);
   private readonly token: string;
   private readonly access: 'private' | 'public';
+  private readonly s3Client?: S3Client;
+  private readonly r2BucketName: string;
+  private readonly r2PublicDomain: string;
+  private readonly useR2: boolean;
 
   constructor(private readonly configService: ConfigService) {
     this.token = this.configService.get<string>('BLOB_READ_WRITE_TOKEN') || '';
-    // Store is created in private mode (IAD1 store_wR8r8cKpuVEOvQ1m)
     this.access = (this.configService.get<string>('BLOB_ACCESS') as 'private' | 'public') || 'private';
 
-    if (!this.token) {
-      this.logger.warn('BLOB_READ_WRITE_TOKEN is not set in .env');
+    const r2AccountId = this.configService.get<string>('R2_ACCOUNT_ID');
+    const r2AccessKeyId = this.configService.get<string>('R2_ACCESS_KEY_ID');
+    const r2SecretAccessKey = this.configService.get<string>('R2_SECRET_ACCESS_KEY');
+    this.r2BucketName = this.configService.get<string>('R2_BUCKET_NAME') || 'waimuncipal';
+    this.r2PublicDomain = (this.configService.get<string>('R2_PUBLIC_DOMAIN') || '').replace(/\/+$/, '');
+
+    if (
+      r2AccountId &&
+      r2AccessKeyId &&
+      r2SecretAccessKey &&
+      !r2AccessKeyId.includes('placeholder') &&
+      !r2AccessKeyId.includes('your_')
+    ) {
+      this.s3Client = new S3Client({
+        region: 'auto',
+        endpoint: `https://${r2AccountId}.r2.cloudflarestorage.com`,
+        credentials: {
+          accessKeyId: r2AccessKeyId,
+          secretAccessKey: r2SecretAccessKey,
+        },
+      });
+      this.useR2 = true;
+      this.logger.log(`Cloudflare R2 Storage initialized for bucket: ${this.r2BucketName}`);
     } else {
-      this.logger.log(`Vercel Blob Storage initialized in ${this.access} mode`);
+      this.useR2 = false;
+      if (!this.token) {
+        this.logger.warn('Neither Cloudflare R2 nor Vercel Blob is configured');
+      } else {
+        this.logger.log(`Vercel Blob Storage initialized in ${this.access} mode`);
+      }
     }
   }
 
   /**
-   * Uploads a file buffer directly to Vercel Blob storage.
+   * Uploads a file buffer directly to Cloudflare R2 or Vercel Blob storage.
    */
   async uploadFile(
     file: Express.Multer.File,
@@ -38,7 +75,7 @@ export class StorageService {
   }
 
   /**
-   * Uploads a raw buffer directly to Vercel Blob storage.
+   * Uploads a raw buffer directly to Cloudflare R2 or Vercel Blob storage.
    */
   async uploadBuffer(
     buffer: Buffer,
@@ -46,12 +83,40 @@ export class StorageService {
     mimetype: string,
     folder: StorageFolder = 'general',
   ) {
-    if (!this.token) {
-      throw new BadRequestException('Vercel Blob Storage token is not configured in .env');
-    }
-
     const cleanFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
     const pathname = `${folder}/${Date.now()}-${cleanFilename}`;
+
+    // Prefer Cloudflare R2 S3 storage
+    if (this.useR2 && this.s3Client) {
+      this.logger.log(`Uploading buffer to Cloudflare R2: ${pathname} (${buffer.length} bytes, ${mimetype})`);
+      const command = new PutObjectCommand({
+        Bucket: this.r2BucketName,
+        Key: pathname,
+        Body: buffer,
+        ContentType: mimetype,
+      });
+      await this.s3Client.send(command);
+
+      const viewUrl = `/api/storage/file?pathname=${encodeURIComponent(pathname)}`;
+      const publicUrl = this.r2PublicDomain ? `${this.r2PublicDomain}/${pathname}` : viewUrl;
+
+      this.logger.log(`Cloudflare R2 upload successful: ${pathname} (viewUrl: ${viewUrl})`);
+
+      return {
+        url: publicUrl,
+        downloadUrl: publicUrl,
+        pathname,
+        filename,
+        contentType: mimetype,
+        size: buffer.length,
+        viewUrl,
+      };
+    }
+
+    // Fallback to Vercel Blob
+    if (!this.token) {
+      throw new BadRequestException('Storage service is not configured in .env');
+    }
 
     this.logger.log(`Uploading buffer to Vercel Blob: ${pathname} (${buffer.length} bytes, ${mimetype})`);
 
@@ -125,13 +190,9 @@ export class StorageService {
   }
 
   /**
-   * Retrieves a file stream from Vercel Blob storage.
+   * Retrieves a file stream from Cloudflare R2 or Vercel Blob storage.
    */
   async getFileStream(pathnameOrUrl: string): Promise<any> {
-    if (!this.token) {
-      throw new BadRequestException('Vercel Blob Storage token is not configured');
-    }
-
     // Extract pathname if a full URL was provided
     let cleanPathname = pathnameOrUrl;
     try {
@@ -143,27 +204,83 @@ export class StorageService {
       cleanPathname = pathnameOrUrl;
     }
 
+    // Try Cloudflare R2 first if enabled
+    if (this.useR2 && this.s3Client) {
+      try {
+        const s3Obj = await this.s3Client.send(
+          new GetObjectCommand({
+            Bucket: this.r2BucketName,
+            Key: cleanPathname,
+          }),
+        );
+
+        if (s3Obj && s3Obj.Body) {
+          return {
+            blob: {
+              contentType: s3Obj.ContentType || 'application/octet-stream',
+              size: s3Obj.ContentLength || 0,
+            },
+            nodeStream: s3Obj.Body as Readable,
+          };
+        }
+      } catch (err: any) {
+        this.logger.warn(`File not found in R2 (${cleanPathname}): ${err.message}. Trying Vercel Blob fallback...`);
+      }
+    }
+
+    if (!this.token) {
+      throw new NotFoundException(`File not found in storage: ${cleanPathname}`);
+    }
+
     const result = await get(cleanPathname, {
       access: this.access,
       token: this.token,
     });
 
     if (!result || result.statusCode !== 200) {
-      throw new NotFoundException(`File not found in Vercel Blob storage: ${cleanPathname}`);
+      throw new NotFoundException(`File not found in storage: ${cleanPathname}`);
     }
 
     return result;
   }
 
   /**
-   * Deletes a file from Vercel Blob storage by its full URL or pathname.
+   * Deletes a file from Cloudflare R2 or Vercel Blob storage by its full URL or pathname.
    */
   async deleteFile(urlOrPathname: string) {
-    if (!this.token) {
-      throw new BadRequestException('Vercel Blob Storage token is not configured');
+    let cleanPathname = urlOrPathname;
+    try {
+      if (urlOrPathname.startsWith('http://') || urlOrPathname.startsWith('https://')) {
+        const parsed = new URL(urlOrPathname);
+        cleanPathname = parsed.pathname.replace(/^\/+/, '');
+      }
+    } catch {
+      cleanPathname = urlOrPathname;
     }
-    await del(urlOrPathname, { token: this.token });
-    this.logger.log(`Deleted blob: ${urlOrPathname}`);
+
+    if (this.useR2 && this.s3Client) {
+      try {
+        await this.s3Client.send(
+          new DeleteObjectCommand({
+            Bucket: this.r2BucketName,
+            Key: cleanPathname,
+          }),
+        );
+        this.logger.log(`Deleted from Cloudflare R2: ${cleanPathname}`);
+      } catch (err: any) {
+        this.logger.warn(`Failed to delete from R2: ${err.message}`);
+      }
+    }
+
+    if (this.token) {
+      try {
+        await del(urlOrPathname, { token: this.token });
+        this.logger.log(`Deleted blob: ${urlOrPathname}`);
+      } catch {
+        // ignore if not found in Vercel blob
+      }
+    }
+
     return { success: true };
   }
 

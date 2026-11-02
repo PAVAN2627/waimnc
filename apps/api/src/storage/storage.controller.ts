@@ -112,8 +112,10 @@ export class StorageController {
       res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(safeFilename)}"`);
     }
 
-    // Convert Web stream to Node readable stream and pipe to Express response
-    if (result.stream) {
+    // Stream file to Express response
+    if (result.nodeStream) {
+      result.nodeStream.pipe(res);
+    } else if (result.stream) {
       const nodeStream = Readable.fromWeb(result.stream as any);
       nodeStream.pipe(res);
     } else {
