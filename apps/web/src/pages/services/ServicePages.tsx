@@ -15,8 +15,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { createComplaint } from "@/lib/complaints";
 import { validateMobileInput, sanitizeMobileInput } from "@/lib/validation";
 
-const WARDS = Array.from({ length: 17 }, (_, i) => i + 1);
-
 interface ServiceData {
   key: "property-tax" | "water-bill" | "birth-certificate" | "death-certificate" | "construction-permit";
   icon: LucideIcon;
@@ -81,13 +79,11 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
 
     let name = "";
     let mobile = "";
-    let ward = "";
     let description = "";
 
     if (data.key === "birth-certificate") {
       name = (formData.get("fatherName") as string) || (formData.get("childName") as string);
       mobile = (formData.get("mobile") as string) || "";
-      ward = (formData.get("ward") as string) || "1";
       description = [
         `[जन्म दाखला ऑनलाइन अर्ज]`,
         `बालकाचे पूर्ण नाव: ${formData.get("childName")}`,
@@ -97,13 +93,11 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
         `वडिलांचे पूर्ण नाव: ${formData.get("fatherName")}`,
         `आईचे पूर्ण नाव: ${formData.get("motherName")}`,
         `कायमचा पत्ता: ${formData.get("address")}`,
-        `प्रभाग क्रमांक: प्रभाग क्र. ${ward}`,
         `नोंद: रुग्णालय जन्म नोंद कागदपत्र जोडले आहे.`,
       ].join("\n");
     } else if (data.key === "death-certificate") {
       name = (formData.get("applicantName") as string) || "";
       mobile = (formData.get("mobile") as string) || "";
-      ward = (formData.get("ward") as string) || "1";
       description = [
         `[मृत्यू दाखला ऑनलाइन अर्ज]`,
         `मृत व्यक्तीचे पूर्ण नाव: ${formData.get("deceasedName")}`,
@@ -114,13 +108,11 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
         `अर्जदाराचे नाव: ${name}`,
         `मृत व्यक्तीशी नातेसंबंध: ${formData.get("relation")}`,
         `अर्जदाराचा निवासी पत्ता: ${formData.get("address")}`,
-        `प्रभाग क्रमांक: प्रभाग क्र. ${ward}`,
         `नोंद: स्मशानभूमी / वैद्यकीय प्रमाणपत्र जोडले आहे.`,
       ].join("\n");
     } else if (data.key === "water-bill") {
       name = (formData.get("applicantName") as string) || "";
       mobile = (formData.get("mobile") as string) || "";
-      ward = (formData.get("ward") as string) || "1";
       description = [
         `[नवीन पाणी नळ जोडणी / पाणी बिल सेवा अर्ज]`,
         `अर्जदाराचे नाव: ${name}`,
@@ -128,13 +120,11 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
         `जोडणीचा प्रकार: ${formData.get("connectionType")}`,
         `आवश्यक पाईप आकार: ${formData.get("pipeSize")}`,
         `जोडणी पत्ता: ${formData.get("address")}`,
-        `प्रभाग क्रमांक: प्रभाग क्र. ${ward}`,
         `तपशील: ${formData.get("notes") || "कोणतीही विशेष नोंद नाही"}`,
       ].join("\n");
     } else if (data.key === "construction-permit") {
       name = (formData.get("ownerName") as string) || "";
       mobile = (formData.get("mobile") as string) || "";
-      ward = (formData.get("ward") as string) || "1";
       description = [
         `[बांधकाम परवानगी व नकाशा मंजुरी अर्ज]`,
         `जागा मालकाचे नाव: ${name}`,
@@ -143,12 +133,10 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
         `प्रस्तावित चटई क्षेत्रफळ (Built-up Area): ${formData.get("areaSqFt")} चौ. फूट`,
         `नोंदणीकृत वास्तुविशारद / अभियंता नाव: ${formData.get("architectName")}`,
         `बांधकाम जागेचा पत्ता: ${formData.get("address")}`,
-        `प्रभाग क्रमांक: प्रभाग क्र. ${ward}`,
       ].join("\n");
     } else if (data.key === "property-tax") {
       name = (formData.get("ownerName") as string) || "";
       mobile = (formData.get("mobile") as string) || "";
-      ward = (formData.get("ward") as string) || "1";
       description = [
         `[मालमत्ता कर नोंदणी व फेरफार अर्ज]`,
         `मालकाचे नाव: ${name}`,
@@ -156,7 +144,6 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
         `अर्जाचा उद्देश: ${formData.get("purpose")}`,
         `मालमत्तेचा प्रकार: ${formData.get("propertyType")}`,
         `मालमत्तेचा सविस्तर पत्ता: ${formData.get("address")}`,
-        `प्रभाग क्रमांक: प्रभाग क्र. ${ward}`,
       ].join("\n");
     }
 
@@ -176,7 +163,6 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
       const record = await createComplaint({
         name: name.trim(),
         mobile: mobileCheck.cleaned,
-        ward: ward.trim(),
         type: `दाखला/सेवा: ${data.title}`,
         department: "लोकसेवा हक्क व दाखले कक्ष",
         description,
@@ -459,15 +445,6 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
                                 {t("१० अंकी खरा नंबर (६ ते ९ ने सुरू; ९९९९९९९९९९ सारखे बनावट नंबर चालणार नाहीत)", "10 real digits (starting 6-9; 9999999999 prohibited)")}
                               </p>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold text-foreground">{t("प्रभाग / वार्ड क्र. *", "Ward Number *")}</label>
-                              <select required name="ward" className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm">
-                                <option value="">{t("वार्ड निवडा...", "Select Ward...")}</option>
-                                {WARDS.map((w) => (
-                                  <option key={w} value={String(w)}>{t(`प्रभाग क्र. ${w}`, `Ward ${w}`)}</option>
-                                ))}
-                              </select>
-                            </div>
                           </div>
                           <div className="space-y-1">
                             <label className="text-xs font-bold text-foreground">{t("कायमचा निवासी पत्ता *", "Permanent Address *")}</label>
@@ -556,15 +533,6 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
                                 {t("१० अंकी खरा नंबर (६ ते ९ ने सुरू; ९९९९९९९९९९ सारखे बनावट नंबर चालणार नाहीत)", "10 real digits (starting 6-9; 9999999999 prohibited)")}
                               </p>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold text-foreground">{t("प्रभाग / वार्ड क्र. *", "Ward Number *")}</label>
-                              <select required name="ward" className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm">
-                                <option value="">{t("वार्ड निवडा...", "Select Ward...")}</option>
-                                {WARDS.map((w) => (
-                                  <option key={w} value={String(w)}>{t(`प्रभाग क्र. ${w}`, `Ward ${w}`)}</option>
-                                ))}
-                              </select>
-                            </div>
                           </div>
                           <div className="space-y-1">
                             <label className="text-xs font-bold text-foreground">{t("अर्जदाराचा निवासी पत्ता *", "Address *")}</label>
@@ -611,20 +579,9 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
                               </p>
                             </div>
                           </div>
-                          <div className="grid sm:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold text-foreground">{t("मालमत्ता कर नोंदणी क्र. / घर क्र. *", "Property Tax / House No. *")}</label>
-                              <Input required name="propertyNo" placeholder={t("उदा. WMC-TAX-4521 किंवा घर क्र. 124", "Property Tax No.")} className="rounded-xl" />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold text-foreground">{t("प्रभाग / वार्ड क्र. *", "Ward Number *")}</label>
-                              <select required name="ward" className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm">
-                                <option value="">{t("वार्ड निवडा...", "Select Ward...")}</option>
-                                {WARDS.map((w) => (
-                                  <option key={w} value={String(w)}>{t(`प्रभाग क्र. ${w}`, `Ward ${w}`)}</option>
-                                ))}
-                              </select>
-                            </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("मालमत्ता कर नोंदणी क्र. / घर क्र. *", "Property Tax / House No. *")}</label>
+                            <Input required name="propertyNo" placeholder={t("उदा. WMC-TAX-4521 किंवा घर क्र. 124", "Property Tax No.")} className="rounded-xl" />
                           </div>
                         </div>
 
@@ -697,20 +654,9 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
                               </p>
                             </div>
                           </div>
-                          <div className="grid sm:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold text-foreground">{t("सी.टी.एस. क्र. / गट नंबर / प्लॉट क्र. *", "CTS / Survey / Plot No. *")}</label>
-                              <Input required name="ctsNo" placeholder={t("उदा. CTS No. 1542, Plot 8", "e.g. CTS No. 1542")} className="rounded-xl" />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold text-foreground">{t("प्रभाग / वार्ड क्र. *", "Ward Number *")}</label>
-                              <select required name="ward" className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm">
-                                <option value="">{t("वार्ड निवडा...", "Select Ward...")}</option>
-                                {WARDS.map((w) => (
-                                  <option key={w} value={String(w)}>{t(`प्रभाग क्र. ${w}`, `Ward ${w}`)}</option>
-                                ))}
-                              </select>
-                            </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("सी.टी.एस. क्र. / गट नंबर / प्लॉट क्र. *", "CTS / Survey / Plot No. *")}</label>
+                            <Input required name="ctsNo" placeholder={t("उदा. CTS No. 1542, Plot 8", "e.g. CTS No. 1542")} className="rounded-xl" />
                           </div>
                         </div>
 
@@ -786,20 +732,9 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
                               </p>
                             </div>
                           </div>
-                          <div className="grid sm:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold text-foreground">{t("विद्यमान मालमत्ता क्रमांक (असल्यास)", "Existing Assessment No. (If any)")}</label>
-                              <Input name="propertyNo" placeholder={t("उदा. WMC-PROP-0092 (पर्यायी)", "Optional")} className="rounded-xl" />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold text-foreground">{t("प्रभाग / वार्ड क्र. *", "Ward Number *")}</label>
-                              <select required name="ward" className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm">
-                                <option value="">{t("वार्ड निवडा...", "Select Ward...")}</option>
-                                {WARDS.map((w) => (
-                                  <option key={w} value={String(w)}>{t(`प्रभाग क्र. ${w}`, `Ward ${w}`)}</option>
-                                ))}
-                              </select>
-                            </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("विद्यमान मालमत्ता क्रमांक (असल्यास)", "Existing Assessment No. (If any)")}</label>
+                            <Input name="propertyNo" placeholder={t("उदा. WMC-PROP-0092 (पर्यायी)", "Optional")} className="rounded-xl" />
                           </div>
                         </div>
 
