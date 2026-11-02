@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
@@ -52,6 +52,8 @@ function matchesDepartment(c: any, targetDept: string): boolean {
 
 @Injectable()
 export class GrievancesService {
+  private readonly logger = new Logger(GrievancesService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
