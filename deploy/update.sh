@@ -9,12 +9,12 @@ echo "=========================================="
 echo "  🚀 Updating Wai Municipal Council Live   "
 echo "=========================================="
 
-# Ensure we are in project root
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "📥 1. Pulling latest changes from GitHub..."
-git pull origin main
+echo "📥 1. Clean Sync with GitHub..."
+git fetch origin main
+git reset --hard origin/main
 
 echo "⚡ 2. Building Packages & Frontends..."
 export VITE_API_URL="/api"
