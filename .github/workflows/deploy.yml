@@ -1,0 +1,57 @@
+name: Auto Deploy to Oracle Cloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build & Deploy to OCI VM
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Monorepo Dependencies
+        run: npm ci
+
+      - name: Build Shared Types
+        run: npm --prefix packages/types run build
+
+      - name: Build Web, Admin & Employee Portals
+        env:
+          VITE_API_URL: https://api.waimunicipalcouncil.org/api
+          VITE_MEDIA_URL: https://media.waimunicipalcouncil.org
+          VITE_SITE_URL: https://waimunicipalcouncil.org
+          VITE_ADMIN_PORTAL_URL: https://admin.waimunicipalcouncil.org
+        run: |
+          npm run build:web
+          npm run build:admin
+          npm run build:employee
+
+      - name: Deploy to Oracle Cloud via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORACLE_HOST }}
+          username: ${{ secrets.ORACLE_USERNAME || 'ubuntu' }}
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          script: |
+            set -e
+            echo "🚀 Deploying Wai Municipal Council updates on Oracle Cloud..."
+            cd /opt/nagari-seva-setu
+            
+            # Pull latest changes
+            git pull origin main
+            
+            # Restart containers with newly built images
+            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+            
+            echo "✅ Deployment completed successfully!"
