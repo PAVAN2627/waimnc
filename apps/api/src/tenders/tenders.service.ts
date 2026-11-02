@@ -1,23 +1,28 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class TendersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async getPublicTenders(status?: string, category?: string) {
-    const statusFilter = status && status !== 'all' ? status : { in: ['ACTIVE', 'CLOSED'] };
-    return this.prisma.tender.findMany({
-      where: {
-        status: statusFilter as any,
-        ...(category ? { category } : {}),
-      },
-      orderBy: { publishDate: 'desc' },
-    });
+    const cacheKey = `tenders:public:${status || 'all'}:${category || 'all'}`;
+    return this.cacheService.wrap(cacheKey, () => {
+      const statusFilter = status && status !== 'all' ? status : { in: ['ACTIVE', 'CLOSED'] };
+      return this.prisma.tender.findMany({
+        where: {
+          status: statusFilter as any,
+          ...(category ? { category } : {}),
+        },
+        orderBy: { publishDate: 'desc' },
+      });
+    }, 300);
   }
 
   async getAllAdminTenders() {
@@ -40,7 +45,7 @@ export class TendersService {
     delete payload.documentBase64;
     payload.documentUrl = documentUrl;
 
-    return this.prisma.tender.create({
+    const created = await this.prisma.tender.create({
       data: {
         ...payload,
         publishDate: new Date(data.publishDate),
@@ -48,6 +53,9 @@ export class TendersService {
         openingDate: data.openingDate ? new Date(data.openingDate) : null,
       },
     });
+
+    await this.cacheService.delPattern('tenders:*');
+    return created;
   }
 
   async updateTender(id: string, data: any) {
@@ -65,7 +73,7 @@ export class TendersService {
       }
     }
 
-    return this.prisma.tender.update({
+    const updated = await this.prisma.tender.update({
       where: { id },
       data: {
         ...updateData,
@@ -74,6 +82,9 @@ export class TendersService {
         ...(data.openingDate ? { openingDate: new Date(data.openingDate) } : {}),
       },
     });
+
+    await this.cacheService.delPattern('tenders:*');
+    return updated;
   }
 
   async deleteTender(id: string) {
@@ -84,6 +95,8 @@ export class TendersService {
       await this.storageService.deleteFile(existing.documentUrl);
     }
 
-    return this.prisma.tender.delete({ where: { id } });
+    const deleted = await this.prisma.tender.delete({ where: { id } });
+    await this.cacheService.delPattern('tenders:*');
+    return deleted;
   }
 }

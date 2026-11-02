@@ -1,19 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class OfficialsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async getPublicOfficials() {
-    return this.prisma.official.findMany({
-      where: { isActive: true },
-      orderBy: { displayOrder: 'asc' },
-    });
+    return this.cacheService.wrap('officials:public', () => {
+      return this.prisma.official.findMany({
+        where: { isActive: true },
+        orderBy: { displayOrder: 'asc' },
+      });
+    }, 600);
   }
 
   async getAllAdminOfficials() {
@@ -36,7 +40,9 @@ export class OfficialsService {
     delete payload.photoBase64;
     payload.photoUrl = photoUrl;
 
-    return this.prisma.official.create({ data: payload });
+    const created = await this.prisma.official.create({ data: payload });
+    await this.cacheService.delPattern('officials:*');
+    return created;
   }
 
   async updateOfficial(id: string, data: any) {
@@ -54,10 +60,13 @@ export class OfficialsService {
       }
     }
 
-    return this.prisma.official.update({
+    const updated = await this.prisma.official.update({
       where: { id },
       data: updateData,
     });
+
+    await this.cacheService.delPattern('officials:*');
+    return updated;
   }
 
   async deleteOfficial(id: string) {
@@ -68,6 +77,8 @@ export class OfficialsService {
       await this.storageService.deleteFile(existing.photoUrl);
     }
 
-    return this.prisma.official.delete({ where: { id } });
+    const deleted = await this.prisma.official.delete({ where: { id } });
+    await this.cacheService.delPattern('officials:*');
+    return deleted;
   }
 }

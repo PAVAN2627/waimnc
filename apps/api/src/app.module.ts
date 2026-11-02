@@ -19,6 +19,7 @@ import { GalleryModule } from './gallery/gallery.module';
 import { RoutineModule } from './routine/routine.module';
 import { StorageModule } from './storage/storage.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
       },
     ]),
     PrismaModule,
+    CacheModule,
     AuditLogsModule,
     AuthModule,
     StorageModule,

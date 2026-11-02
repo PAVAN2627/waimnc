@@ -1,19 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class NewsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async getPublicNews() {
-    return this.prisma.newsItem.findMany({
-      where: { status: 'active' },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.cacheService.wrap('news:public', () => {
+      return this.prisma.newsItem.findMany({
+        where: { status: 'active' },
+        orderBy: { createdAt: 'desc' },
+      });
+    }, 300); // 5 minutes cache
   }
 
   async getAllAdmin() {
@@ -26,7 +30,7 @@ export class NewsService {
     const rawImage = data.imageUrl || data.imageBase64;
     const imageUrl = await this.storageService.processAndUploadIfBase64(rawImage, 'news', 'general');
 
-    return this.prisma.newsItem.create({
+    const created = await this.prisma.newsItem.create({
       data: {
         title: data.title,
         titleEn: data.titleEn,
@@ -39,6 +43,9 @@ export class NewsService {
         status: data.status || 'active',
       },
     });
+
+    await this.cacheService.delPattern('news:*');
+    return created;
   }
 
   async update(id: string, data: any) {
@@ -57,10 +64,13 @@ export class NewsService {
       }
     }
 
-    return this.prisma.newsItem.update({
+    const updated = await this.prisma.newsItem.update({
       where: { id },
       data: updateData,
     });
+
+    await this.cacheService.delPattern('news:*');
+    return updated;
   }
 
   async delete(id: string) {
@@ -72,7 +82,9 @@ export class NewsService {
       await this.storageService.deleteFile(existing.imageUrl);
     }
 
-    return this.prisma.newsItem.delete({ where: { id } });
+    const deleted = await this.prisma.newsItem.delete({ where: { id } });
+    await this.cacheService.delPattern('news:*');
+    return deleted;
   }
 }
 

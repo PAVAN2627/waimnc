@@ -38,6 +38,10 @@ service-account*.json
 *.pem
 *.key
 
+# AI & Agent Workspaces
+.agents/
+.gemini/
+
 # Editor directories and OS files
 .vscode/*
 !.vscode/extensions.json

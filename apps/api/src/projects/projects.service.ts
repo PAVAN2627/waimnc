@@ -1,19 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async getPublicProjects() {
-    return this.prisma.project.findMany({
-      where: { status: 'active' },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.cacheService.wrap('projects:public', () => {
+      return this.prisma.project.findMany({
+        where: { status: 'active' },
+        orderBy: { createdAt: 'desc' },
+      });
+    }, 300);
   }
 
   async getAllAdmin() {
@@ -26,7 +30,7 @@ export class ProjectsService {
     const rawDoc = data.documentUrl || data.documentBase64;
     const documentUrl = await this.storageService.processAndUploadIfBase64(rawDoc, 'project_doc', 'general');
 
-    return this.prisma.project.create({
+    const created = await this.prisma.project.create({
       data: {
         titleMr: data.titleMr || data.title,
         titleEn: data.titleEn,
@@ -39,6 +43,9 @@ export class ProjectsService {
         status: data.status || 'active',
       },
     });
+
+    await this.cacheService.delPattern('projects:*');
+    return created;
   }
 
   async update(id: string, data: any) {
@@ -64,10 +71,13 @@ export class ProjectsService {
       updatePayload.documentName = data.documentName || null;
     }
 
-    return this.prisma.project.update({
+    const updated = await this.prisma.project.update({
       where: { id },
       data: updatePayload,
     });
+
+    await this.cacheService.delPattern('projects:*');
+    return updated;
   }
 
   async delete(id: string) {
@@ -79,7 +89,9 @@ export class ProjectsService {
       await this.storageService.deleteFile(existing.documentUrl);
     }
 
-    return this.prisma.project.delete({ where: { id } });
+    const deleted = await this.prisma.project.delete({ where: { id } });
+    await this.cacheService.delPattern('projects:*');
+    return deleted;
   }
 }
 

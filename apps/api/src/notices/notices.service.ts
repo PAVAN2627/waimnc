@@ -1,19 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class NoticesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async getPublicNotices() {
-    return this.prisma.notice.findMany({
-      where: { status: 'active' },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.cacheService.wrap('notices:public', () => {
+      return this.prisma.notice.findMany({
+        where: { status: 'active' },
+        orderBy: { createdAt: 'desc' },
+      });
+    }, 300); // Cache for 5 minutes
   }
 
   async getAllAdminNotices() {
@@ -26,7 +30,7 @@ export class NoticesService {
     const rawDoc = data.documentUrl || data.attachmentBase64;
     const documentUrl = await this.storageService.processAndUploadIfBase64(rawDoc, 'notice', 'notices');
 
-    return this.prisma.notice.create({
+    const created = await this.prisma.notice.create({
       data: {
         title: data.title,
         titleEn: data.titleEn,
@@ -39,6 +43,9 @@ export class NoticesService {
         status: data.status || 'active',
       },
     });
+
+    await this.cacheService.delPattern('notices:*');
+    return created;
   }
 
   async updateNotice(id: string, data: any) {
@@ -57,10 +64,13 @@ export class NoticesService {
       }
     }
 
-    return this.prisma.notice.update({
+    const updated = await this.prisma.notice.update({
       where: { id },
       data: updateData,
     });
+
+    await this.cacheService.delPattern('notices:*');
+    return updated;
   }
 
   async deleteNotice(id: string) {
@@ -72,6 +82,8 @@ export class NoticesService {
       await this.storageService.deleteFile(notice.documentUrl);
     }
 
-    return this.prisma.notice.delete({ where: { id } });
+    const deleted = await this.prisma.notice.delete({ where: { id } });
+    await this.cacheService.delPattern('notices:*');
+    return deleted;
   }
 }

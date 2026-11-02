@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { CacheService } from '../cache/cache.service';
 
 export interface CreateSabhaDto {
   type?: 'upcoming' | 'previous';
@@ -23,20 +24,24 @@ export class SabhaService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async getPublicSabha(year?: number, sabhaType?: string) {
-    const where: any = { status: 'active' };
-    if (year) where.year = year;
-    if (sabhaType && sabhaType !== 'all') where.sabhaType = sabhaType;
+    const cacheKey = `sabha:public:${year || 'all'}:${sabhaType || 'all'}`;
+    return this.cacheService.wrap(cacheKey, () => {
+      const where: any = { status: 'active' };
+      if (year) where.year = year;
+      if (sabhaType && sabhaType !== 'all') where.sabhaType = sabhaType;
 
-    return (this.prisma.sabhaMeeting as any).findMany({
-      where,
-      orderBy: [
-        { date: 'desc' },
-        { createdAt: 'desc' },
-      ],
-    });
+      return (this.prisma.sabhaMeeting as any).findMany({
+        where,
+        orderBy: [
+          { date: 'desc' },
+          { createdAt: 'desc' },
+        ],
+      });
+    }, 300);
   }
 
   async getAllAdmin(year?: number, sabhaType?: string) {
@@ -65,7 +70,7 @@ export class SabhaService {
     }
     if (!year) year = new Date().getFullYear();
 
-    return (this.prisma.sabhaMeeting as any).create({
+    const created = await (this.prisma.sabhaMeeting as any).create({
       data: {
         type: data.type || 'upcoming',
         sabhaType: data.sabhaType || 'sarvasadharan',
@@ -81,6 +86,9 @@ export class SabhaService {
         status: data.status || 'active',
       },
     });
+
+    await this.cacheService.delPattern('sabha:*');
+    return created;
   }
 
   async update(id: string, data: Partial<CreateSabhaDto>) {
@@ -104,10 +112,13 @@ export class SabhaService {
       if (match) updateData.year = parseInt(match[1], 10);
     }
 
-    return (this.prisma.sabhaMeeting as any).update({
+    const updated = await (this.prisma.sabhaMeeting as any).update({
       where: { id },
       data: updateData,
     });
+
+    await this.cacheService.delPattern('sabha:*');
+    return updated;
   }
 
   async delete(id: string) {
@@ -119,6 +130,8 @@ export class SabhaService {
       await this.storageService.deleteFile(existing.minutesUrl);
     }
 
-    return this.prisma.sabhaMeeting.delete({ where: { id } });
+    const deleted = await this.prisma.sabhaMeeting.delete({ where: { id } });
+    await this.cacheService.delPattern('sabha:*');
+    return deleted;
   }
 }
