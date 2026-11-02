@@ -100,7 +100,7 @@ const MainNav = () => {
             className="w-14 h-14 object-contain"
           />
           <div>
-            <h1 className="text-lg font-bold text-primary leading-tight">{t("वाई नगरपरिषद,वाई", "Wai Municipal Council, Wai")}</h1>
+            <h1 className="text-lg font-bold text-primary leading-tight">{t("वाई नगरपरिषद,वाई", "Wai Municipal Council")}</h1>
             <p className="text-xs text-muted-foreground">{t("जिल्हा सातारा, महाराष्ट्र", "District Satara, Maharashtra")}</p>
           </div>
         </Link>
