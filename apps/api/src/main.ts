@@ -32,13 +32,18 @@ async function bootstrap() {
 
   // Strict CORS setup
   const allowedOrigins = [
+    'http://localhost',
+    'http://localhost:80',
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:5175',
+    'http://130.210.21.72',
+    'https://130.210.21.72',
     'https://www.waimunicipalcouncil.org',
     'https://waimunicipalcouncil.org',
     'https://admin.waimunicipalcouncil.org',
     'https://employee.waimunicipalcouncil.org',
+    'https://api.waimunicipalcouncil.org',
   ];
 
   app.enableCors({

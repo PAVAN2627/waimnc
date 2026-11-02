@@ -23,19 +23,10 @@ jobs:
       - name: Install Monorepo Dependencies
         run: npm ci
 
-      - name: Build Shared Types
-        run: npm --prefix packages/types run build
-
-      - name: Build Web, Admin & Employee Portals
-        env:
-          VITE_API_URL: https://api.waimunicipalcouncil.org/api
-          VITE_MEDIA_URL: https://media.waimunicipalcouncil.org
-          VITE_SITE_URL: https://waimunicipalcouncil.org
-          VITE_ADMIN_PORTAL_URL: https://admin.waimunicipalcouncil.org
+      - name: Verify Types & API Build
         run: |
-          npm run build:web
-          npm run build:admin
-          npm run build:employee
+          npm --prefix packages/types run build
+          npm --prefix apps/api run build
 
       - name: Deploy to Oracle Cloud via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -51,8 +42,15 @@ jobs:
             # Pull latest changes
             git pull origin main
             
+            # Build types & frontends with relative /api
+            export VITE_API_URL="/api"
+            npm --prefix packages/types run build
+            npm run build:web
+            npm run build:admin
+            npm run build:employee
+            npm --prefix apps/api run build
+            
             # Restart containers with newly built images
-            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+            sudo docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
             
             echo "✅ Deployment completed successfully!"
-
