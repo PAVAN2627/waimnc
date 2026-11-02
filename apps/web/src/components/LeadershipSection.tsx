@@ -59,7 +59,7 @@ const LEADERS = [
     subEn: "Leader of Opposition, Wai Municipal Council",
     accent: "from-amber-500 to-rose-600",
     badgeBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
-    photo: "/vijay_dekane.jpeg",
+    photo: "/vijay_dhekane.jpeg",
     icon: UserCheck,
   },
 ];
