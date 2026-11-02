@@ -29,8 +29,8 @@ const AdminLayout = () => {
               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                 <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
                 <span className="font-extrabold text-xs sm:text-sm text-foreground truncate">
-                  <span className="inline sm:hidden">{t("वाई नगरपरिषद", "Wai Council")}</span>
-                  <span className="hidden sm:inline">{t("वाई नगरपरिषद — प्रशासकीय पॅनेल", "Wai Municipal Council Admin")}</span>
+                  <span className="inline sm:hidden">{t("वाई नगरपरिषद,वाई", "Wai Council")}</span>
+                  <span className="hidden sm:inline">{t("वाई नगरपरिषद,वाई — प्रशासकीय पॅनेल", "Wai Municipal Council Admin")}</span>
                 </span>
               </div>
             </div>

@@ -148,11 +148,11 @@ export class AuthController {
 
     const cookieName = portal === 'employee' ? 'wmc_employee_token' : 'wmc_admin_token';
 
-    // Set secure HttpOnly cookie for XSS protection
+    // Set secure cookie for cross-origin (Vercel <-> Render) and same-origin
     response.cookie(cookieName, result.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -165,8 +165,8 @@ export class AuthController {
     const result = await this.authService.registerInitialAdmin(dto);
     response.cookie('wmc_admin_token', result.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return result;

@@ -53,7 +53,7 @@ export function AdminSidebar() {
         {!isCollapsedDesktop && (
           <div className="overflow-hidden flex-1 min-w-0">
             <div className="flex items-center gap-1">
-              <span className="font-black text-sm text-foreground truncate">{t("वाई नगरपरिषद", "Wai Municipal Council")}</span>
+              <span className="font-black text-sm text-foreground truncate">{t("वाई नगरपरिषद,वाई", "Wai Municipal Council, Wai")}</span>
             </div>
             <div className="mt-0.5">
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 dark:text-blue-300 bg-blue-500/15 px-2 py-0.5 rounded-full border border-blue-500/30 truncate max-w-full">

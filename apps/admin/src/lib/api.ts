@@ -76,6 +76,11 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
   headers.set("X-Portal-Type", "admin");
 
+  const token = typeof window !== "undefined" ? localStorage.getItem("wmc_admin_token") : null;
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
   const response = await fetch(url, {
     ...options,
     headers,
@@ -103,14 +108,21 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 // -----------------------------------------------------------------------------
 // Authentication
 // -----------------------------------------------------------------------------
-export async function loginAdmin(email: string, password: string): Promise<{ user: AdminUser }> {
-  return request<{ user: AdminUser }>("/auth/login", {
+export async function loginAdmin(email: string, password: string): Promise<{ user: AdminUser; accessToken?: string }> {
+  const result = await request<{ user: AdminUser; accessToken?: string }>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password, portal: "admin" }),
   });
+  if (result.accessToken && typeof window !== "undefined") {
+    localStorage.setItem("wmc_admin_token", result.accessToken);
+  }
+  return result;
 }
 
 export async function logoutAdmin(): Promise<{ success: boolean }> {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("wmc_admin_token");
+  }
   return request<{ success: boolean }>("/auth/logout", {
     method: "POST",
   });
