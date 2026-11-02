@@ -39,8 +39,9 @@ jobs:
             echo "🚀 Deploying Wai Municipal Council updates on Oracle Cloud..."
             cd /opt/nagari-seva-setu
             
-            # Pull latest changes
-            git pull origin main
+            # Clean any local modifications & sync cleanly with GitHub
+            git fetch origin main
+            git reset --hard origin/main
             
             # Build types & frontends with relative /api
             export VITE_API_URL="/api"
