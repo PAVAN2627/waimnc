@@ -46,7 +46,8 @@ async function bootstrap() {
       if (
         !origin ||
         allowedOrigins.includes(origin) ||
-        /^https:\/\/([a-zA-Z0-9-]+\.)?waimunicipalcouncil\.org$/.test(origin)
+        /^https:\/\/([a-zA-Z0-9-]+\.)?waimunicipalcouncil\.org$/.test(origin) ||
+        /^https:\/\/([a-zA-Z0-9-]+\.)?vercel\.app$/.test(origin)
       ) {
         callback(null, true);
       } else {
