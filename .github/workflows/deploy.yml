@@ -34,6 +34,7 @@ jobs:
           host: ${{ secrets.ORACLE_HOST }}
           username: ${{ secrets.ORACLE_USERNAME || 'ubuntu' }}
           key: ${{ secrets.ORACLE_SSH_KEY }}
+          command_timeout: 30m
           script: |
             set -e
             echo "🚀 Deploying Wai Municipal Council updates on Oracle Cloud..."
