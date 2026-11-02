@@ -72,7 +72,7 @@ export const Footer = () => {
                 <img src="/wai-logo-withoutbg.png" alt="Wai Logo" className="w-full h-full object-contain" />
               </div>
               <div>
-                <h3 className="font-black text-xl text-white leading-tight">{t("वाई नगरपरिषद , वाई", "Wai Municipal Council, Wai")}</h3>
+                <h3 className="font-black text-xl text-white leading-tight">{t("वाई नगरपरिषद,वाई", "Wai Municipal Council, Wai")}</h3>
                 <p className="text-xs text-amber-200 font-semibold">{t("जिल्हा सातारा, महाराष्ट्र शासन", "District Satara, Govt of Maharashtra")}</p>
               </div>
             </div>
@@ -180,7 +180,7 @@ export const Footer = () => {
 
         {/* Copyright Footer Strip */}
         <div className="border-t border-white/20 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-white/80 font-medium gap-2">
-          <p>{t("© २०२६ वाई नगरपरिषद , वाई. सर्व हक्क राखीव.", "© 2026 Wai Municipal Council, Wai. All rights reserved.")}</p>
+          <p>{t("© २०२६ वाई नगरपरिषद,वाई. सर्व हक्क राखीव.", "© 2026 Wai Municipal Council, Wai. All rights reserved.")}</p>
           <div className="flex items-center gap-3">
             <Link to="/sitemap" className="hover:text-white underline">
               {t("साइटमॅप (HTML)", "Sitemap (HTML)")}
