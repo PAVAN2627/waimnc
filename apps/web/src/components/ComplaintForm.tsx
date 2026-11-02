@@ -5,8 +5,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { createComplaint } from "@/lib/complaints";
 import { validateMobileInput, sanitizeMobileInput } from "@/lib/validation";
 
-const WARDS = Array.from({ length: 17 }, (_, i) => i + 1);
-
 const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
   const [submitting, setSubmitting] = useState(false);
   const [trackingId, setTrackingId] = useState<string | null>(null);
@@ -59,7 +57,6 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
     const data = new FormData(form);
     const name = data.get("name") as string;
     const mobile = (data.get("mobile") as string) || mobileValue;
-    const ward = data.get("ward") as string;
     const type = data.get("type") as string;
     const department = data.get("department") as string;
     const location = (data.get("location") as string) || "";
@@ -78,7 +75,6 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
       const record = await createComplaint({
         name,
         mobile: mobileCheck.cleaned,
-        ward,
         type,
         department,
         description: combinedDesc,
@@ -225,23 +221,8 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
             </div>
           </div>
 
-          {/* Row 2: Ward + Type + Department */}
-          <div className="grid md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">{t("वार्ड क्र. *", "Ward No. *")}</label>
-              <select
-                name="ward"
-                required
-                className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
-              >
-                <option value="">{t("निवडा...", "Select...")}</option>
-                {WARDS.map((w) => (
-                  <option key={w} value={String(w)}>
-                    {t(`वार्ड ${w}`, `Ward ${w}`)}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Row 2: Type + Department */}
+          <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">{t("तक्रारीचा प्रकार *", "Complaint Type *")}</label>
               <select

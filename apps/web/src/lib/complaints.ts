@@ -53,7 +53,7 @@ export interface ComplaintRecord {
 export interface CreateComplaintInput {
   name: string;
   mobile: string;
-  ward: string;
+  ward?: string;
   type: string;
   department: string;
   description: string;
@@ -135,7 +135,7 @@ export async function createComplaint(input: CreateComplaintInput): Promise<Comp
   const res = await api.submitComplaint({
     name: input.name.trim(),
     mobile: input.mobile.trim(),
-    ward: input.ward.trim(),
+    ward: (input.ward || "General").trim(),
     type: input.type.trim(),
     department: input.department.trim(),
     description: input.description.trim(),
