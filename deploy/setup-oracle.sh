@@ -8,11 +8,23 @@ echo "========================================================"
 echo "  Setting up Wai Municipal Council on Oracle Cloud VM   "
 echo "========================================================"
 
-# 1. Update Ubuntu system packages
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y curl wget git ufw apt-transport-https ca-certificates gnupg lsb-release
+# 1. Setup 4 GB Swap memory for ultra-smooth performance
+if [ ! -f /swapfile ]; then
+    echo "⚡ Creating 4 GB Swap memory..."
+    sudo fallocate -l 4G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile
+    sudo swapon /swapfile
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+    sudo sysctl vm.swappiness=10
+    echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+fi
 
-# 2. Configure Host Firewall (Open HTTP 80, HTTPS 443, SSH 22)
+# 2. Update Ubuntu system packages
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl wget git ufw apt-transport-https ca-certificates gnupg lsb-release iptables-persistent
+
+# 3. Configure Host Firewall (Open HTTP 80, HTTPS 443, SSH 22)
 echo "🔒 Configuring Host Firewall rules..."
 sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
 sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
@@ -43,3 +55,4 @@ echo "========================================================"
 echo "✅ Oracle Cloud VM is ready!"
 echo "Next step: Run 'docker compose -f docker-compose.prod.yml up -d --build'"
 echo "========================================================"
+
