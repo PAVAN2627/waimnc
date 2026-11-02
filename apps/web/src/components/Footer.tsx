@@ -28,7 +28,7 @@ export const Footer = () => {
             </div>
             <div>
               <div className="text-xs text-white/80 font-medium">{t("ऑफिस / टोल फ्री क्र.", "Office / Toll-Free")}</div>
-              <div className="text-xs font-black text-white font-mono">02167-220022 / 1800233221</div>
+              <div className="text-xs font-black text-white font-mono">02167-220022 / 18002332214</div>
             </div>
           </div>
 

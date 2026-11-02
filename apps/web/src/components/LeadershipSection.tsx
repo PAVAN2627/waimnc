@@ -51,8 +51,8 @@ const LEADERS = [
     icon: UserCheck,
   },
   {
-    nameMr: "श्री. विजय वसंत ढेकाणे",
-    nameEn: "Shri. Vijay Vasant Dhekane",
+    nameMr: "श्री. विजय वसंतराव ढेकाणे",
+    nameEn: "Shri. Vijay Vasantrao Dhekane",
     roleMr: "मा. विरोधी पक्षनेते",
     roleEn: "Hon. Leader of Opposition",
     subMr: "विरोधी पक्षनेते, वाई नगरपरिषद",

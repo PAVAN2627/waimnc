@@ -115,7 +115,7 @@ const Contact = () => {
                     {lang === "mr" ? "०२१६७-२२००२२" : "02167-220022"}
                   </p>
                   <p className="text-[11px] text-amber-600 dark:text-amber-400 font-bold mt-0.5">
-                    {t("टोल फ्री क्र. १८००२३३२२१", "Toll Free: 1800233221")}
+                    {t("टोल फ्री क्र. १८००२३३२२१४", "Toll Free: 18002332214")}
                   </p>
                 </div>
               </div>

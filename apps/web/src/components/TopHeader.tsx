@@ -56,8 +56,8 @@ const TopHeader = () => {
             <Phone className="w-3.5 h-3.5 flex-shrink-0" />
             <span>02167-220022</span>
           </a>
-          <a href="tel:1800233221" className="flex items-center gap-1 hover:underline hidden sm:flex">
-            <span>{t("टोल फ्री: १८००२३३२२१", "Toll-Free: 1800233221")}</span>
+          <a href="tel:18002332214" className="flex items-center gap-1 hover:underline hidden sm:flex">
+            <span>{t("टोल फ्री: १८००२३३२२१४", "Toll-Free: 18002332214")}</span>
           </a>
           <a href="mailto:waimunicipalcouncil@gmail.com" className="flex items-center gap-1 hover:underline hidden lg:flex">
             <Mail className="w-3.5 h-3.5" />
