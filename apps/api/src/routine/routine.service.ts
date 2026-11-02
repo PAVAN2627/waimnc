@@ -48,6 +48,11 @@ export class RoutineService {
       const rawImage = data.imageUrl || data.imageBase64;
       updateData.imageUrl = await this.storageService.processAndUploadIfBase64(rawImage, 'routine', 'routine');
       delete updateData.imageBase64;
+
+      // Delete old routine image from storage if replaced
+      if (existing.imageUrl && existing.imageUrl !== updateData.imageUrl) {
+        await this.storageService.deleteFile(existing.imageUrl);
+      }
     }
 
     return this.prisma.routineItem.update({
@@ -59,6 +64,11 @@ export class RoutineService {
   async delete(id: string) {
     const existing = await this.prisma.routineItem.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Routine item not found');
+
+    // Delete attached image from Cloudflare R2 / storage
+    if (existing.imageUrl) {
+      await this.storageService.deleteFile(existing.imageUrl);
+    }
 
     return this.prisma.routineItem.delete({ where: { id } });
   }

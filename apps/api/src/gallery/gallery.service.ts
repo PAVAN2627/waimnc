@@ -51,6 +51,11 @@ export class GalleryService {
       const rawImage = data.imageUrl || data.imageBase64;
       updateData.imageUrl = await this.storageService.processAndUploadIfBase64(rawImage, 'gallery', 'gallery');
       delete updateData.imageBase64;
+
+      // Delete old gallery image from storage if replaced
+      if (existing.imageUrl && existing.imageUrl !== updateData.imageUrl) {
+        await this.storageService.deleteFile(existing.imageUrl);
+      }
     }
 
     return this.prisma.galleryItem.update({
@@ -62,6 +67,11 @@ export class GalleryService {
   async delete(id: string) {
     const existing = await this.prisma.galleryItem.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Gallery item not found');
+
+    // Delete attached image from Cloudflare R2 / storage
+    if (existing.imageUrl) {
+      await this.storageService.deleteFile(existing.imageUrl);
+    }
 
     return this.prisma.galleryItem.delete({ where: { id } });
   }

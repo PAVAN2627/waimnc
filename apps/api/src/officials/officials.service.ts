@@ -40,13 +40,18 @@ export class OfficialsService {
   }
 
   async updateOfficial(id: string, data: any) {
-    await this.getOfficialById(id);
+    const existing = await this.getOfficialById(id);
 
     const updateData = { ...data };
     if (data.photoUrl !== undefined || data.photoBase64 !== undefined) {
       const rawPhoto = data.photoUrl || data.photoBase64;
       updateData.photoUrl = await this.storageService.processAndUploadIfBase64(rawPhoto, 'official', 'officials');
       delete updateData.photoBase64;
+
+      // Delete old official photo from storage if replaced
+      if (existing.photoUrl && existing.photoUrl !== updateData.photoUrl) {
+        await this.storageService.deleteFile(existing.photoUrl);
+      }
     }
 
     return this.prisma.official.update({
@@ -56,7 +61,13 @@ export class OfficialsService {
   }
 
   async deleteOfficial(id: string) {
-    await this.getOfficialById(id);
+    const existing = await this.getOfficialById(id);
+
+    // Delete photo from Cloudflare R2 / storage
+    if (existing.photoUrl) {
+      await this.storageService.deleteFile(existing.photoUrl);
+    }
+
     return this.prisma.official.delete({ where: { id } });
   }
 }

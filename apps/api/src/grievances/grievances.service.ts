@@ -262,6 +262,23 @@ export class GrievancesService {
       },
     });
 
+    // Delete any attached images/files from Cloudflare R2 / storage
+    if (existing.attachments) {
+      const attachments = Array.isArray(existing.attachments)
+        ? existing.attachments
+        : [existing.attachments];
+      for (const att of attachments) {
+        const fileUrl = typeof att === 'string' ? att : (att as any)?.url || (att as any)?.pathname;
+        if (fileUrl) {
+          try {
+            await this.storageService.deleteFile(fileUrl);
+          } catch (err) {
+            this.logger.warn(`Failed to delete complaint attachment from storage (${fileUrl}): ${err}`);
+          }
+        }
+      }
+    }
+
     return this.prisma.complaint.delete({
       where: { id },
     });

@@ -50,6 +50,11 @@ export class NoticesService {
       const rawDoc = data.documentUrl || data.attachmentBase64;
       updateData.documentUrl = await this.storageService.processAndUploadIfBase64(rawDoc, 'notice', 'notices');
       delete updateData.attachmentBase64;
+
+      // Delete old notice PDF from storage if replaced
+      if (notice.documentUrl && notice.documentUrl !== updateData.documentUrl) {
+        await this.storageService.deleteFile(notice.documentUrl);
+      }
     }
 
     return this.prisma.notice.update({
@@ -61,6 +66,11 @@ export class NoticesService {
   async deleteNotice(id: string) {
     const notice = await this.prisma.notice.findUnique({ where: { id } });
     if (!notice) throw new NotFoundException('Notice not found');
+
+    // Delete attached notice PDF from Cloudflare R2 / storage
+    if (notice.documentUrl) {
+      await this.storageService.deleteFile(notice.documentUrl);
+    }
 
     return this.prisma.notice.delete({ where: { id } });
   }

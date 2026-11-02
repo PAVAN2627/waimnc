@@ -56,6 +56,11 @@ export class SchemesService {
       const rawImage = data.imageUrl || data.imageBase64;
       updateData.imageUrl = await this.storageService.processAndUploadIfBase64(rawImage, 'scheme', 'schemes');
       delete updateData.imageBase64;
+
+      // Delete old scheme image from storage if replaced
+      if (existing.imageUrl && existing.imageUrl !== updateData.imageUrl) {
+        await this.storageService.deleteFile(existing.imageUrl);
+      }
     }
 
     return this.prisma.scheme.update({
@@ -67,6 +72,11 @@ export class SchemesService {
   async delete(id: string) {
     const existing = await this.prisma.scheme.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Scheme not found');
+
+    // Delete attached image from Cloudflare R2 / storage
+    if (existing.imageUrl) {
+      await this.storageService.deleteFile(existing.imageUrl);
+    }
 
     return this.prisma.scheme.delete({ where: { id } });
   }

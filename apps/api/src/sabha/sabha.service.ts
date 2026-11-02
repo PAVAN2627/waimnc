@@ -92,6 +92,11 @@ export class SabhaService {
       const rawMinutes = data.minutesUrl || data.minutesBase64;
       updateData.minutesUrl = await this.storageService.processAndUploadIfBase64(rawMinutes, 'minutes', 'sabha');
       delete updateData.minutesBase64;
+
+      // Delete old minutes PDF from storage if replaced
+      if (existing.minutesUrl && existing.minutesUrl !== updateData.minutesUrl) {
+        await this.storageService.deleteFile(existing.minutesUrl);
+      }
     }
 
     if (data.date && !data.year) {
@@ -108,6 +113,11 @@ export class SabhaService {
   async delete(id: string) {
     const existing = await this.prisma.sabhaMeeting.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Sabha meeting not found');
+
+    // Delete attached meeting minutes PDF from Cloudflare R2 / storage
+    if (existing.minutesUrl) {
+      await this.storageService.deleteFile(existing.minutesUrl);
+    }
 
     return this.prisma.sabhaMeeting.delete({ where: { id } });
   }

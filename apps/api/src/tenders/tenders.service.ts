@@ -51,13 +51,18 @@ export class TendersService {
   }
 
   async updateTender(id: string, data: any) {
-    await this.getTenderById(id);
+    const existing = await this.getTenderById(id);
 
     const updateData: any = { ...data };
     if (data.documentUrl !== undefined || data.documentBase64 !== undefined) {
       const rawDoc = data.documentUrl || data.documentBase64;
       updateData.documentUrl = await this.storageService.processAndUploadIfBase64(rawDoc, 'tender_doc', 'tenders');
       delete updateData.documentBase64;
+
+      // Delete old tender PDF from storage if replaced
+      if (existing.documentUrl && existing.documentUrl !== updateData.documentUrl) {
+        await this.storageService.deleteFile(existing.documentUrl);
+      }
     }
 
     return this.prisma.tender.update({
@@ -72,7 +77,13 @@ export class TendersService {
   }
 
   async deleteTender(id: string) {
-    await this.getTenderById(id);
+    const existing = await this.getTenderById(id);
+
+    // Delete attached tender PDF from Cloudflare R2 / storage
+    if (existing.documentUrl) {
+      await this.storageService.deleteFile(existing.documentUrl);
+    }
+
     return this.prisma.tender.delete({ where: { id } });
   }
 }

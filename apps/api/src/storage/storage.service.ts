@@ -189,19 +189,38 @@ export class StorageService {
     }
   }
 
+  private extractCleanPathname(urlOrPathname: string): string {
+    if (!urlOrPathname || typeof urlOrPathname !== 'string') return '';
+    let clean = urlOrPathname.trim();
+
+    if (clean.includes('pathname=')) {
+      const match = clean.match(/pathname=([^&]+)/);
+      if (match) {
+        clean = decodeURIComponent(match[1]);
+      }
+    } else if (clean.startsWith('http://') || clean.startsWith('https://')) {
+      try {
+        const parsed = new URL(clean);
+        if (parsed.searchParams.has('pathname')) {
+          clean = parsed.searchParams.get('pathname') || clean;
+        } else {
+          clean = parsed.pathname.replace(/^\/+/, '');
+        }
+      } catch {
+        // fallback to original
+      }
+    }
+
+    return clean.replace(/^\/+/, '');
+  }
+
   /**
    * Retrieves a file stream from Cloudflare R2 or Vercel Blob storage.
    */
   async getFileStream(pathnameOrUrl: string): Promise<any> {
-    // Extract pathname if a full URL was provided
-    let cleanPathname = pathnameOrUrl;
-    try {
-      if (pathnameOrUrl.startsWith('http://') || pathnameOrUrl.startsWith('https://')) {
-        const parsed = new URL(pathnameOrUrl);
-        cleanPathname = parsed.pathname.replace(/^\/+/, '');
-      }
-    } catch {
-      cleanPathname = pathnameOrUrl;
+    const cleanPathname = this.extractCleanPathname(pathnameOrUrl);
+    if (!cleanPathname) {
+      throw new BadRequestException('Invalid file path or URL');
     }
 
     // Try Cloudflare R2 first if enabled
@@ -247,16 +266,15 @@ export class StorageService {
   /**
    * Deletes a file from Cloudflare R2 or Vercel Blob storage by its full URL or pathname.
    */
-  async deleteFile(urlOrPathname: string) {
-    let cleanPathname = urlOrPathname;
-    try {
-      if (urlOrPathname.startsWith('http://') || urlOrPathname.startsWith('https://')) {
-        const parsed = new URL(urlOrPathname);
-        cleanPathname = parsed.pathname.replace(/^\/+/, '');
-      }
-    } catch {
-      cleanPathname = urlOrPathname;
+  async deleteFile(urlOrPathname: string | null | undefined) {
+    if (!urlOrPathname || typeof urlOrPathname !== 'string') {
+      return { success: true };
     }
+
+    const cleanPathname = this.extractCleanPathname(urlOrPathname);
+    if (!cleanPathname) return { success: true };
+
+    this.logger.log(`Deleting file from storage: ${cleanPathname}`);
 
     if (this.useR2 && this.s3Client) {
       try {
@@ -268,7 +286,7 @@ export class StorageService {
         );
         this.logger.log(`Deleted from Cloudflare R2: ${cleanPathname}`);
       } catch (err: any) {
-        this.logger.warn(`Failed to delete from R2: ${err.message}`);
+        this.logger.warn(`Failed to delete from R2 (${cleanPathname}): ${err.message}`);
       }
     }
 
