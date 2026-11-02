@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="mr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>साइटमॅप (HTML Sitemap) | वाई नगरपरिषद (Wai Municipal Council)</title>
+  <meta name="description" content="वाई नगरपरिषद अधिकृत संकेतस्थळ साइटमॅप - सर्व नागरिक सेवा, विभाग, योजना, कायदे आणि निविदा यांची संपूर्ण सूची.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.waimunicipalcouncil.org/sitemap.html">
+  <style>
+    :root {
+      --primary: #d97706;
+      --primary-dark: #b45309;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1120;
+        --card-bg: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Mukta', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px 16px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #78350f 100%);
+      color: white;
+      padding: 32px 24px;
+      border-radius: 16px;
+      margin-bottom: 32px;
+      box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    header img {
+      width: 70px;
+      height: 70px;
+      background: white;
+      border-radius: 12px;
+      padding: 6px;
+    }
+    header h1 {
+      font-size: 26px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+    header p {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .card h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 14px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    ul {
+      list-style: none;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    li a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      display: block;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    li a:hover {
+      background: rgba(217, 119, 6, 0.1);
+      color: var(--primary);
+      transform: translateX(4px);
+    }
+    .subtext {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-btn">← मुख्य संकेतस्थळावर परत जा (Back to Main Portal)</a>
+
+    <header>
+      <img src="/wai-logo-withoutbg.png" alt="Wai Municipal Council Logo">
+      <div>
+        <h1>साइटमॅप | HTML Sitemap</h1>
+        <p>वाई नगरपरिषद, जिल्हा सातारा (Wai Municipal Council, Dist. Satara)</p>
+      </div>
+    </header>
+
+    <div class="grid">
+
+      <!-- Section 1: Main Pages -->
+      <div class="card">
+        <h2>🏛️ मुख्य पृष्ठ व परिचय (About Council)</h2>
+        <ul>
+          <li><a href="/"><strong>मुख्य पृष्ठ (Home Page)</strong><span class="subtext">https://www.waimunicipalcouncil.org/</span></a></li>
+          <li><a href="/about/introduction"><strong>नगरपालिका परिचय (Overview)</strong><span class="subtext">इतिहास व माहिती</span></a></li>
+          <li><a href="/about/history"><strong>ऐतिहासिक वारसा (History)</strong><span class="subtext">दक्षिण काशी वाई इतिहास</span></a></li>
+          <li><a href="/about/structure"><strong>प्रशासकीय रचना (Administrative Structure)</strong><span class="subtext">प्रशासन संघटन तक्ता</span></a></li>
+          <li><a href="/about/mayor"><strong>मा. नगराध्यक्ष (President Profile)</strong><span class="subtext">नगराध्यक्ष परिचय व संदेश</span></a></li>
+          <li><a href="/about/chief-officer"><strong>मा. मुख्याधिकारी (Chief Officer)</strong><span class="subtext">मुख्याधिकारी कार्यालय</span></a></li>
+          <li><a href="/about/corporators"><strong>नगरसेवक यादी (Elected Corporators)</strong><span class="subtext">सर्व २६ निर्वाचित लोकप्रतिनिधी</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Section 2: Online Citizen Services -->
+      <div class="card">
+        <h2>⚡ नागरिक सेवा (Online Citizen Services)</h2>
+        <ul>
+          <li><a href="/services/complaint"><strong>नागरी तक्रार नोंदणी (Grievance Redressal)</strong><span class="subtext">थेट ऑनलाईन तक्रार दाखल करा</span></a></li>
+          <li><a href="/track"><strong>तक्रार / अर्ज स्थिती ट्रॅकिंग (Track Application)</strong><span class="subtext">ट्रॅकिंग आयडीद्वारे स्थिती तपासा</span></a></li>
+          <li><a href="/services/property-tax"><strong>मालमत्ता कर भरणा (Property Tax)</strong><span class="subtext">घरपट्टी कर आकारणी व ऑनलाईन पावती</span></a></li>
+          <li><a href="/services/water-bill"><strong>पाणी पुरवठा व बिल (Water Supply & Bill)</strong><span class="subtext">पाणीपट्टी आकारणी व मीटर बिल</span></a></li>
+          <li><a href="/services/birth-certificate"><strong>जन्म दाखला अर्ज (Birth Certificate)</strong><span class="subtext">जन्म नोंदणी व प्रमाणपत्र</span></a></li>
+          <li><a href="/services/death-certificate"><strong>मृत्यू दाखला अर्ज (Death Certificate)</strong><span class="subtext">मृत्यू नोंदणी व प्रमाणपत्र</span></a></li>
+          <li><a href="/services/construction-permit"><strong>बांधकाम परवाना (Building Permission)</strong><span class="subtext">नगररचना व नकाशा मंजुरी</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Section 3: Schemes -->
+      <div class="card">
+        <h2>📑 शासकीय योजना (Government Schemes)</h2>
+        <ul>
+          <li><a href="/schemes/all"><strong>सर्व शासकीय योजना (All Schemes Portal)</strong><span class="subtext">केंद्रीत, राज्य व स्थानिक योजना</span></a></li>
+          <li><a href="/schemes/central"><strong>केंद्र शासन पुरस्कृत योजना (Central Govt Schemes)</strong><span class="subtext">केंद्र सरकारच्या योजना</span></a></li>
+          <li><a href="/schemes/state"><strong>महाराष्ट्र शासन योजना (State Govt Schemes)</strong><span class="subtext">महाराष्ट्र राज्य योजना</span></a></li>
+          <li><a href="/schemes/local"><strong>नगरपरिषद स्थानिक उपक्रम (Local Schemes)</strong><span class="subtext">वाई नगरपरिषद निधी उपक्रम</span></a></li>
+          <li><a href="/schemes/pmay"><strong>प्रधानमंत्री आवास योजना (PMAY Housing)</strong><span class="subtext">सर्वांसाठी घरे योजना</span></a></li>
+          <li><a href="/schemes/swachh-bharat"><strong>स्वच्छ भारत अभियान (Swachh Bharat)</strong><span class="subtext">स्वच्छता मोहीम व ओडीएफ प्लस</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Section 4: Departments -->
+      <div class="card">
+        <h2>🏢 प्रशासकीय विभाग (Municipal Departments)</h2>
+        <ul>
+          <li><a href="/departments/general-admin"><strong>सामान्य प्रशासन विभाग (General Administration)</strong></a></li>
+          <li><a href="/departments/health"><strong>आरोग्य व स्वच्छता विभाग (Health & Sanitation)</strong></a></li>
+          <li><a href="/departments/water"><strong>पाणीपुरवठा विभाग (Water Works)</strong></a></li>
+          <li><a href="/departments/civil"><strong>बांधकाम व सार्वजनिक बांधकाम (Public Works)</strong></a></li>
+          <li><a href="/departments/planning"><strong>नगररचना व विकास नियोजन (Town Planning)</strong></a></li>
+          <li><a href="/departments/tax"><strong>कर आकारणी व कर संकलन (Tax Department)</strong></a></li>
+          <li><a href="/departments/electrical"><strong>विद्युत व दिवाबत्ती विभाग (Electrical Department)</strong></a></li>
+          <li><a href="/departments/computer"><strong>माहिती तंत्रज्ञान कक्ष (IT / Computer Department)</strong></a></li>
+          <li><a href="/departments/fire"><strong>अग्निशमन व आपत्ती व्यवस्थापन (Fire & Disaster)</strong></a></li>
+          <li><a href="/departments/birth-death"><strong>जन्म-मृत्यू नोंदणी विभाग (Birth-Death Cell)</strong></a></li>
+          <li><a href="/departments/accounts"><strong>लेखा व वित्त विभाग (Accounts & Finance)</strong></a></li>
+          <li><a href="/departments/records"><strong>अभिलेख व दप्तर कक्ष (Records Room)</strong></a></li>
+          <li><a href="/departments/disabled"><strong>दिव्यांग कल्याण कक्ष (Disability Welfare)</strong></a></li>
+          <li><a href="/departments/women"><strong>महिला व बालकल्याण कक्ष (Women & Child Cell)</strong></a></li>
+          <li><a href="/departments/election"><strong>निवडणूक कक्ष (Election Cell)</strong></a></li>
+        </ul>
+      </div>
+
+      <!-- Section 5: Governance & Civic -->
+      <div class="card">
+        <h2>⚖️ कायदे, नियम व निविदा (Laws & Tenders)</h2>
+        <ul>
+          <li><a href="/tenders"><strong>ई-निविदा व लिलाव (E-Tenders & Procurement)</strong><span class="subtext">अधिकृत निविदा सूचना</span></a></li>
+          <li><a href="/laws"><strong>कायदे, नियम व उपविधी (Laws, Rules & Byelaws)</strong><span class="subtext">नगरपरिषद अधिनियम १९६५</span></a></li>
+          <li><a href="/acts"><strong>महत्त्वाचे अधिनियम (Acts & Regulations)</strong><span class="subtext">शासकीय गॅझेट व कायदे</span></a></li>
+          <li><a href="/vikas-yojna"><strong>विकास योजना (Development Plan)</strong><span class="subtext">शहर विकास आराखडा</span></a></li>
+          <li><a href="/live-sabha"><strong>लाईव्ह सभा व ठराव (Sabha Meetings & Minutes)</strong><span class="subtext">सर्वसाधारण सभा ठराव</span></a></li>
+          <li><a href="/portals"><strong>शासकीय पोर्टल्स (Official Govt Portals)</strong><span class="subtext">आपले सरकार, महाडीबीटी, ई-टेंडर</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Section 6: Media & Tourism -->
+      <div class="card">
+        <h2>🌸 पर्यटन, छायाचित्रे व संपर्क (Tourism & Contact)</h2>
+        <ul>
+          <li><a href="/tourism"><strong>वाई पर्यटन स्थळे (Wai Tourism & Heritage)</strong><span class="subtext">महागणपती, कृष्णा घाट, धोम धरण</span></a></li>
+          <li><a href="/gallery"><strong>छायाचित्र दालन (Photo & Event Gallery)</strong><span class="subtext">नागरी कार्यक्रम व घडामोडी</span></a></li>
+          <li><a href="/contact"><strong>संपर्क व मदत कक्ष (Contact Us Desk)</strong><span class="subtext">कार्यालय पत्ता, दूरध्वनी व ई-मेल</span></a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <footer>
+      <p>© २०२६ वाई नगरपरिषद, वाई (Wai Municipal Council, Wai). सर्व हक्क राखीव.</p>
+      <p style="margin-top: 6px;">
+        XML Sitemap: <a href="/sitemap.xml" style="color: var(--primary);">sitemap.xml</a> | 
+        Robots: <a href="/robots.txt" style="color: var(--primary);">robots.txt</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

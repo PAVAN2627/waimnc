@@ -1,0 +1,477 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ExternalLink, BookOpen, CheckCircle2, ShieldCheck, ArrowRight, Search, FileText, Gift, Award, Info, X, Send, Copy, Check, LoaderCircle } from "lucide-react";
+import PageLayout from "@/components/PageLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { subscribeToActiveSchemes, type SchemeRecord, type SchemeCategory } from "@/lib/schemes";
+import { createComplaint } from "@/lib/complaints";
+import { validateMobileInput, sanitizeMobileInput } from "@/lib/validation";
+
+const CATEGORIES: { value: SchemeCategory | "all"; labelMr: string; labelEn: string; icon: string }[] = [
+  { value: "all", labelMr: "सर्व योजना", labelEn: "All Schemes", icon: "🌐" },
+  { value: "central", labelMr: "केंद्र सरकार योजना", labelEn: "Central Govt Schemes", icon: "🏛️" },
+  { value: "state", labelMr: "राज्य सरकार योजना", labelEn: "State Govt Schemes", icon: "🏰" },
+  { value: "local", labelMr: "स्थानिक नगरपरिषद योजना", labelEn: "Local Schemes", icon: "🏢" },
+];
+
+const SchemesPage = () => {
+  const { t, language } = useLanguage();
+  const [schemes, setSchemes] = useState<SchemeRecord[]>([]);
+  const [activeCategory, setActiveCategory] = useState<SchemeCategory | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSchemeForApply, setSelectedSchemeForApply] = useState<SchemeRecord | null>(null);
+
+  useEffect(() => subscribeToActiveSchemes(setSchemes), []);
+
+  const filteredSchemes = schemes.filter((s) => {
+    const matchesCategory = activeCategory === "all" || s.category === activeCategory;
+    const title = (language === "mr" ? s.titleMr : s.titleEn || s.titleMr).toLowerCase();
+    const desc = (language === "mr" ? s.descMr : s.descEn || s.descMr).toLowerCase();
+    const matchesSearch = title.includes(searchQuery.toLowerCase()) || desc.includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  return (
+    <PageLayout>
+      <div className="py-12 bg-gradient-to-b from-background via-muted/30 to-background border-b relative overflow-hidden">
+        {/* Background Glows */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto space-y-8">
+
+            {/* Scheme Application Modal */}
+            {selectedSchemeForApply && (
+              <ApplySchemeModal
+                scheme={selectedSchemeForApply}
+                language={language}
+                t={t}
+                onClose={() => setSelectedSchemeForApply(null)}
+              />
+            )}
+
+            {/* Hero Card */}
+            <div className="gov-gradient rounded-3xl p-8 md:p-10 text-primary-foreground shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-bl-full pointer-events-none" />
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-sm border border-white/30">
+                    <Gift className="w-3.5 h-3.5" />
+                    {t("शासकीय जनकल्याण उपक्रम", "Welfare & Governance Portal")}
+                  </span>
+                  <h1 className="text-3xl md:text-5xl font-black text-white">{t("सरकारी योजना व उपक्रम", "Government Schemes")}</h1>
+                  <p className="text-primary-foreground/90 text-sm md:text-base font-medium mt-2 max-w-xl">
+                    {t(
+                      "केंद्र सरकार, महाराष्ट्र शासन व वाई नगरपरिषदेच्या सर्व जनकल्याणकारी योजनांची सविस्तर माहिती व ऑनलाइन अर्ज सुविधा.",
+                      "Comprehensive information and online application for Central, State & Wai Municipal schemes."
+                    )}
+                  </p>
+                </div>
+
+                <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-4xl shadow-xl flex-shrink-0">
+                  🎁
+                </div>
+              </div>
+            </div>
+
+            {/* Search & Category Filter Pills */}
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                {/* Search Bar */}
+                <div className="relative w-full sm:flex-1">
+                  <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t("योजनेचे नाव किंवा शब्द शोधा...", "Search scheme by name...")}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
+                  />
+                </div>
+
+                {/* Category Pills */}
+                <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.value}
+                      onClick={() => setActiveCategory(cat.value)}
+                      className={`px-4 py-2 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 shadow-sm ${
+                        activeCategory === cat.value
+                          ? "gov-gradient text-white shadow-md scale-105"
+                          : "bg-card text-foreground hover:bg-muted border border-border"
+                      }`}
+                    >
+                      <span>{cat.icon}</span>
+                      <span>{t(cat.labelMr, cat.labelEn)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Scheme Cards Grid */}
+            {filteredSchemes.length === 0 ? (
+              <div className="bg-card rounded-3xl p-12 text-center border border-border shadow-xl space-y-3">
+                <BookOpen className="h-12 w-12 mx-auto text-muted-foreground opacity-40" />
+                <h3 className="text-lg font-bold text-foreground">{t("कोणतीही योजना सापडली नाही.", "No schemes found.")}</h3>
+                <p className="text-xs text-muted-foreground">{t("कृपया वेगळा शोध शब्द वापरून प्रयत्न करा.", "Please try searching with another keyword.")}</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredSchemes.map((scheme) => (
+                  <SchemeCard
+                    key={scheme.id}
+                    scheme={scheme}
+                    language={language}
+                    t={t}
+                    onApply={() => setSelectedSchemeForApply(scheme)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </PageLayout>
+  );
+};
+
+function SchemeCard({
+  scheme,
+  language,
+  t,
+  onApply,
+}: {
+  scheme: SchemeRecord;
+  language: string;
+  t: (mr: string, en: string) => string;
+  onApply: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const title = language === "mr" ? scheme.titleMr : scheme.titleEn || scheme.titleMr;
+  const desc = language === "mr" ? scheme.descMr : scheme.descEn || scheme.descMr;
+  const eligibility = language === "mr" ? scheme.eligibilityMr : scheme.eligibilityEn || scheme.eligibilityMr;
+  const benefits = language === "mr" ? scheme.benefitsMr : scheme.benefitsEn || scheme.benefitsMr;
+
+  const categoryBadge =
+    scheme.category === "central"
+      ? { label: t("केंद्र सरकार", "Central Govt"), color: "bg-blue-500/10 text-blue-600 border-blue-500/30" }
+      : scheme.category === "state"
+      ? { label: t("महाराष्ट्र शासन", "Govt of Maharashtra"), color: "bg-orange-500/10 text-orange-600 border-orange-500/30" }
+      : { label: t("स्थानिक नगरपरिषद", "Wai Council"), color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" };
+
+  return (
+    <div className="bg-card rounded-3xl border border-border shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+      <div>
+        {/* Card Image Banner */}
+        {scheme.imageBase64 ? (
+          <div className="aspect-video overflow-hidden relative border-b border-border/50">
+            <img src={scheme.imageBase64} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <div className="absolute top-3 left-3">
+              <span className={`text-[10px] font-extrabold px-3 py-1 rounded-full backdrop-blur-md border ${categoryBadge.color}`}>
+                {categoryBadge.label}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 border-b border-border/50 bg-primary/5 flex items-center justify-between">
+            <span className={`text-[10px] font-extrabold px-3 py-1 rounded-full border ${categoryBadge.color}`}>
+              {categoryBadge.label}
+            </span>
+            <Gift className="w-5 h-5 text-primary" />
+          </div>
+        )}
+
+        <div className="p-5 space-y-3">
+          <h3 className="font-extrabold text-base text-foreground group-hover:text-primary transition-colors leading-snug">
+            {title}
+          </h3>
+
+          {desc && <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{desc}</p>}
+
+          {expanded && (
+            <div className="space-y-3 pt-2 border-t border-border/60 text-xs animate-in fade-in duration-200">
+              {eligibility && (
+                <div>
+                  <p className="font-bold text-primary mb-1 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>{t("पात्रता निकष", "Eligibility Criteria")}</span>
+                  </p>
+                  <ul className="text-muted-foreground space-y-1 list-disc list-inside pl-1">
+                    {eligibility.split("\n").filter(Boolean).map((line, i) => (
+                      <li key={i}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {benefits && (
+                <div>
+                  <p className="font-bold text-primary mb-1 flex items-center gap-1">
+                    <Gift className="w-3.5 h-3.5 text-amber-500" />
+                    <span>{t("योजनेचे फायदे", "Key Benefits")}</span>
+                  </p>
+                  <p className="text-muted-foreground">{benefits}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Card Actions Footer */}
+      <div className="p-4 pt-0 border-t border-border/40 flex items-center justify-between gap-2 mt-auto">
+        {(eligibility || benefits) && (
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
+          >
+            {expanded ? t("कमी दाखवा ▲", "Show less ▲") : t("अधिक माहिती ▼", "More info ▼")}
+          </button>
+        )}
+
+        {scheme.externalUrl ? (
+          <a
+            href={scheme.externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto"
+          >
+            <button className="px-3.5 py-1.5 rounded-xl gov-gradient text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1">
+              <span>{scheme.externalUrl.includes("drive.google.com") ? t("गुगल ड्राईव्ह GR / तपशील", "Drive Document") : t("शासन निर्णय (GR) / अर्ज", "View GR / Apply")}</span>
+              <ExternalLink className="w-3 h-3 ml-0.5" />
+            </button>
+          </a>
+        ) : (
+          <button
+            onClick={onApply}
+            className="ml-auto px-3.5 py-1.5 rounded-xl gov-gradient text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1"
+          >
+            <span>{t("ऑनलाइन अर्ज करा", "Apply Online")}</span>
+            <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ApplySchemeModal({
+  scheme,
+  language,
+  t,
+  onClose,
+}: {
+  scheme: SchemeRecord;
+  language: string;
+  t: (mr: string, en: string) => string;
+  onClose: () => void;
+}) {
+  const title = language === "mr" ? scheme.titleMr : scheme.titleEn || scheme.titleMr;
+  const [submitting, setSubmitting] = useState(false);
+  const [trackingId, setTrackingId] = useState<string | null>(null);
+  const [mobileValue, setMobileValue] = useState("");
+  const [applicantMobile, setApplicantMobile] = useState<string>("");
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCopy = () => {
+    if (!trackingId) return;
+    navigator.clipboard.writeText(trackingId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const name = (formData.get("name") as string) || "";
+    const mobile = (formData.get("mobile") as string) || mobileValue;
+    const aadhaar = (formData.get("aadhaar") as string) || "";
+    const address = (formData.get("address") as string) || "";
+
+    // 10-digit mobile number validation (no fake / repeating numbers like 9999999999)
+    const mobileCheck = validateMobileInput(mobile, (language === "mr" ? "mr" : "en"));
+    if (!mobileCheck.isValid) {
+      setError(mobileCheck.error || t("कृपया १० अंकी वैध मोबाईल नंबर प्रविष्ट करा.", "Please enter a valid 10-digit mobile number."));
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setApplicantMobile(mobileCheck.cleaned);
+      const res = await createComplaint({
+        name: name.trim(),
+        mobile: mobileCheck.cleaned,
+        ward: "1",
+        type: `शासकीय योजना: ${title}`,
+        department: "शासकीय योजना व उपक्रम",
+        description: [
+          `[शासकीय योजना ऑनलाइन अर्ज]`,
+          `योजनेचे नाव: ${title}`,
+          `अर्जदाराचे पूर्ण नाव: ${name.trim()}`,
+          `मोबाइल नंबर: ${mobileCheck.cleaned}`,
+          `आधार क्रमांक: ${aadhaar.trim()}`,
+          `पत्ता / तपशील: ${address.trim() || "उपलब्ध नाही"}`,
+        ].join("\n"),
+      });
+
+      const generatedId = res.trackingId || `WMC-${res.id.slice(0, 6).toUpperCase()}`;
+      setTrackingId(generatedId);
+      setMobileValue("");
+    } catch (err) {
+      console.error("Scheme apply error:", err);
+      setError(err instanceof Error ? err.message : t("अर्ज नोंदवता आला नाही.", "Failed to submit."));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+      <div className="bg-card text-card-foreground rounded-3xl max-w-md w-full border border-border shadow-2xl overflow-hidden relative my-auto">
+        <div className="gov-gradient text-primary-foreground p-6 pr-14 relative">
+          <button
+            onClick={onClose}
+            aria-label="Close Modal"
+            className="absolute top-5 right-5 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all hover:scale-110 shadow-lg border border-white/30"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/30 uppercase tracking-wider">
+            {t("योजना अर्ज नोंदणी", "Scheme Application")}
+          </span>
+          <h2 className="text-xl font-black text-white mt-1 leading-snug">{title}</h2>
+        </div>
+
+        <div className="p-6">
+          {trackingId ? (
+            <div className="text-center py-4 space-y-4 animate-in zoom-in-95 duration-200">
+              <div className="w-16 h-16 rounded-full bg-emerald-500 text-white mx-auto flex items-center justify-center text-3xl shadow-lg">
+                ✓
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                  {t("योजना अर्ज यशस्वीरित्या नोंदवला!", "Scheme Request Registered!")}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("आपला अर्ज प्रशासनाकडे नोंदवला गेला आहे.", "Your application is successfully registered.")}
+                </p>
+              </div>
+
+              {/* Real Tracking ID on Screen */}
+              <div className="bg-background rounded-2xl p-4 border-2 border-emerald-500/40 space-y-1.5 shadow-inner">
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block">
+                  {t("अर्ज ट्रॅकिंग आयडी (Tracking ID)", "Tracking ID")}
+                </span>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-2xl font-mono font-black text-primary tracking-wider">
+                    {trackingId}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="p-1.5 rounded-lg border border-primary/30 hover:bg-primary/10 text-primary transition-colors flex items-center gap-1 text-xs font-bold"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    <span>{copied ? t("कॉपी!", "Copied!") : t("कॉपी", "Copy")}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-[11px] font-semibold leading-relaxed">
+                ⚠️ {t("कृपया हा ट्रॅकिंग आयडी लिहून किंवा स्क्रीनशॉट काढून ठेवा.", "Please save or take a screenshot of this Tracking ID.")}
+              </div>
+
+              <div className="flex flex-col gap-2 pt-1">
+                <Link
+                  to={`/track?id=${trackingId}&mobile=${applicantMobile}`}
+                  className="w-full py-2.5 rounded-xl gov-gradient text-white font-bold text-xs shadow-md hover:shadow-lg flex items-center justify-center gap-1.5"
+                >
+                  <span>{t("अर्जाची स्थिती तपासा", "Track Application Status")}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full py-2 rounded-xl border border-border text-xs font-bold hover:bg-muted text-foreground"
+                >
+                  {t("बंद करा", "Close")}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-foreground">{t("पूर्ण नाव *", "Full Name *")}</label>
+                <input required name="name" placeholder={t("तुमचे नाव...", "Enter name...")} className="w-full px-3.5 py-2 rounded-xl bg-muted/50 border border-border text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-foreground">{t("मोबाइल नंबर *", "Mobile Number *")}</label>
+                  <span className="text-[10px] font-mono text-muted-foreground">{mobileValue.length}/10 {t("अंक", "digits")}</span>
+                </div>
+                <input
+                  required
+                  name="mobile"
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  value={mobileValue}
+                  onChange={(e) => {
+                    setMobileValue(sanitizeMobileInput(e.target.value));
+                    if (error) setError(null);
+                  }}
+                  placeholder="98XXXXXXXX"
+                  className="w-full px-3.5 py-2 rounded-xl bg-muted/50 border border-border text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  {t("१० अंकी खरा नंबर (६ ते ९ ने सुरू; ९९९९९९९९९९ सारखे बनावट नंबर चालणार नाहीत)", "10 real digits (starting 6-9; 9999999999 prohibited)")}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-foreground">{t("आधार क्रमांक *", "Aadhaar Number *")}</label>
+                <input required name="aadhaar" placeholder="XXXX-XXXX-XXXX" className="w-full px-3.5 py-2 rounded-xl bg-muted/50 border border-border text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-foreground">{t("पत्ता व प्रभाग / तपशील", "Address & Ward")}</label>
+                <input name="address" placeholder={t("घराचा पत्ता, प्रभाग...", "Address, ward...")} className="w-full px-3.5 py-2 rounded-xl bg-muted/50 border border-border text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+
+              {error && (
+                <p className="text-xs text-destructive font-bold">⚠️ {error}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3 rounded-xl gov-gradient text-white font-black text-xs shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 mt-2 disabled:opacity-60"
+              >
+                {submitting ? (
+                  <>
+                    <LoaderCircle className="w-4 h-4 animate-spin" />
+                    <span>{t("अर्ज सादर करत आहे...", "Submitting...")}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{t("अर्ज सबमिट करा व आयडी मिळवा", "Submit Request & Get ID")}</span>
+                    <Send className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SchemesPage;

@@ -1,16 +1,27 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "wmc-monorepo",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:dev": "vite build --mode development",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "dev": "npm run dev --workspace=@wmc/web",
+    "dev:all": "turbo run dev",
+    "dev:web": "npm run dev --workspace=@wmc/web",
+    "dev:admin": "npm run dev --workspace=@wmc/admin",
+    "dev:employee": "npm run dev --workspace=@wmc/employee",
+    "dev:api": "npm run dev --workspace=@wmc/api",
+    "build": "turbo run build",
+    "build:web": "npm run build --workspace=@wmc/web",
+    "build:admin": "npm run build --workspace=@wmc/admin",
+    "build:employee": "npm run build --workspace=@wmc/employee",
+    "build:api": "npm run build --workspace=@wmc/api",
+    "build:all": "turbo run build",
+    "prisma:seed": "npm run prisma:seed --workspace=@wmc/api",
+    "lint": "turbo run lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -47,7 +58,6 @@
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
-    "firebase": "^12.10.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",

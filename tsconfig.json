@@ -1,26 +1,16 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "moduleResolution": "bundler",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@wmc/types": ["./packages/types/src/index.ts"],
+      "@/*": ["./apps/admin/src/*", "./apps/web/src/*"]
     },
-    "allowJs": true,
-    "noImplicitAny": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "skipLibCheck": true,
-    "strictNullChecks": false
+    "skipLibCheck": true
   },
   "files": [],
   "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.node.json"
-    }
+    { "path": "./apps/web" },
+    { "path": "./apps/admin" },
+    { "path": "./apps/api" }
   ]
 }

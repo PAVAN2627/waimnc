@@ -7,26 +7,43 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+**/node_modules
+
+# Production Build Outputs
 dist
+**/dist
 dist-ssr
+**/dist-ssr
+
+# Monorepo, Build & Deploy Caches
+.turbo
+.vercel
+.cache
+coverage
+
+# Environment & Secrets (NEVER push to git)
 *.local
 .env
 .env.*
+**/.env
+**/.env.*
 !.env.example
+!**/.env.example
+
+# Credentials & Service Accounts
 *-firebase-adminsdk-*.json
 service-account*.json
-wainagarpalika-42dd4-firebase-adminsdk-fbsvc-54c333e14f.json
+*.pem
+*.key
 
-# Admin user creation pages (sensitive — keep off public repos)
-src/pages/AdminSetup.tsx
-src/pages/admin/AdminCreateUser.tsx
-
-# Editor directories and files
+# Editor directories and OS files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj

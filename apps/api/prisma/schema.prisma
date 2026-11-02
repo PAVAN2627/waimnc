@@ -1,0 +1,257 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -----------------------------------------------------------------------------
+// 1. Single Admin & Department Officers Authentication (RBAC)
+// -----------------------------------------------------------------------------
+model Admin {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  name         String    @default("System Administrator")
+  passwordHash String
+  role         String    @default("SUPER_ADMIN") // "SUPER_ADMIN" | "DEPT_OFFICER"
+  department   String?   // e.g. "पाणी पुरवठा विभाग", "आरोग्य व स्वच्छता विभाग", etc.
+  departments  String[]  @default([]) // Support multiple departments per officer
+  accessScope  String?   @default("all") // "all" | "complaints" | "applications"
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("admins")
+}
+
+// -----------------------------------------------------------------------------
+// 2. Complaints Management (तक्रारी निवारा)
+// -----------------------------------------------------------------------------
+model Complaint {
+  id          String   @id @default(uuid())
+  trackingId  String?  @unique
+  name        String
+  mobile      String
+  ward        String
+  type        String   @default("general")
+  department  String
+  description String
+  status      String   @default("pending") // "pending" | "in-progress" | "resolved"
+  attachments Json?    // Array of Cloudflare R2 file URLs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("complaints")
+}
+
+// -----------------------------------------------------------------------------
+// 3. Civic Notices & Circulars (सूचना व्यवस्थापन)
+// -----------------------------------------------------------------------------
+model Notice {
+  id          String   @id @default(uuid())
+  title       String
+  titleEn     String?
+  content     String?
+  contentEn   String?
+  tag         String?
+  tagEn       String?
+  externalUrl String?
+  documentUrl String?  // Cloudflare R2 PDF / Image URL
+  status      String   @default("active") // "active" | "inactive"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("notices")
+}
+
+// -----------------------------------------------------------------------------
+// 4. City Development Projects (विकास प्रकल्प)
+// -----------------------------------------------------------------------------
+model Project {
+  id           String   @id @default(uuid())
+  titleMr      String
+  titleEn      String?
+  descMr       String?
+  descEn       String?
+  progress     Int      @default(0) // 0 - 100%
+  iconName     String?  @default("FolderOpen")
+  documentUrl  String?  // PDF file URL or Google Drive link
+  documentName String?  // Filename or document title
+  status       String   @default("active") // "active" | "inactive"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("projects")
+}
+
+// -----------------------------------------------------------------------------
+// 5. News & Press Releases (बातमीपत्र)
+// -----------------------------------------------------------------------------
+model NewsItem {
+  id          String   @id @default(uuid())
+  title       String
+  titleEn     String?
+  date        String?
+  dateEn      String?
+  tag         String?
+  tagEn       String?
+  externalUrl String?
+  imageUrl    String?  // Cloudflare R2 URL
+  status      String   @default("active") // "active" | "inactive"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("news_items")
+}
+
+// -----------------------------------------------------------------------------
+// 6. General Body Meetings & Resolutions (सभा व ठराव)
+// -----------------------------------------------------------------------------
+model SabhaMeeting {
+  id           String   @id @default(uuid())
+  type         String   @default("upcoming") // "upcoming" | "previous"
+  sabhaType    String?  @default("sarvasadharan") // "sarvasadharan" | "vishesh" | "sthayi_samiti"
+  year         Int?     // Meeting / Resolution Year (e.g. 2026, 2025, 2024)
+  tharavNumber String?  // e.g. "ठराव क्र. २४/२०२६"
+  titleMr      String
+  titleEn      String?
+  date         String   // Meeting date (YYYY-MM-DD)
+  time         String?  // e.g. "11:00 AM"
+  videoUrl     String?  // YouTube live / embed URL
+  minutesUrl   String?  // Cloudflare R2 / Vercel Blob PDF URL of meeting minutes & resolutions
+  minutesName  String?  // Original filename
+  status       String   @default("active") // "active" | "inactive"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("sabha_meetings")
+}
+
+// -----------------------------------------------------------------------------
+// 7. Leadership Routine (दैनंदिन दिनक्रम)
+// -----------------------------------------------------------------------------
+model RoutineItem {
+  id        String   @id @default(uuid())
+  date      String
+  titleMr   String
+  titleEn   String?
+  descMr    String?
+  descEn    String?
+  imageUrl  String?  // Cloudflare R2 URL
+  status    String   @default("active") // "active" | "inactive"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("routine_items")
+}
+
+// -----------------------------------------------------------------------------
+// 8. Elected Officials & Nagarsevaks (पदाधिकारी)
+// -----------------------------------------------------------------------------
+model Official {
+  id            String   @id @default(uuid())
+  nameMr        String
+  nameEn        String
+  designationMr String
+  designationEn String
+  wardNumber    String?
+  addressMr     String?
+  addressEn     String?
+  partyMr       String?
+  partyEn       String?
+  phone         String?
+  photoUrl      String?  // Cloudflare R2 URL
+  displayOrder  Int      @default(999)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("officials")
+}
+
+// -----------------------------------------------------------------------------
+// 9. Photo & Video Gallery (गॅलरी व्यवस्थापन)
+// -----------------------------------------------------------------------------
+model GalleryItem {
+  id        String   @id @default(uuid())
+  type      String   @default("photo") // "photo" | "video"
+  titleMr   String
+  titleEn   String?
+  date      String?
+  imageUrl  String?  // Cloudflare R2 Image URL
+  videoUrl  String?  // YouTube Video URL
+  status    String   @default("active") // "active" | "inactive"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("gallery_items")
+}
+
+// -----------------------------------------------------------------------------
+// 10. Government Schemes (शासकीय योजना)
+// -----------------------------------------------------------------------------
+model Scheme {
+  id            String   @id @default(uuid())
+  category      String   @default("central") // "central" | "state" | "local" | "other"
+  titleMr       String
+  titleEn       String?
+  descMr        String?
+  descEn        String?
+  eligibilityMr String?
+  eligibilityEn String?
+  benefitsMr    String?
+  benefitsEn    String?
+  externalUrl   String?
+  imageUrl      String?  // Cloudflare R2 URL
+  status        String   @default("active") // "active" | "inactive"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("schemes")
+}
+
+// -----------------------------------------------------------------------------
+// 11. E-Tenders & Procurement (ई-निविदा)
+// -----------------------------------------------------------------------------
+model Tender {
+  id                String    @id @default(uuid())
+  tenderNumber      String    @unique
+  titleMr           String
+  titleEn           String
+  department        String
+  category          String
+  estimatedCost     Float?
+  tenderFee         Float?
+  emdAmount         Float?
+  publishDate       DateTime
+  submissionEndDate DateTime
+  openingDate       DateTime?
+  documentUrl       String    // Cloudflare R2 PDF URL
+  status            String    @default("ACTIVE") // "ACTIVE" | "ARCHIVED" | "CLOSED"
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("tenders")
+}
+
+// -----------------------------------------------------------------------------
+// 12. Security Audit Trail
+// -----------------------------------------------------------------------------
+model AuditLog {
+  id         String   @id @default(uuid())
+  adminId    String?
+  adminEmail String?
+  adminName  String?
+  action     String   // "LOGIN" | "LOGOUT" | "UPDATE_STATUS" | "CREATE" | "DELETE" | "UPDATE"
+  resource   String   // "AUTH" | "COMPLAINTS" | "APPLICATIONS" | "STAFF" | "NOTICES" | "SABHA" | "TENDERS"
+  resourceId String?
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
