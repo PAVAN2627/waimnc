@@ -23,7 +23,7 @@ export const Footer = () => {
         }
       })
       .catch(() => {
-        setVisitorCount(15280);
+        // No mock data - keep loading or current
       });
   }, []);
 
@@ -230,19 +230,8 @@ export const Footer = () => {
         </div>
 
         {/* Copyright Footer Strip */}
-        <div className="border-t border-white/20 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-white/80 font-medium gap-3">
+        <div className="border-t border-white/20 pt-6 flex flex-col sm:flex-row items-center justify-center text-xs text-white/80 font-medium gap-3 text-center">
           <p>{t("© २०२६ वाई नगरपरिषद,वाई. सर्व हक्क राखीव.", "© 2026 Wai Municipal Council, Wai. All rights reserved.")}</p>
-          <div className="flex items-center gap-3">
-            <Link to="/sitemap" className="hover:text-white underline">
-              {t("साइटमॅप (HTML)", "Sitemap (HTML)")}
-            </Link>
-            <span>•</span>
-            <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-white underline">
-              XML
-            </a>
-            <span>•</span>
-            <span>{t("डिजिटल नागरी सेवा सेतू पोर्टलाद्वारे संचालित", "Powered by Digital Nagari Seva Setu Portal")}</span>
-          </div>
         </div>
       </div>
     </footer>

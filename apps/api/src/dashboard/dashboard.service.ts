@@ -49,7 +49,7 @@ export class DashboardService {
    * Real-time visitor counter powered by Redis atomic INCR.
    */
   async recordVisitor(track: boolean = false): Promise<{ totalVisitors: number }> {
-    const BASE_INITIAL_COUNT = 15280; // Official municipal portal baseline
+    const BASE_INITIAL_COUNT = 0; // Real visitor count starting from scratch
     const key = 'wmc:visitors:total';
 
     let totalVisitors: number;
