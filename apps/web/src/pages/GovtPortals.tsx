@@ -185,6 +185,21 @@ export const GOVT_PORTALS: PortalItem[] = [
     icon: Radio,
     badge: "MahaSanchar",
   },
+  {
+    id: "aaple-sarkar-services",
+    titleMr: "आपले सरकार सेवा केंद्र (MahaOnline)",
+    titleEn: "Aaple Sarkar Citizen Services (MahaOnline)",
+    subTitleMr: "महाराष्ट्र शासन सर्व नागरिक ई-सेवा पोर्टल",
+    subTitleEn: "Government of Maharashtra Online Citizen Services",
+    descMr: "नागरिकांना विविध दाखले, प्रमाणपत्रे, महसूल व नगरपरिषद सेवा ऑनलाइन मिळवण्यासाठीचे अधिकृत आपले सरकार पोर्टल.",
+    descEn: "Official Government of Maharashtra citizen portal for certificates, revenue services, and urban local body permits.",
+    url: "https://aaplesarkar.mahaonline.gov.in/",
+    category: "citizen",
+    categoryMr: "नागरी सेवा",
+    categoryEn: "Citizen Services",
+    icon: CheckCircle2,
+    badge: "आपले सरकार",
+  },
 ];
 
 export default function GovtPortals() {
@@ -281,8 +296,8 @@ export default function GovtPortals() {
               </div>
             </div>
 
-            {/* Portals Grid - Entire card is clickable to open directly */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Portals Grid - 4 per row on desktop, compact cards with small icons, name and visit button */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {filtered.map((portal) => {
                 const IconComponent = portal.icon;
                 return (
@@ -291,50 +306,33 @@ export default function GovtPortals() {
                     href={portal.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-card rounded-3xl p-6 md:p-7 border border-border hover:border-primary/60 shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="bg-card hover:bg-muted/40 rounded-2xl p-4 border border-border hover:border-primary/60 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all flex-shrink-0 shadow-sm">
-                            <IconComponent className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:bg-primary/20 transition-colors">
-                              {portal.badge}
-                            </span>
-                            <h3 className="font-black text-base sm:text-lg text-foreground group-hover:text-primary transition-colors mt-1">
-                              {lang === "mr" ? portal.titleMr : portal.titleEn}
-                            </h3>
-                          </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all flex-shrink-0 shadow-xs">
+                          <IconComponent className="w-5 h-5" />
                         </div>
-
-                        <div className="p-2 rounded-xl bg-muted/50 group-hover:bg-primary/10 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0">
-                          <ExternalLink className="w-4 h-4" />
-                        </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                          {portal.badge}
+                        </span>
                       </div>
 
-                      <p className="text-xs font-bold text-amber-600 dark:text-amber-400">
-                        {lang === "mr" ? portal.subTitleMr : portal.subTitleEn}
-                      </p>
-
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        {lang === "mr" ? portal.descMr : portal.descEn}
-                      </p>
+                      <div>
+                        <h3 className="font-extrabold text-sm text-foreground group-hover:text-primary transition-colors leading-snug line-clamp-2">
+                          {lang === "mr" ? portal.titleMr : portal.titleEn}
+                        </h3>
+                        <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400 mt-1 line-clamp-1">
+                          {lang === "mr" ? portal.subTitleMr : portal.subTitleEn}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="pt-5 mt-4 border-t border-border flex items-center justify-between gap-3">
-                      <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5 truncate">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                        <span>{t("अधिकृत शासकीय पोर्टल (क्लिक करून उघडा)", "Official Portal (Click to Open)")}</span>
+                    <div className="pt-3 mt-3 border-t border-border flex items-center justify-between text-xs font-bold text-primary group-hover:text-primary">
+                      <span className="group-hover:underline flex items-center gap-1">
+                        {t("भेट द्या", "Visit Link")}
                       </span>
-
-                      <span
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl gov-gradient text-white text-xs font-bold shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all flex-shrink-0"
-                      >
-                        <span>{t("पोर्टल उघडा", "Open Portal")}</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </span>
+                      <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </div>
                   </a>
                 );
