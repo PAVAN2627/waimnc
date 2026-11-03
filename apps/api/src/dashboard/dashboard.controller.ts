@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -9,6 +9,12 @@ export class DashboardController {
   @Get('public-stats')
   async getPublicStats() {
     return this.dashboardService.getPublicStats();
+  }
+
+  @Get('visitor-count')
+  async getVisitorCount(@Query('track') track?: string) {
+    const shouldTrack = track === 'true' || track === '1';
+    return this.dashboardService.recordVisitor(shouldTrack);
   }
 
   @UseGuards(JwtAuthGuard)

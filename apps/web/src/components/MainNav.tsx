@@ -48,6 +48,7 @@ const getMenuItems = (t: (mr: string, en: string) => string): MenuItem[] => [
       { label: t("दिव्यांग विभाग", "Disabled Dept."), href: "/departments/disabled" },
       { label: t("महिला व बाल कल्याण", "Women & Child Welfare"), href: "/departments/women" },
       { label: t("निवडणूक विभाग", "Election Department"), href: "/departments/election" },
+      { label: t("आस्थापना विभाग", "Establishment Department"), href: "/departments/establishment" },
     ],
   },
   {

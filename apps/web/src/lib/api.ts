@@ -38,7 +38,13 @@ export async function fetchPublicStats() {
     activeTenders: number;
     activeNotices: number;
     totalOfficials: number;
+    totalVisitors?: number;
   }>("/dashboard/public-stats");
+}
+
+// Real-time Visitor Counter (Powered by Redis)
+export async function fetchVisitorCount(track: boolean = false): Promise<{ totalVisitors: number }> {
+  return request<{ totalVisitors: number }>(`/dashboard/visitor-count${track ? "?track=1" : ""}`);
 }
 
 // Public Notices

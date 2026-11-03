@@ -191,5 +191,57 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     this.inFlight.set(key, promise);
     return promise;
   }
+
+  /**
+   * Atomic increment for real-time counters (e.g. Visitor Count) with Redis INCR support.
+   */
+  async incrementCounter(key: string, initialOffset: number = 0): Promise<number> {
+    if (this.isRedisEnabled && this.redisClient) {
+      try {
+        const exists = await this.redisClient.exists(key);
+        if (!exists && initialOffset > 0) {
+          await this.redisClient.set(key, initialOffset);
+        }
+        const newVal = await this.redisClient.incr(key);
+        return newVal;
+      } catch (err: any) {
+        this.logger.warn(`Redis INCR error for ${key}: ${err.message}`);
+      }
+    }
+
+    // In-Memory Fallback
+    const current = (this.memoryCache.get(key)?.value as number) || initialOffset;
+    const next = current + 1;
+    this.memoryCache.set(key, { value: next, expiresAt: Date.now() + 86400 * 365 * 1000 });
+    return next;
+  }
+
+  /**
+   * Get current counter value without incrementing.
+   */
+  async getCounter(key: string, initialOffset: number = 0): Promise<number> {
+    if (this.isRedisEnabled && this.redisClient) {
+      try {
+        const val = await this.redisClient.get(key);
+        if (val !== null) {
+          return parseInt(val, 10);
+        }
+        if (initialOffset > 0) {
+          await this.redisClient.set(key, initialOffset);
+          return initialOffset;
+        }
+      } catch (err: any) {
+        this.logger.warn(`Redis GET counter error for ${key}: ${err.message}`);
+      }
+    }
+
+    const current = (this.memoryCache.get(key)?.value as number);
+    if (current !== undefined) return current;
+    if (initialOffset > 0) {
+      this.memoryCache.set(key, { value: initialOffset, expiresAt: Date.now() + 86400 * 365 * 1000 });
+      return initialOffset;
+    }
+    return 0;
+  }
 }
 

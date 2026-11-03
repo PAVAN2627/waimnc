@@ -10,7 +10,7 @@ import PublicLayout from "@/components/PublicLayout";
 
 import Index from "./pages/Index";
 import { Introduction, History, Structure, Mayor, ChiefOfficer, Corporators } from "./pages/about/AboutPages";
-import { GeneralAdmin, Health, Water, Civil, Planning, Tax, Electrical, Computer, Fire, BirthDeath, Accounts, Records, Disabled, WomenChild, Election } from "./pages/departments/DepartmentPages";
+import { GeneralAdmin, Health, Water, Civil, Planning, Tax, Electrical, Computer, Fire, BirthDeath, Accounts, Records, Disabled, WomenChild, Election, Establishment } from "./pages/departments/DepartmentPages";
 import { PropertyTax, WaterBill, Complaint, BirthCertificate, DeathCertificate, ConstructionPermit } from "./pages/services/ServicePages";
 import { CentralSchemes, StateSchemes, LocalSchemes, PMAY, SwachhBharat } from "./pages/schemes/SchemePages";
 import SchemesPage from "./pages/schemes/SchemesPage";
@@ -67,6 +67,7 @@ const App = () => (
                 <Route path="/departments/disabled" element={<Disabled />} />
                 <Route path="/departments/women" element={<WomenChild />} />
                 <Route path="/departments/election" element={<Election />} />
+                <Route path="/departments/establishment" element={<Establishment />} />
 
                 {/* Services */}
                 <Route path="/services/property-tax" element={<PropertyTax />} />

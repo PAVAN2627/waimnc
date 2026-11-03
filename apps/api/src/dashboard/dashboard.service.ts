@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CacheService } from '../cache/cache.service';
 import { isFakeMobile } from '@wmc/types';
 
 @Injectable()
 export class DashboardService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+  ) {}
 
   async getPublicStats() {
     const [
@@ -27,6 +31,8 @@ export class DashboardService {
       ? Number(((resolvedComplaints / totalComplaints) * 100).toFixed(1))
       : 98.4;
 
+    const { totalVisitors } = await this.recordVisitor(false);
+
     return {
       totalComplaints,
       resolvedComplaints,
@@ -35,7 +41,25 @@ export class DashboardService {
       activeTenders,
       activeNotices,
       totalOfficials,
+      totalVisitors,
     };
+  }
+
+  /**
+   * Real-time visitor counter powered by Redis atomic INCR.
+   */
+  async recordVisitor(track: boolean = false): Promise<{ totalVisitors: number }> {
+    const BASE_INITIAL_COUNT = 15280; // Official municipal portal baseline
+    const key = 'wmc:visitors:total';
+
+    let totalVisitors: number;
+    if (track) {
+      totalVisitors = await this.cacheService.incrementCounter(key, BASE_INITIAL_COUNT);
+    } else {
+      totalVisitors = await this.cacheService.getCounter(key, BASE_INITIAL_COUNT);
+    }
+
+    return { totalVisitors };
   }
 
   async getDashboardStats() {

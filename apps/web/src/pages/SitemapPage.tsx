@@ -91,6 +91,7 @@ const SITEMAP_SECTIONS: SitemapSection[] = [
       { labelMr: "दिव्यांग कल्याण कक्ष", labelEn: "Disability Welfare Cell", url: "/departments/disabled" },
       { labelMr: "महिला व बालकल्याण कक्ष", labelEn: "Women & Child Welfare Cell", url: "/departments/women" },
       { labelMr: "निवडणूक कक्ष", labelEn: "Election Cell", url: "/departments/election" },
+      { labelMr: "आस्थापना विभाग", labelEn: "Establishment Department", url: "/departments/establishment" },
     ],
   },
   {

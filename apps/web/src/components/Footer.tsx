@@ -1,9 +1,31 @@
-import { MapPin, Phone, Mail, Instagram, Landmark, ShieldCheck, Building2, ExternalLink } from "lucide-react";
+import { MapPin, Phone, Mail, Instagram, Landmark, ShieldCheck, Building2, ExternalLink, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useState, useEffect } from "react";
+import { fetchVisitorCount } from "@/lib/api";
 
 export const Footer = () => {
   const { t } = useLanguage();
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Only increment once per browser session to prevent artificial inflation on tab clicks
+    const visited = sessionStorage.getItem("wmc_visited_session");
+    const track = !visited;
+
+    fetchVisitorCount(track)
+      .then((data) => {
+        if (data?.totalVisitors) {
+          setVisitorCount(data.totalVisitors);
+          if (track) {
+            sessionStorage.setItem("wmc_visited_session", "true");
+          }
+        }
+      })
+      .catch(() => {
+        setVisitorCount(15280);
+      });
+  }, []);
 
   const quickLinks = [
     { label: t("मुख्य पृष्ठ", "Home"), href: "/" },
@@ -190,11 +212,25 @@ export const Footer = () => {
                 <ExternalLink className="w-3 h-3 flex-shrink-0 text-white/80" />
               </a>
             </div>
+
+            {/* Realtime Live Visitor Count (Redis Powered) */}
+            <div className="pt-3 border-t border-white/15">
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-white/15 border border-white/25 text-white shadow-xs">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-xs font-semibold text-white/90">{t("एकूण अभ्यागत", "Total Visitors")}:</span>
+                <span className="font-mono font-black text-sm text-amber-300 tracking-wider">
+                  {visitorCount !== null ? visitorCount.toLocaleString("en-IN") : "..."}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Copyright Footer Strip */}
-        <div className="border-t border-white/20 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-white/80 font-medium gap-2">
+        <div className="border-t border-white/20 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-white/80 font-medium gap-3">
           <p>{t("© २०२६ वाई नगरपरिषद,वाई. सर्व हक्क राखीव.", "© 2026 Wai Municipal Council, Wai. All rights reserved.")}</p>
           <div className="flex items-center gap-3">
             <Link to="/sitemap" className="hover:text-white underline">

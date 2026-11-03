@@ -1,7 +1,7 @@
 import PageLayout from "@/components/PageLayout";
 import { Phone, Users, ClipboardList, Clock, Mail, CheckCircle2, ShieldCheck, Building2, ArrowRight, ExternalLink, X, FileText, HelpCircle, CheckSquare, Vote } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { HeartPulse, Droplets, Map, Receipt, Zap, Monitor, Flame, FileCheck, Baby, Accessibility, Wallet, Archive, HardHat, BookOpen } from "lucide-react";
+import { HeartPulse, Droplets, Map, Receipt, Zap, Monitor, Flame, FileCheck, Baby, Accessibility, Wallet, Archive, HardHat, BookOpen, Briefcase } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -454,6 +454,37 @@ const depts: Record<string, DeptData> = {
     hours: "सकाळी 10:00 - संध्याकाळी 5:45",
     hoursEn: "9:45 AM - 6:15 PM",
   },
+  establishment: {
+    icon: Briefcase,
+    title: "आस्थापना विभाग",
+    titleEn: "Establishment Department",
+    head: "मुख्याधिकारी / आस्थापना अधीक्षक",
+    headEn: "Chief Officer / Establishment Superintendent",
+    phone: "02167-220022",
+    email: "waimunicipalcouncil@gmail.com",
+    desc: "नगरपरिषद अधिकारी व कर्मचारी यांच्या सेवाविषयक बाबी, भरती, पदोन्नती, रजा, भविष्य निर्वाह निधी (GPF/NPS), निवृत्तीवेतन, गोपनीय अहवाल, रोस्टर नोंदवही आणि शिस्तभंग विषयक कामकाजाचे व्यवस्थापन.",
+    descEn: "Management of municipal personnel service matters, recruitment, promotions, leaves, provident fund (GPF/NPS), pensions, confidential reports, roster registers, and departmental disciplinary procedures.",
+    services: [
+      "कर्मचारी सेवापुस्तिका व सेवाविषयक बाबी",
+      "पदोन्नती, रजा व रजा रोखीकरण",
+      "पेन्शन व सेवानिवृत्ती लाभ प्रकरणे",
+      "NPS व भविष्य निर्वाह निधी (GPF)",
+      "वैद्यकीय बिल प्रतिपूर्ती",
+      "अनुकंपा भरती व पदभरती प्रक्रिया",
+      "विभागीय चौकशी व शिस्तभंग कामकाज",
+    ],
+    servicesEn: [
+      "Service Book & personnel records management",
+      "Promotions, leave approvals & encashment",
+      "Pension & retirement settlement cases",
+      "NPS & General Provident Fund (GPF)",
+      "Medical bill reimbursements",
+      "Compassionate appointments & recruitment",
+      "Departmental inquiries & disciplinary proceedings",
+    ],
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
+  },
 };
 
 export const GeneralAdmin = () => <DeptPage data={depts["general-admin"]} />;
@@ -471,4 +502,5 @@ export const Records = () => <DeptPage data={depts.records} />;
 export const Disabled = () => <DeptPage data={depts.disabled} />;
 export const WomenChild = () => <DeptPage data={depts.women} />;
 export const Election = () => <DeptPage data={depts.election} />;
+export const Establishment = () => <DeptPage data={depts.establishment} />;
 
