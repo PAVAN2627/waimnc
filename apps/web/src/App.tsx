@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { NoticeProvider } from "@/contexts/NoticeContext";
 import ScrollToTop from "@/components/ScrollToTop";
+import SeoUpdater from "@/components/SeoUpdater";
 import PublicLayout from "@/components/PublicLayout";
 
 import Index from "./pages/Index";
@@ -38,6 +39,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <ScrollToTop />
+            <SeoUpdater />
             <Routes>
               {/* Persistent Public Layout: TopHeader & MainNav stay alive across all pages */}
               <Route element={<PublicLayout />}>
