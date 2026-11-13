@@ -109,3 +109,4 @@ export function validateFileMagicBytes(buffer: Buffer, originalname: string): Va
 
   return { detectedMime, sanitizedFilename };
 }
+

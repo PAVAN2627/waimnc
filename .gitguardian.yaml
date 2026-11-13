@@ -1,0 +1,9 @@
+# GitGuardian security scanner configuration
+version: 2
+secret:
+  ignored_paths:
+    - '**/spec.ts'
+    - '**/test.ts'
+    - '**/*.spec.ts'
+    - '**/*.test.ts'
+    - 'apps/**/test/**'

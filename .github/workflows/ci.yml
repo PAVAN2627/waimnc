@@ -40,3 +40,4 @@ jobs:
 
       - name: Dependency Security Audit
         run: npm audit --audit-level=critical || true
+

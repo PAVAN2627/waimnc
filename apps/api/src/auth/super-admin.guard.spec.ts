@@ -33,3 +33,4 @@ describe('SuperAdminGuard', () => {
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
   });
 });
+

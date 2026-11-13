@@ -46,3 +46,4 @@ describe('validateFileMagicBytes', () => {
     expect(() => validateFileMagicBytes(Buffer.alloc(0), 'empty.pdf')).toThrow(BadRequestException);
   });
 });
+
