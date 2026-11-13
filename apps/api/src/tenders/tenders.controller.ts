@@ -12,7 +12,7 @@ export class TendersController {
     return this.tendersService.getPublicTenders(status, category);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Get('admin/all')
   async getAllAdmin() {
     return this.tendersService.getAllAdminTenders();

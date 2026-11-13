@@ -12,7 +12,7 @@ export class GalleryController {
     return this.galleryService.getPublicGallery(type);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Get('admin/all')
   async getAllAdmin() {
     return this.galleryService.getAllAdmin();

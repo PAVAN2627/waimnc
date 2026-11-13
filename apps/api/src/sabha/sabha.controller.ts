@@ -13,7 +13,7 @@ export class SabhaController {
     return this.sabhaService.getPublicSabha(parsedYear, sabhaType);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Get('admin/all')
   async getAllAdmin(@Query('year') year?: string, @Query('sabhaType') sabhaType?: string) {
     const parsedYear = year ? parseInt(year, 10) : undefined;

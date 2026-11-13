@@ -22,7 +22,10 @@
     "build:api": "npm run build --workspace=@wmc/api",
     "build:all": "turbo run build",
     "prisma:seed": "npm run prisma:seed --workspace=@wmc/api",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

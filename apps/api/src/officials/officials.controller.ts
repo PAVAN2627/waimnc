@@ -12,7 +12,7 @@ export class OfficialsController {
     return this.officialsService.getPublicOfficials();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Get('admin/all')
   async getAllAdmin() {
     return this.officialsService.getAllAdminOfficials();

@@ -12,7 +12,7 @@ export class NewsController {
     return this.newsService.getPublicNews();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Get('admin/all')
   async getAllAdmin() {
     return this.newsService.getAllAdmin();

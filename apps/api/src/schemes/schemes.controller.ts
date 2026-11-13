@@ -12,7 +12,7 @@ export class SchemesController {
     return this.schemesService.getPublicSchemes(category);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Get('admin/all')
   async getAllAdmin() {
     return this.schemesService.getAllAdmin();

@@ -1,0 +1,42 @@
+name: CI & Security Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  audit-and-test:
+    name: Lint, Test & Build Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm --prefix apps/api run prisma:generate
+
+      - name: Run Automated Vitest Suites (Auth, RBAC, Storage Security)
+        run: npm test
+
+      - name: Build All Monorepo Workspaces
+        run: |
+          npm --prefix packages/types run build
+          npm run build:web
+          npm run build:admin
+          npm run build:employee
+          npm --prefix apps/api run build
+
+      - name: Dependency Security Audit
+        run: npm audit --audit-level=critical || true

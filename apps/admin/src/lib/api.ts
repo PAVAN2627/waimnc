@@ -76,10 +76,8 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
   headers.set("X-Portal-Type", "admin");
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("wmc_admin_token") : null;
-  if (token && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
+  // Authentication uses secure HttpOnly cookies exclusively (credentials: "include")
+  // Browser localStorage token storage is removed to prevent XSS credential theft.
 
   const response = await fetch(url, {
     ...options,
@@ -113,8 +111,9 @@ export async function loginAdmin(email: string, password: string): Promise<{ use
     method: "POST",
     body: JSON.stringify({ email, password, portal: "admin" }),
   });
-  if (result.accessToken && typeof window !== "undefined") {
-    localStorage.setItem("wmc_admin_token", result.accessToken);
+  // Clear any legacy localStorage token to prevent XSS leakage
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("wmc_admin_token");
   }
   return result;
 }

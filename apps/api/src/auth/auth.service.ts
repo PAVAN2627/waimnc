@@ -120,28 +120,41 @@ export class AuthService {
     };
   }
 
+  private isProvisioningAdmin = false;
+
   async registerInitialAdmin(data: { name: string; email: string; password: string }) {
-    const count = await this.prisma.admin.count();
-    if (count > 0) {
-      throw new BadRequestException('Administrator already configured.');
+    if (this.isProvisioningAdmin) {
+      throw new BadRequestException('Administrator setup is currently in progress. Please retry.');
     }
+    this.isProvisioningAdmin = true;
 
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(data.password, salt);
+    try {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(data.password, salt);
 
-    const admin = await (this.prisma.admin as any).create({
-      data: {
-        name: data.name || 'System Administrator',
-        email: data.email,
-        passwordHash,
-        role: 'SUPER_ADMIN',
-        department: null,
-        departments: [],
-        accessScope: 'all',
-      },
-    });
+      const admin = await this.prisma.$transaction(async (tx) => {
+        const count = await tx.admin.count();
+        if (count > 0) {
+          throw new BadRequestException('Administrator already configured.');
+        }
 
-    return this.login(admin);
+        return (tx.admin as any).create({
+          data: {
+            name: data.name || 'System Administrator',
+            email: data.email,
+            passwordHash,
+            role: 'SUPER_ADMIN',
+            department: null,
+            departments: [],
+            accessScope: 'all',
+          },
+        });
+      });
+
+      return this.login(admin);
+    } finally {
+      this.isProvisioningAdmin = false;
+    }
   }
 
   async updateProfile(id: string, name: string) {

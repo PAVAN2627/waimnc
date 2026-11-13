@@ -6,10 +6,12 @@ import {
   Query,
   Body,
   Res,
+  Req,
   UploadedFile,
   UseInterceptors,
   UseGuards,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { Readable } from 'stream';
@@ -18,15 +20,16 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService, StorageFolder } from './storage.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SuperAdminGuard } from '../auth/super-admin.guard';
+import { validateFileMagicBytes } from './file-validation';
 
 @Controller('storage')
 export class StorageController {
   constructor(private readonly storageService: StorageService) {}
 
   /**
-   * Upload an asset to Vercel Blob storage.
+   * Upload an asset to Cloudflare R2 or Vercel Blob storage.
    * Accepts multipart/form-data with field name 'file' and optional 'folder' query/body.
-   * Protected with Admin JWT guard.
+   * Protected with Admin JWT guard and strict role + MIME/magic byte validation.
    */
   @UseGuards(JwtAuthGuard)
   @Post('upload')
@@ -35,6 +38,7 @@ export class StorageController {
   }))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
+    @Req() req: any,
     @Query('folder') queryFolder?: StorageFolder,
     @Body('folder') bodyFolder?: StorageFolder,
   ) {
@@ -42,12 +46,24 @@ export class StorageController {
       throw new BadRequestException('File is required in multipart form data (field name: "file")');
     }
     const folder = queryFolder || bodyFolder || 'general';
+
+    // Enforce role separation: Only SUPER_ADMIN can upload to municipal admin assets
+    const adminFolders: StorageFolder[] = ['tenders', 'officials', 'notices', 'schemes', 'routine', 'sabha', 'gallery'];
+    if (adminFolders.includes(folder) && req.user?.role !== 'SUPER_ADMIN') {
+      throw new ForbiddenException('केवळ मुख्य प्रशासकाला (Super Admin) या फोल्डरमध्ये फाईल अपलोड करण्याची परवानगी आहे.');
+    }
+
+    // Inspect file buffer magic bytes (file signature) - do not trust client MIME type
+    const { detectedMime, sanitizedFilename } = validateFileMagicBytes(file.buffer, file.originalname);
+    file.mimetype = detectedMime;
+    file.originalname = sanitizedFilename;
+
     return this.storageService.uploadFile(file, folder);
   }
 
   /**
-   * Public endpoint for citizens to upload grievance photos/attachments to Vercel Blob.
-   * Rate limited to prevent abuse.
+   * Public endpoint for citizens to upload grievance photos/attachments.
+   * Protected with rate limiting and strict magic-byte validation.
    */
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('upload-grievance')
@@ -58,15 +74,20 @@ export class StorageController {
     if (!file) {
       throw new BadRequestException('File is required in multipart form data (field name: "file")');
     }
+
+    // Public citizen upload: Strict magic byte validation
+    const { detectedMime, sanitizedFilename } = validateFileMagicBytes(file.buffer, file.originalname);
+    file.mimetype = detectedMime;
+    file.originalname = sanitizedFilename;
+
     return this.storageService.uploadFile(file, 'grievances');
   }
 
   /**
    * Request client upload token for direct browser upload up to 500 MB.
-   * Completely bypasses any 4.5 MB serverless body limits.
-   * Protected with Admin JWT guard.
+   * Restricted strictly to Super Administrators.
    */
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Post('client-token')
   async getClientUploadToken(
     @Body('filename') filename: string,

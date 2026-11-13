@@ -12,7 +12,7 @@ export class ProjectsController {
     return this.projectsService.getPublicProjects();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Get('admin/all')
   async getAllAdmin() {
     return this.projectsService.getAllAdmin();

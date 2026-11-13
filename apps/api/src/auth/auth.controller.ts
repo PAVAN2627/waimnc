@@ -2,8 +2,11 @@ import { Controller, Post, Patch, Delete, Body, Res, Get, UseGuards, Req, Param,
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsBoolean, IsArray } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsBoolean, IsArray, Matches } from 'class-validator';
 import { Throttle } from '@nestjs/throttler';
+
+export const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+export const STRONG_PASSWORD_MESSAGE = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*).';
 
 export class LoginDto {
   @IsEmail()
@@ -27,7 +30,8 @@ export class CreateStaffDto {
   email: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
+  @Matches(STRONG_PASSWORD_REGEX, { message: STRONG_PASSWORD_MESSAGE })
   password: string;
 
   @IsString()
@@ -74,6 +78,8 @@ export class UpdateStaffDto {
 
   @IsString()
   @IsOptional()
+  @MinLength(8)
+  @Matches(STRONG_PASSWORD_REGEX, { message: STRONG_PASSWORD_MESSAGE })
   password?: string;
 }
 
@@ -87,6 +93,7 @@ export class InitialAdminDto {
 
   @IsString()
   @MinLength(8)
+  @Matches(STRONG_PASSWORD_REGEX, { message: STRONG_PASSWORD_MESSAGE })
   password: string;
 }
 
@@ -103,6 +110,7 @@ export class ChangePasswordDto {
 
   @IsString()
   @MinLength(8)
+  @Matches(STRONG_PASSWORD_REGEX, { message: STRONG_PASSWORD_MESSAGE })
   newPassword: string;
 }
 

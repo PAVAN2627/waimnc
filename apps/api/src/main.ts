@@ -30,34 +30,58 @@ async function bootstrap() {
   // Global API route prefix
   app.setGlobalPrefix('api');
 
-  // Strict CORS setup
-  const allowedOrigins = [
-    'http://localhost',
-    'http://localhost:80',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5175',
-    'http://130.210.21.72',
-    'https://130.210.21.72',
+  // Strict, explicitly approved production and development origins
+  const approvedProductionOrigins = new Set([
     'https://www.waimunicipalcouncil.org',
     'https://waimunicipalcouncil.org',
     'https://admin.waimunicipalcouncil.org',
     'https://employee.waimunicipalcouncil.org',
     'https://api.waimunicipalcouncil.org',
+    'https://130.210.21.72',
+    'http://130.210.21.72',
+  ]);
+
+  const developmentOrigins = [
+    'http://localhost',
+    'http://localhost:80',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
+    'http://127.0.0.1:5175',
   ];
+
+  const envCustomOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+  const isProduction = process.env.NODE_ENV === 'production';
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        /^https:\/\/([a-zA-Z0-9-]+\.)?waimunicipalcouncil\.org$/.test(origin) ||
-        /^https:\/\/([a-zA-Z0-9-]+\.)?vercel\.app$/.test(origin)
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error('Blocked by CORS policy'));
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) {
+        return callback(null, true);
       }
+
+      if (approvedProductionOrigins.has(origin)) {
+        return callback(null, true);
+      }
+
+      if (envCustomOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      if (!isProduction && developmentOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      logger.warn(`CORS blocked unauthorized origin: ${origin}`);
+      return callback(new Error('Blocked by CORS policy: Origin not allowed'), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
