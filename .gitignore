@@ -1,4 +1,7 @@
-# Logs
+# Persistent Runtime Data
+data/
+**/data/*.json
+apps/api/data/
 logs
 *.log
 npm-debug.log*

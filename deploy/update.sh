@@ -26,6 +26,14 @@ npm run build:employee
 echo "⚡ 3. Building NestJS API..."
 npm --prefix apps/api run build
 
+echo "⚡ 3.5 Ensuring Redis & Persistent Storage..."
+mkdir -p apps/api/data
+if command -v systemctl &> /dev/null; then
+    if ! systemctl is-active --quiet redis-server 2>/dev/null; then
+        sudo systemctl start redis-server 2>/dev/null || true
+    fi
+fi
+
 echo "🔄 4. Restarting API via PM2 (0.2s)..."
 pm2 restart wmc-api
 

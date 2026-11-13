@@ -1,6 +1,8 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface CacheEntry<T> {
   value: T;
@@ -15,50 +17,101 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   private readonly inFlight = new Map<string, Promise<any>>();
   private isRedisEnabled = false;
   private cleanupTimer: NodeJS.Timeout | null = null;
+  private readonly dataDir: string;
+  private readonly statsFilePath: string;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+    this.dataDir = path.resolve(process.cwd(), 'data');
+    this.statsFilePath = path.join(this.dataDir, 'visitor-stats.json');
+  }
 
-  onModuleInit() {
+  /**
+   * Reads persistent counter backup from disk so counts never reset on PM2 restarts.
+   */
+  private loadPersistedCounters(): Record<string, number> {
+    try {
+      if (fs.existsSync(this.statsFilePath)) {
+        const raw = fs.readFileSync(this.statsFilePath, 'utf-8');
+        return JSON.parse(raw);
+      }
+    } catch (err: any) {
+      this.logger.warn(`Could not read persisted stats: ${err.message}`);
+    }
+    return {};
+  }
+
+  /**
+   * Persists counter to local disk file so it survives server reboots and PM2 restarts.
+   */
+  private savePersistedCounter(key: string, value: number) {
+    try {
+      if (!fs.existsSync(this.dataDir)) {
+        fs.mkdirSync(this.dataDir, { recursive: true });
+      }
+      let existing: Record<string, number> = {};
+      if (fs.existsSync(this.statsFilePath)) {
+        try {
+          existing = JSON.parse(fs.readFileSync(this.statsFilePath, 'utf-8'));
+        } catch {
+          existing = {};
+        }
+      }
+      existing[key] = value;
+      fs.writeFileSync(this.statsFilePath, JSON.stringify(existing, null, 2), 'utf-8');
+    } catch (err: any) {
+      this.logger.warn(`Could not persist counter ${key} to disk: ${err.message}`);
+    }
+  }
+
+  async onModuleInit() {
+    // 1. Restore any previously saved count from persistent disk
+    const persisted = this.loadPersistedCounters();
+    for (const [key, val] of Object.entries(persisted)) {
+      this.memoryCache.set(key, { value: val, expiresAt: Date.now() + 86400 * 365 * 1000 });
+      this.logger.log(`Restored persistent counter for ${key}: ${val}`);
+    }
+
+    // 2. Connect to Redis (attempt local 127.0.0.1:6379 by default if no env specified)
     const redisUrl = this.configService.get<string>('REDIS_URL');
-    const redisHost = this.configService.get<string>('REDIS_HOST');
+    const redisHost = this.configService.get<string>('REDIS_HOST') || '127.0.0.1';
     const redisPort = parseInt(this.configService.get<string>('REDIS_PORT') || '6379', 10);
     const redisPassword = this.configService.get<string>('REDIS_PASSWORD') || undefined;
 
-    if (redisUrl || redisHost) {
-      try {
-        if (redisUrl) {
-          this.redisClient = new Redis(redisUrl, {
-            maxRetriesPerRequest: 2,
-            enableReadyCheck: true,
-            lazyConnect: true,
-          });
-        } else {
-          this.redisClient = new Redis({
-            host: redisHost,
-            port: redisPort,
-            password: redisPassword,
-            maxRetriesPerRequest: 2,
-            enableReadyCheck: true,
-            lazyConnect: true,
-          });
-        }
-
-        this.redisClient.connect().then(() => {
-          this.isRedisEnabled = true;
-          this.logger.log('Redis Cache connection established successfully');
-        }).catch((err) => {
-          this.logger.warn(`Redis connection failed: ${err.message}. Operating in high-speed In-Memory cache mode.`);
-          this.isRedisEnabled = false;
+    try {
+      if (redisUrl) {
+        this.redisClient = new Redis(redisUrl, {
+          maxRetriesPerRequest: 2,
+          enableReadyCheck: true,
+          lazyConnect: true,
         });
-
-        this.redisClient.on('error', (err) => {
-          this.logger.warn(`Redis error: ${err.message}`);
+      } else {
+        this.redisClient = new Redis({
+          host: redisHost,
+          port: redisPort,
+          password: redisPassword,
+          maxRetriesPerRequest: 2,
+          enableReadyCheck: true,
+          lazyConnect: true,
+          connectTimeout: 2000,
         });
-      } catch (err: any) {
-        this.logger.warn(`Failed to initialize Redis: ${err.message}. Fallback to In-Memory cache.`);
       }
-    } else {
-      this.logger.log('No REDIS_URL found. Operating in built-in High-Speed In-Memory Cache mode (Hot-Key Protected).');
+
+      await this.redisClient.connect();
+      this.isRedisEnabled = true;
+      this.logger.log('Redis Cache connection established successfully');
+
+      // Sync Redis with persistent disk if Redis is empty or lower
+      for (const [key, val] of Object.entries(persisted)) {
+        const redisValStr = await this.redisClient.get(key);
+        const redisVal = redisValStr ? parseInt(redisValStr, 10) : 0;
+        if (val > redisVal) {
+          await this.redisClient.set(key, val);
+          this.logger.log(`Synced Redis ${key} to disk value: ${val}`);
+        }
+      }
+    } catch (err: any) {
+      this.logger.warn(`Redis connection failed (${err.message}). Operating in durable File-Backed In-Memory cache mode.`);
+      this.isRedisEnabled = false;
     }
 
     // Background garbage collection for expired in-memory entries every 60 seconds
@@ -193,26 +246,34 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Atomic increment for real-time counters (e.g. Visitor Count) with Redis INCR support.
+   * Atomic increment for real-time counters (e.g. Visitor Count) with Redis INCR support
+   * and persistent disk synchronization so counts NEVER reset on server restarts.
    */
   async incrementCounter(key: string, initialOffset: number = 0): Promise<number> {
+    const persisted = this.loadPersistedCounters();
+    const diskVal = persisted[key] || 0;
+    const baseOffset = Math.max(initialOffset, diskVal);
+
     if (this.isRedisEnabled && this.redisClient) {
       try {
         const exists = await this.redisClient.exists(key);
-        if (!exists && initialOffset > 0) {
-          await this.redisClient.set(key, initialOffset);
+        if (!exists && baseOffset > 0) {
+          await this.redisClient.set(key, baseOffset);
         }
         const newVal = await this.redisClient.incr(key);
+        this.savePersistedCounter(key, newVal);
         return newVal;
       } catch (err: any) {
         this.logger.warn(`Redis INCR error for ${key}: ${err.message}`);
       }
     }
 
-    // In-Memory Fallback
-    const current = (this.memoryCache.get(key)?.value as number) || initialOffset;
+    // Durable In-Memory Fallback backed by disk persistence
+    const memVal = (this.memoryCache.get(key)?.value as number) || 0;
+    const current = Math.max(baseOffset, memVal);
     const next = current + 1;
     this.memoryCache.set(key, { value: next, expiresAt: Date.now() + 86400 * 365 * 1000 });
+    this.savePersistedCounter(key, next);
     return next;
   }
 
@@ -220,26 +281,38 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
    * Get current counter value without incrementing.
    */
   async getCounter(key: string, initialOffset: number = 0): Promise<number> {
+    const persisted = this.loadPersistedCounters();
+    const diskVal = persisted[key] || 0;
+    const baseOffset = Math.max(initialOffset, diskVal);
+
     if (this.isRedisEnabled && this.redisClient) {
       try {
         const val = await this.redisClient.get(key);
         if (val !== null) {
-          return parseInt(val, 10);
+          const num = parseInt(val, 10);
+          this.savePersistedCounter(key, num);
+          return num;
         }
-        if (initialOffset > 0) {
-          await this.redisClient.set(key, initialOffset);
-          return initialOffset;
+        if (baseOffset > 0) {
+          await this.redisClient.set(key, baseOffset);
+          this.savePersistedCounter(key, baseOffset);
+          return baseOffset;
         }
       } catch (err: any) {
         this.logger.warn(`Redis GET counter error for ${key}: ${err.message}`);
       }
     }
 
+    if (diskVal > 0) {
+      return diskVal;
+    }
+
     const current = (this.memoryCache.get(key)?.value as number);
     if (current !== undefined) return current;
-    if (initialOffset > 0) {
-      this.memoryCache.set(key, { value: initialOffset, expiresAt: Date.now() + 86400 * 365 * 1000 });
-      return initialOffset;
+    if (baseOffset > 0) {
+      this.memoryCache.set(key, { value: baseOffset, expiresAt: Date.now() + 86400 * 365 * 1000 });
+      this.savePersistedCounter(key, baseOffset);
+      return baseOffset;
     }
     return 0;
   }
