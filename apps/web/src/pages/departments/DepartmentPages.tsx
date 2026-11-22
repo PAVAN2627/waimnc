@@ -346,7 +346,7 @@ const depts: Record<string, DeptData> = {
   },
   tax: {
     icon: Receipt, title: "कर व मूल्यांकन विभाग", titleEn: "Tax and Assessment Department",
-    head: "श्री. बाळासाहेब कांबळे", headEn: "Mr. Balasaheb Kambale", phone: "9623417205", email: "bgkamble11@gmail.com",
+    head: "श्री. वैभव गोळे", headEn: "Mr. Vaibhav Gole", phone: "9623025193", email: "waimunicipalcouncil@gmail.com",
     desc: "महाराष्ट्र नगरपरिषदा अधिनियम १९६५ कलम १०५ ते १२७ व १४९ ते १७२ नुसार इमारतींवर कर आकारणी, आकारणी रजिस्टर, मालमत्ता कर वसुली, बिल वितरण, मागणी नोटीसा व जप्ती कारवाई.",
     descEn: "Property tax assessment under Maharashtra Municipal Councils Act 1965 sections 105-127 and 149-172. Maintaining assessment registers, collecting property tax, issuing bills, demand notices and seizure action.",
     services: ["मालमत्ता कर आकारणी", "मालमत्ता कर भरणा", "कर दाखला", "नवीन मालमत्ता नोंदणी", "थकबाकी वसुली", "दर चतुर्थ वार्षिक फेर आकारणी", "कर माफी अर्ज"],
