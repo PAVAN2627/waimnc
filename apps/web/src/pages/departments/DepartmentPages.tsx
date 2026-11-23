@@ -10,6 +10,7 @@ interface DeptData {
   icon: LucideIcon;
   title: string; titleEn: string;
   head: string; headEn: string;
+  role?: string; roleEn?: string;
   phone: string; email?: string;
   desc: string; descEn: string;
   services: string[]; servicesEn: string[];
@@ -216,7 +217,7 @@ const DeptPage = ({ data }: { data: DeptData }) => {
                     </div>
                     <div>
                       <h3 className="font-extrabold text-base text-foreground">{t(data.head, data.headEn)}</h3>
-                      <p className="text-xs text-muted-foreground font-semibold mt-0.5">{t("विभागीय अधिकारी", "Departmental Officer")}</p>
+                      <p className="text-xs text-muted-foreground font-semibold mt-0.5">{t(data.role || "प्रशासकीय अधिकारी", data.roleEn || "Administrative Officer")}</p>
                     </div>
                   </div>
 
@@ -301,7 +302,9 @@ const DeptPage = ({ data }: { data: DeptData }) => {
 const depts: Record<string, DeptData> = {
   "general-admin": {
     icon: Building2, title: "सामान्य प्रशासन विभाग", titleEn: "General Administration Department",
-    head: "श्री. हर्षवर्धन मोहिते", headEn: "Shri. Harshvardhan Mohite", phone: "8149225859", email: "harshamohite1234@gmail.com",
+    head: "श्री. हर्षवर्धन शिवाजीराव मोहिते", headEn: "Mr. Harshvardhan Shivajirao Mohite",
+    role: "कर व प्रशासकीय अधिकारी", roleEn: "Tax and Administrative Officer",
+    phone: "8149225859", email: "harshamohite1234@gmail.com",
     desc: "नगरपरिषदेचा प्रशासकीय व कार्यात्मक कारभार महाराष्ट्र नगरपरिषदा अधिनियम १९६५ नुसार चालविणे. नगरपरिषदेच्या सर्व ठरावांची अमलबजावणी, लेखे व अभिलेखे ठेवणे, अंदाजपत्रक तयार करणे व सर्व कर्मचाऱ्यांवर नियंत्रण ठेवणे.",
     descEn: "Administration of the municipality under Maharashtra Municipal Councils Act 1965. Implementation of all resolutions, maintaining accounts and records, preparing budgets and controlling all staff.",
     services: ["नगरपरिषद ठरावांची अमलबजावणी", "लेखे व अभिलेखे व्यवस्थापन", "वार्षिक अंदाजपत्रक तयार करणे", "कर्मचारी नियंत्रण व व्यवस्थापन", "माहिती अधिकार (RTI) अर्ज", "सभा आयोजन व इतिवृत्त", "ना-हरकत दाखले"],
@@ -346,7 +349,9 @@ const depts: Record<string, DeptData> = {
   },
   tax: {
     icon: Receipt, title: "कर व मूल्यांकन विभाग", titleEn: "Tax and Assessment Department",
-    head: "श्री. वैभव गोळे", headEn: "Mr. Vaibhav Gole", phone: "9623025193", email: "waimunicipalcouncil@gmail.com",
+    head: "श्री. वैभव गोळे", headEn: "Mr. Vaibhav Gole",
+    role: "प्रशासकीय अधिकारी", roleEn: "Administrative Officer",
+    phone: "9623025193", email: "waimunicipalcouncil@gmail.com",
     desc: "महाराष्ट्र नगरपरिषदा अधिनियम १९६५ कलम १०५ ते १२७ व १४९ ते १७२ नुसार इमारतींवर कर आकारणी, आकारणी रजिस्टर, मालमत्ता कर वसुली, बिल वितरण, मागणी नोटीसा व जप्ती कारवाई.",
     descEn: "Property tax assessment under Maharashtra Municipal Councils Act 1965 sections 105-127 and 149-172. Maintaining assessment registers, collecting property tax, issuing bills, demand notices and seizure action.",
     services: ["मालमत्ता कर आकारणी", "मालमत्ता कर भरणा", "कर दाखला", "नवीन मालमत्ता नोंदणी", "थकबाकी वसुली", "दर चतुर्थ वार्षिक फेर आकारणी", "कर माफी अर्ज"],

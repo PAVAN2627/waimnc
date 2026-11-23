@@ -240,23 +240,6 @@ export const Structure = () => {
               );
             })}
           </div>
-
-          <div className="flex justify-center"><div className="w-0.5 h-8 bg-border" /></div>
-
-          {/* Level 3 Committees */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { title: t("स्थायी समिती", "Standing Committee"), desc: t("आर्थिक नियोजन", "Finance & Policy") },
-              { title: t("बांधकाम समिती", "Works Committee"), desc: t("शहर पायाभूत विकास", "Civil Works") },
-              { title: t("आरोग्य समिती", "Health Committee"), desc: t("स्वच्छता व आरोग्य", "Health & Sanitation") },
-              { title: t("शिक्षण समिती", "Education Committee"), desc: t("शालेय उपक्रम", "Education & Culture") },
-            ].map((item, idx) => (
-              <div key={idx} className="bg-card rounded-2xl p-4 border border-border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all text-center">
-                <h3 className="font-bold text-sm text-foreground">{item.title}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </PageLayout>
