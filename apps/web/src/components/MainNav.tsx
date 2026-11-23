@@ -65,6 +65,7 @@ const getMenuItems = (t: (mr: string, en: string) => string): MenuItem[] => [
   {
     label: t("योजना", "Schemes"),
     children: [
+      { label: t("सर्व योजना (All Schemes)", "All Schemes"), href: "/schemes/all" },
       { label: t("केंद्र शासन योजना", "Central Govt. Schemes"), href: "/schemes/central" },
       { label: t("राज्य शासन योजना", "State Govt. Schemes"), href: "/schemes/state" },
       { label: t("नगरपालिकेच्या योजना", "Municipal Schemes"), href: "/schemes/local" },

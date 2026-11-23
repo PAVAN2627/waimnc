@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ExternalLink, BookOpen, CheckCircle2, ShieldCheck, ArrowRight, Search, FileText, Gift, Award, Info, X, Send, Copy, Check, LoaderCircle } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,10 +16,23 @@ const CATEGORIES: { value: SchemeCategory | "all"; labelMr: string; labelEn: str
 
 const SchemesPage = () => {
   const { t, language } = useLanguage();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryCat = searchParams.get("category");
+  const initialCategory: SchemeCategory | "all" =
+    queryCat && ["central", "state", "local"].includes(queryCat)
+      ? (queryCat as SchemeCategory)
+      : "all";
+
   const [schemes, setSchemes] = useState<SchemeRecord[]>([]);
-  const [activeCategory, setActiveCategory] = useState<SchemeCategory | "all">("all");
+  const [activeCategory, setActiveCategory] = useState<SchemeCategory | "all">(initialCategory);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchemeForApply, setSelectedSchemeForApply] = useState<SchemeRecord | null>(null);
+
+  useEffect(() => {
+    if (queryCat && ["central", "state", "local", "all"].includes(queryCat)) {
+      setActiveCategory(queryCat as any);
+    }
+  }, [queryCat]);
 
   useEffect(() => subscribeToActiveSchemes(setSchemes), []);
 
@@ -96,7 +109,14 @@ const SchemesPage = () => {
                   {CATEGORIES.map((cat) => (
                     <button
                       key={cat.value}
-                      onClick={() => setActiveCategory(cat.value)}
+                      onClick={() => {
+                        setActiveCategory(cat.value);
+                        if (cat.value === "all") {
+                          setSearchParams({}, { replace: true });
+                        } else {
+                          setSearchParams({ category: cat.value }, { replace: true });
+                        }
+                      }}
                       className={`px-4 py-2 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 shadow-sm ${
                         activeCategory === cat.value
                           ? "gov-gradient text-white shadow-md scale-105"

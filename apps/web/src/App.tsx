@@ -13,7 +13,19 @@ import Index from "./pages/Index";
 import { Introduction, History, Structure, Mayor, ChiefOfficer, Corporators } from "./pages/about/AboutPages";
 import { GeneralAdmin, Health, Water, Civil, Planning, Tax, Electrical, Computer, Fire, BirthDeath, Accounts, Records, Disabled, WomenChild, Election, Establishment } from "./pages/departments/DepartmentPages";
 import { PropertyTax, WaterBill, Complaint, BirthCertificate, DeathCertificate, ConstructionPermit } from "./pages/services/ServicePages";
-import { CentralSchemes, StateSchemes, LocalSchemes, PMAY, SwachhBharat } from "./pages/schemes/SchemePages";
+import {
+  CentralSchemes,
+  StateSchemes,
+  LocalSchemes,
+  PMAY,
+  SwachhBharat,
+  AMRUT,
+  PMSVANidhi,
+  SanjayGandhi,
+  Shravanbal,
+  DivyangKalyan,
+  MahilaBal,
+} from "./pages/schemes/SchemePages";
 import SchemesPage from "./pages/schemes/SchemesPage";
 import Tenders from "./pages/Tenders";
 import GovtPortals from "./pages/GovtPortals";
@@ -85,6 +97,12 @@ const App = () => (
                 <Route path="/schemes/local" element={<LocalSchemes />} />
                 <Route path="/schemes/pmay" element={<PMAY />} />
                 <Route path="/schemes/swachh-bharat" element={<SwachhBharat />} />
+                <Route path="/schemes/amrut" element={<AMRUT />} />
+                <Route path="/schemes/pmsvanidhi" element={<PMSVANidhi />} />
+                <Route path="/schemes/sanjay-gandhi" element={<SanjayGandhi />} />
+                <Route path="/schemes/shravanbal" element={<Shravanbal />} />
+                <Route path="/schemes/divyang" element={<DivyangKalyan />} />
+                <Route path="/schemes/mahila-bal" element={<MahilaBal />} />
                 <Route path="/schemes/all" element={<SchemesPage />} />
 
                 {/* Civic & City Information */}
