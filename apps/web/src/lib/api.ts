@@ -115,6 +115,10 @@ export async function trackComplaint(trackingId: string, mobile?: string) {
   return request<any>(`/complaints/track/${encodeURIComponent(trackingId.trim())}${qStr}`);
 }
 
+export async function trackComplaintsByMobile(mobile: string) {
+  return request<any[]>(`/complaints/by-mobile/${encodeURIComponent(mobile.trim())}`);
+}
+
 // Upload Citizen Grievance Attachment directly to Vercel Blob
 export async function uploadGrievanceMedia(file: File): Promise<{ url: string; viewUrl: string; pathname: string; filename: string }> {
   const formData = new FormData();

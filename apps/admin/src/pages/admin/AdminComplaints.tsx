@@ -27,7 +27,7 @@ import {
   type ComplaintStatus,
   type ComplaintAttachment,
 } from "@/lib/complaints";
-import { fetchAdminComplaints } from "@/lib/api";
+import { fetchAdminComplaints, uploadMedia } from "@/lib/api";
 
 const statusColors: Record<ComplaintStatus, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -48,6 +48,12 @@ const AdminComplaints = () => {
   const [complaints, setComplaints] = useState<ComplaintRecord[]>([]);
   const [selected, setSelected] = useState<ComplaintRecord | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [resolveModalOpen, setResolveModalOpen] = useState(false);
+  const [targetResolveComplaint, setTargetResolveComplaint] = useState<ComplaintRecord | null>(null);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [proofNotes, setProofNotes] = useState<string>("");
+  const [uploadingProof, setUploadingProof] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [wardFilter, setWardFilter] = useState<string>("all");
@@ -105,15 +111,48 @@ const AdminComplaints = () => {
     resolved: t("निराकरण", "Resolved"),
   };
 
-  const changeStatus = async (id: string, status: ComplaintStatus) => {
+  const changeStatus = async (
+    id: string,
+    status: ComplaintStatus,
+    resolutionProofUrl?: string,
+    resolutionProofNotes?: string
+  ) => {
     try {
       setUpdating(id);
-      await updateComplaintStatus(id, status);
+      await updateComplaintStatus(id, status, resolutionProofUrl, resolutionProofNotes);
       setComplaints((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, status, updatedAt: Date.now() } : c))
+        prev.map((c) =>
+          c.id === id
+            ? {
+                ...c,
+                status,
+                updatedAt: Date.now(),
+                resolutionProof: resolutionProofUrl
+                  ? {
+                      url: resolutionProofUrl,
+                      notes: resolutionProofNotes,
+                      resolvedAt: new Date().toISOString(),
+                    }
+                  : c.resolutionProof,
+              }
+            : c
+        )
       );
       setSelected((prev) =>
-        prev && prev.id === id ? { ...prev, status, updatedAt: Date.now() } : prev
+        prev && prev.id === id
+          ? {
+              ...prev,
+              status,
+              updatedAt: Date.now(),
+              resolutionProof: resolutionProofUrl
+                ? {
+                    url: resolutionProofUrl,
+                    notes: resolutionProofNotes,
+                    resolvedAt: new Date().toISOString(),
+                  }
+                : prev.resolutionProof,
+            }
+          : prev
       );
       toast({
         title: t("यशस्वी", "Success"),
@@ -127,6 +166,41 @@ const AdminComplaints = () => {
       });
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const handleOpenResolveModal = (c: ComplaintRecord) => {
+    setTargetResolveComplaint(c);
+    setProofFile(null);
+    setProofPreview(c.resolutionProof?.url || null);
+    setProofNotes(c.resolutionProof?.notes || "");
+    setResolveModalOpen(true);
+  };
+
+  const handleConfirmResolve = async () => {
+    if (!targetResolveComplaint) return;
+    try {
+      setUploadingProof(true);
+      let proofUrl = targetResolveComplaint.resolutionProof?.url;
+      if (proofFile) {
+        const uploadRes = await uploadMedia(proofFile, "grievances");
+        proofUrl = uploadRes.url;
+      }
+      await changeStatus(targetResolveComplaint.id, "resolved", proofUrl, proofNotes);
+      setResolveModalOpen(false);
+      setProofFile(null);
+      setProofPreview(null);
+      setProofNotes("");
+      setTargetResolveComplaint(null);
+    } catch (err) {
+      console.error("Resolution update error:", err);
+      toast({
+        title: t("त्रुटी", "Error"),
+        description: t("फोटो अपलोड किंवा स्थिती बदलण्यात त्रुटी आली.", "Failed to upload proof or update status."),
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingProof(false);
     }
   };
 
@@ -636,6 +710,60 @@ const AdminComplaints = () => {
                   </div>
                 </div>
               )}
+              {/* Resolution Proof Photo Display (If marked Resolved) */}
+              {selected.status === "resolved" && (
+                <div className="space-y-2 pt-2 border-t">
+                  {selected.resolutionProof?.url ? (
+                    <div className="p-4 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/30 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs md:text-sm text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          {t("काम पूर्ण झाल्याचा पुरावा / निराकरण छायाचित्र", "Resolution Proof Photo")}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs font-bold border-emerald-500 text-emerald-700 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
+                          onClick={() => handleOpenResolveModal(selected)}
+                        >
+                          <ImageIcon className="w-3.5 h-3.5 mr-1" />
+                          {t("फोटो बदला", "Change Photo")}
+                        </Button>
+                      </div>
+                      <div className="bg-card/70 rounded-xl p-2 border border-emerald-500/20 max-w-sm mx-auto text-center">
+                        <a href={selected.resolutionProof.url} target="_blank" rel="noopener noreferrer" className="block relative group overflow-hidden rounded-lg">
+                          <img src={selected.resolutionProof.url} alt="Proof" className="max-h-56 w-full object-contain mx-auto group-hover:scale-105 transition-transform" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>{t("पूर्ण आकारात पहा", "View Full")}</span>
+                          </div>
+                        </a>
+                      </div>
+                      {selected.resolutionProof.notes && (
+                        <p className="text-xs text-foreground bg-card/60 p-2 rounded-lg italic border border-emerald-500/20">
+                          📝 {selected.resolutionProof.notes}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+                      <span className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+                        {t("निराकरण पुरावा फोटो जोडलेला नाही.", "No resolution proof photo attached.")}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs font-bold border-amber-500 text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-950/50"
+                        onClick={() => handleOpenResolveModal(selected)}
+                      >
+                        <ImageIcon className="w-3.5 h-3.5 mr-1" />
+                        {t("फोटो जोडा (पर्यायी)", "Add Photo (Optional)")}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-2 flex-wrap items-center pt-2 border-t">
                 <Button
                   size="sm"
@@ -663,7 +791,7 @@ const AdminComplaints = () => {
                   variant={selected.status === "resolved" ? "default" : "outline"}
                   className={selected.status === "resolved" ? "bg-green-600 hover:bg-green-700 text-white font-bold" : "border-green-500 text-green-700 hover:bg-green-50"}
                   disabled={updating === selected.id}
-                  onClick={() => changeStatus(selected.id, "resolved")}
+                  onClick={() => handleOpenResolveModal(selected)}
                 >
                   <CheckCircle className="h-3.5 w-3.5 mr-1" />
                   {t("निराकरण", "Resolved")}
@@ -750,6 +878,157 @@ const AdminComplaints = () => {
                   </Button>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Complaint Resolution Proof Upload Modal */}
+      {resolveModalOpen && targetResolveComplaint && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-card text-card-foreground rounded-3xl max-w-lg w-full border border-border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="gov-gradient p-5 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-emerald-300" />
+                <h3 className="font-extrabold text-base md:text-lg">
+                  {t("तक्रार निराकरण पुष्टी व पुरावा", "Complaint Resolution & Proof")}
+                </h3>
+              </div>
+              <button
+                onClick={() => setResolveModalOpen(false)}
+                className="p-1 rounded-full hover:bg-white/20 text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="p-3.5 rounded-2xl bg-muted/60 border border-border text-xs space-y-1">
+                <p>
+                  <span className="font-bold text-muted-foreground">{t("तक्रार क्र.: ", "Tracking ID: ")}</span>
+                  <span className="font-mono font-bold text-primary">{targetResolveComplaint.trackingId || targetResolveComplaint.id}</span>
+                </p>
+                <p>
+                  <span className="font-bold text-muted-foreground">{t("विभाग: ", "Department: ")}</span>
+                  <span className="font-semibold">{targetResolveComplaint.department}</span>
+                </p>
+                <p className="line-clamp-2 text-muted-foreground mt-0.5">{targetResolveComplaint.description}</p>
+              </div>
+
+              <p className="text-xs text-foreground font-medium">
+                {t(
+                  "तुम्ही ही तक्रार 'निराकरण झाले' (Resolved) म्हणून चिन्हांकित करत आहात. काम पूर्ण झाल्याचा पुरावा / फोटो अपलोड करायचा आहे का? (पर्यायी)",
+                  "You are marking this complaint as Resolved. You may attach a photo/proof of completed work (Optional)."
+                )}
+              </p>
+
+              {/* Image Upload Area */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-primary" />
+                  <span>{t("कामाचा पुरावा / फोटो (पर्यायी)", "Proof Photo of Completed Work (Optional)")}</span>
+                </label>
+
+                {proofPreview ? (
+                  <div className="relative rounded-2xl border-2 border-emerald-500/40 bg-muted/30 p-2 text-center">
+                    <img
+                      src={proofPreview}
+                      alt="Proof Preview"
+                      className="max-h-52 w-full object-contain rounded-xl mx-auto"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProofFile(null);
+                        setProofPreview(null);
+                      }}
+                      className="absolute top-4 right-4 p-1.5 rounded-full bg-red-600 text-white shadow-lg hover:bg-red-700 transition-colors"
+                      title={t("फोटो काढा", "Remove Photo")}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    {proofFile && (
+                      <p className="text-[11px] text-muted-foreground mt-1 truncate px-2">
+                        {proofFile.name} ({(proofFile.size / 1024).toFixed(0)} KB)
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-border hover:border-primary/60 bg-muted/20 hover:bg-primary/5 cursor-pointer transition-all group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setProofFile(file);
+                          const reader = new FileReader();
+                          reader.onload = () => setProofPreview(reader.result as string);
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                      <ImageIcon className="w-6 h-6" />
+                    </div>
+                    <p className="text-xs font-bold text-foreground">
+                      {t("कामाचा फोटो निवडण्यासाठी येथे क्लिक करा", "Click here to choose or capture photo")}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      {t("कॅमेरा किंवा गॅलरी (JPG, PNG - कमाल १० MB)", "Camera or Gallery (JPG, PNG - max 10 MB)")}
+                    </p>
+                  </label>
+                )}
+              </div>
+
+              {/* Optional Notes */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-foreground">
+                  {t("कामाचा थोडक्यात शेरा / तपशील (पर्यायी)", "Resolution Notes / Remarks (Optional)")}
+                </label>
+                <Input
+                  value={proofNotes}
+                  onChange={(e) => setProofNotes(e.target.value)}
+                  placeholder={t("उदा. खड्डे बुजवले, कचरा साफ केला, पाणीपुरवठा सुरळीत केला", "e.g. Pothole filled, drain cleared, water line repaired")}
+                  className="text-xs"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 text-xs font-bold"
+                  onClick={() => setResolveModalOpen(false)}
+                  disabled={uploadingProof}
+                >
+                  {t("रद्द करा", "Cancel")}
+                </Button>
+
+                <Button
+                  type="button"
+                  className="flex-1 text-xs font-bold bg-green-600 hover:bg-green-700 text-white gap-1.5"
+                  onClick={handleConfirmResolve}
+                  disabled={uploadingProof}
+                >
+                  {uploadingProof ? (
+                    <LoaderCircle className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4" />
+                  )}
+                  <span>
+                    {uploadingProof
+                      ? t("अपलोड करत आहे...", "Uploading...")
+                      : proofFile
+                      ? t("फोटोसह निराकरण करा", "Resolve With Proof Photo")
+                      : t("निराकरण पूर्ण करा", "Confirm Resolution")}
+                  </span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -139,6 +139,10 @@ export class GrievancesService {
       throw new NotFoundException('Complaint ticket not found with the provided mobile number');
     }
 
+    const attachments = Array.isArray(complaint.attachments) ? complaint.attachments : [];
+    const resolutionProof = attachments.find((a: any) => a.type === 'resolution_proof') || null;
+    const citizenAttachments = attachments.filter((a: any) => a.type !== 'resolution_proof');
+
     // Protect citizen privacy: redact unmasked phone number and citizen full name from public tracking
     return {
       id: complaint.id,
@@ -151,7 +155,41 @@ export class GrievancesService {
       createdAt: complaint.createdAt,
       updatedAt: complaint.updatedAt,
       maskedMobile: complaint.mobile ? complaint.mobile.replace(/\d(?=\d{4})/g, '*') : null,
+      attachments: citizenAttachments,
+      resolutionProof,
     };
+  }
+
+  async trackByMobile(mobile: string) {
+    const cleaned = (mobile || '').replace(/\D/g, '');
+    if (cleaned.length !== 10) {
+      throw new BadRequestException('कृपया वैध १० अंकी मोबाईल नंबर प्रविष्ट करा.');
+    }
+
+    const complaints = await this.prisma.complaint.findMany({
+      where: { mobile: cleaned },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return complaints.map((complaint) => {
+      const attachments = Array.isArray(complaint.attachments) ? complaint.attachments : [];
+      const resolutionProof = attachments.find((a: any) => a.type === 'resolution_proof') || null;
+      const citizenAttachments = attachments.filter((a: any) => a.type !== 'resolution_proof');
+      return {
+        id: complaint.id,
+        trackingId: complaint.trackingId,
+        department: complaint.department,
+        type: complaint.type,
+        ward: complaint.ward,
+        description: complaint.description,
+        status: complaint.status,
+        createdAt: complaint.createdAt,
+        updatedAt: complaint.updatedAt,
+        maskedMobile: complaint.mobile ? complaint.mobile.replace(/\d(?=\d{4})/g, '*') : null,
+        attachments: citizenAttachments,
+        resolutionProof,
+      };
+    });
   }
 
   async getAllAdmin(status?: string, department?: string, currentUser?: any) {
@@ -184,10 +222,23 @@ export class GrievancesService {
       filtered = filtered.filter((c) => matchesDepartment(c, department));
     }
 
-    return filtered;
+    return filtered.map((c) => {
+      const attachments = Array.isArray(c.attachments) ? c.attachments : [];
+      const resolutionProof = attachments.find((a: any) => a.type === 'resolution_proof') || null;
+      const citizenAttachments = attachments.filter((a: any) => a.type !== 'resolution_proof');
+      return {
+        ...c,
+        attachments: citizenAttachments,
+        resolutionProof,
+      };
+    });
   }
 
-  async updateStatus(id: string, updateData: { status: string }, currentUser?: any) {
+  async updateStatus(
+    id: string,
+    updateData: { status: string; resolutionProofUrl?: string; resolutionProofNotes?: string },
+    currentUser?: any,
+  ) {
     const validStatuses = ['pending', 'in-progress', 'resolved'];
     if (!updateData || !validStatuses.includes(updateData.status)) {
       throw new BadRequestException(`अवैध स्थिती मूल्य (Invalid status). Allowed: ${validStatuses.join(', ')}`);
@@ -213,10 +264,25 @@ export class GrievancesService {
       }
     }
 
+    let updatedAttachments: any[] = Array.isArray(existing.attachments) ? [...existing.attachments] : [];
+
+    if (updateData.status === 'resolved' && updateData.resolutionProofUrl) {
+      const proofItem = {
+        type: 'resolution_proof',
+        url: updateData.resolutionProofUrl,
+        name: 'काम पूर्ण झाल्याचा पुरावा (Resolution Proof)',
+        resolvedBy: currentUser?.name || 'Department Officer',
+        resolvedAt: new Date().toISOString(),
+        notes: updateData.resolutionProofNotes || '',
+      };
+      updatedAttachments = [...updatedAttachments.filter((a: any) => a.type !== 'resolution_proof'), proofItem];
+    }
+
     const updated = await this.prisma.complaint.update({
       where: { id },
       data: {
         status: updateData.status,
+        attachments: updatedAttachments,
       },
     });
 
@@ -234,10 +300,19 @@ export class GrievancesService {
         previousStatus: existing.status,
         newStatus: updateData.status,
         citizenName: existing.name,
+        hasResolutionProof: !!updateData.resolutionProofUrl,
       },
     });
 
-    return updated;
+    const attachments = Array.isArray(updated.attachments) ? updated.attachments : [];
+    const resolutionProof = attachments.find((a: any) => a.type === 'resolution_proof') || null;
+    const citizenAttachments = attachments.filter((a: any) => a.type !== 'resolution_proof');
+
+    return {
+      ...updated,
+      attachments: citizenAttachments,
+      resolutionProof,
+    };
   }
 
   async deleteGrievance(id: string, currentUser?: any) {

@@ -109,7 +109,7 @@ export const HeroSection = () => {
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-[1.15]">
               {t("समृद्ध, सुंदर व स्मार्ट ", "Prosperous, Smart & ")}
               <span className="bg-gradient-to-r from-amber-500 via-orange-600 to-primary bg-clip-text text-transparent">
-                {t("वाई नगरपरिषद", "Wai Municipal Council")}
+                {t("वाई नगरपरिषद,वाई", "Wai Municipal Council,Wai")}
               </span>
             </h1>
 

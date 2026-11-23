@@ -241,10 +241,15 @@ export async function fetchAdminComplaints(status?: string, department?: string)
   const qStr = query.toString() ? `?${query.toString()}` : "";
   return request<any[]>(`/complaints/admin/all${qStr}`);
 }
-export async function updateComplaintStatus(id: string, status: string) {
+export async function updateComplaintStatus(
+  id: string,
+  status: string,
+  resolutionProofUrl?: string,
+  resolutionProofNotes?: string,
+) {
   return request<any>(`/complaints/${id}/status`, {
     method: "PATCH",
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, resolutionProofUrl, resolutionProofNotes }),
   });
 }
 export async function deleteComplaint(id: string) {

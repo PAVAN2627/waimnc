@@ -76,6 +76,14 @@ export interface Project {
 
 export type ComplaintStatus = 'pending' | 'in-progress' | 'resolved';
 
+export interface ResolutionProof {
+  url: string;
+  name?: string;
+  resolvedAt?: string;
+  resolvedBy?: string;
+  notes?: string;
+}
+
 export interface Complaint {
   id: string;
   trackingId?: string;
@@ -87,6 +95,7 @@ export interface Complaint {
   description: string;
   status: ComplaintStatus;
   attachments?: any;
+  resolutionProof?: ResolutionProof | null;
   createdAt: string;
   updatedAt: string;
 }

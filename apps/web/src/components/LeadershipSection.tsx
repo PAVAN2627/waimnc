@@ -15,8 +15,8 @@ const LEADERS = [
     icon: Crown,
   },
   {
-    nameMr: "श्री. अभिषेक कृष्णा, (भा.प्र.से.)",
-    nameEn: "Shri. Abhishek Krishna, (I.A.S.)",
+    nameMr: "श्री. अभिषेक कृष्णा (भा.प्र.से.)",
+    nameEn: "Shri. Abhishek Krishna (I.A.S.)",
     roleMr: "आयुक्त तथा संचालक (न.प्र.सं.)",
     roleEn: "Commissioner & Director (DMA)",
     subMr: "आयुक्त तथा संचालक, नगरपरिषद प्रशासन संचालनालय, महाराष्ट्र राज्य",

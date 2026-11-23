@@ -122,6 +122,14 @@ export function isCivicComplaintRecord(c: ComplaintRecord | any): boolean {
   return !isServiceApplicationRecord(c);
 }
 
+export interface ResolutionProof {
+  url: string;
+  name?: string;
+  resolvedAt?: string;
+  resolvedBy?: string;
+  notes?: string;
+}
+
 export interface ComplaintRecord {
   id: string;
   trackingId?: string;
@@ -132,6 +140,7 @@ export interface ComplaintRecord {
   department: string;
   description: string;
   attachments: ComplaintAttachment[];
+  resolutionProof?: ResolutionProof | null;
   status: ComplaintStatus;
   createdAt: number;
   updatedAt: number;
@@ -283,6 +292,7 @@ export function mapComplaint(item: any): ComplaintRecord {
     department: item.department || "सामान्य प्रशासन",
     description: item.description || "",
     attachments: Array.isArray(item.attachments) ? item.attachments.map(normalizeAttachment) : [],
+    resolutionProof: item.resolutionProof || (Array.isArray(item.attachments) ? item.attachments.find((a: any) => a.type === "resolution_proof") : null) || null,
     status: (item.status as ComplaintStatus) || "pending",
     createdAt: new Date(item.createdAt).getTime(),
     updatedAt: new Date(item.updatedAt || item.createdAt).getTime(),
@@ -308,8 +318,13 @@ export function subscribeToAllComplaints(callback: (complaints: ComplaintRecord[
   };
 }
 
-export async function updateComplaintStatus(id: string, status: ComplaintStatus): Promise<void> {
-  await api.updateComplaintStatus(id, status);
+export async function updateComplaintStatus(
+  id: string,
+  status: ComplaintStatus,
+  resolutionProofUrl?: string,
+  resolutionProofNotes?: string,
+): Promise<void> {
+  await api.updateComplaintStatus(id, status, resolutionProofUrl, resolutionProofNotes);
 }
 
 export async function deleteComplaint(id: string): Promise<void> {

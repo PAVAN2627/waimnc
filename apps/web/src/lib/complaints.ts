@@ -35,6 +35,14 @@ export function normalizeAttachment(att: any): ComplaintAttachment {
   };
 }
 
+export interface ResolutionProof {
+  url: string;
+  name?: string;
+  resolvedAt?: string;
+  resolvedBy?: string;
+  notes?: string;
+}
+
 export interface ComplaintRecord {
   id: string;
   trackingId?: string;
@@ -45,6 +53,7 @@ export interface ComplaintRecord {
   department: string;
   description: string;
   attachments: ComplaintAttachment[];
+  resolutionProof?: ResolutionProof | null;
   status: ComplaintStatus;
   createdAt: number;
   updatedAt: number;
@@ -89,6 +98,7 @@ function mapComplaint(item: any): ComplaintRecord {
     department: item.department || "",
     description: item.description || "",
     attachments: Array.isArray(item.attachments) ? item.attachments.map(normalizeAttachment) : [],
+    resolutionProof: item.resolutionProof || (Array.isArray(item.attachments) ? item.attachments.find((a: any) => a.type === "resolution_proof") : null) || null,
     status: (item.status as ComplaintStatus) || "pending",
     createdAt: item.createdAt ? new Date(item.createdAt).getTime() : Date.now(),
     updatedAt: item.updatedAt ? new Date(item.updatedAt).getTime() : Date.now(),
@@ -147,7 +157,7 @@ export async function createComplaint(input: CreateComplaintInput): Promise<Comp
 
 export async function getComplaintByTrackingId(
   trackingId: string,
-  mobile: string
+  mobile?: string
 ): Promise<ComplaintRecord | null> {
   try {
     const res = await api.trackComplaint(trackingId, mobile);
@@ -156,6 +166,17 @@ export async function getComplaintByTrackingId(
   } catch (err) {
     console.warn("Track complaint error:", err);
     return null;
+  }
+}
+
+export async function getComplaintsByMobile(mobile: string): Promise<ComplaintRecord[]> {
+  try {
+    const list = await api.trackComplaintsByMobile(mobile);
+    if (!Array.isArray(list)) return [];
+    return list.map(mapComplaint);
+  } catch (err) {
+    console.warn("Track complaints by mobile error:", err);
+    return [];
   }
 }
 

@@ -52,6 +52,12 @@ export class GrievancesController {
     return this.grievancesService.trackByToken(token, mobile);
   }
 
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
+  @Get('by-mobile/:mobile')
+  async trackByMobile(@Param('mobile') mobile: string) {
+    return this.grievancesService.trackByMobile(mobile);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('admin/all')
   async getAllAdmin(
@@ -67,7 +73,7 @@ export class GrievancesController {
   async updateStatus(
     @Req() req: any,
     @Param('id') id: string,
-    @Body() body: { status: string },
+    @Body() body: { status: string; resolutionProofUrl?: string; resolutionProofNotes?: string },
   ) {
     return this.grievancesService.updateStatus(id, body, req.user);
   }
