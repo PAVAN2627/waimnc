@@ -24,6 +24,7 @@ const SchemesPage = () => {
       : "all";
 
   const [schemes, setSchemes] = useState<SchemeRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<SchemeCategory | "all">(initialCategory);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchemeForApply, setSelectedSchemeForApply] = useState<SchemeRecord | null>(null);
@@ -34,7 +35,12 @@ const SchemesPage = () => {
     }
   }, [queryCat]);
 
-  useEffect(() => subscribeToActiveSchemes(setSchemes), []);
+  useEffect(() => {
+    return subscribeToActiveSchemes((items) => {
+      setSchemes(items);
+      setLoading(false);
+    });
+  }, []);
 
   const filteredSchemes = schemes.filter((s) => {
     const matchesCategory = activeCategory === "all" || s.category === activeCategory;
@@ -132,11 +138,16 @@ const SchemesPage = () => {
             </div>
 
             {/* Scheme Cards Grid */}
-            {filteredSchemes.length === 0 ? (
+            {loading ? (
+              <div className="bg-card rounded-3xl p-12 text-center border border-border shadow-xl space-y-3">
+                <LoaderCircle className="h-10 w-10 mx-auto text-primary animate-spin" />
+                <h3 className="text-lg font-bold text-foreground">{t("डेटाबेसमधून योजना माहिती लोड होत आहे...", "Loading active schemes from database...")}</h3>
+              </div>
+            ) : filteredSchemes.length === 0 ? (
               <div className="bg-card rounded-3xl p-12 text-center border border-border shadow-xl space-y-3">
                 <BookOpen className="h-12 w-12 mx-auto text-muted-foreground opacity-40" />
-                <h3 className="text-lg font-bold text-foreground">{t("कोणतीही योजना सापडली नाही.", "No schemes found.")}</h3>
-                <p className="text-xs text-muted-foreground">{t("कृपया वेगळा शोध शब्द वापरून प्रयत्न करा.", "Please try searching with another keyword.")}</p>
+                <h3 className="text-lg font-bold text-foreground">{t("कोणतीही सक्रिय योजना सापडली नाही.", "No active schemes found.")}</h3>
+                <p className="text-xs text-muted-foreground">{t("कृपया वेगळा शोध शब्द वापरून प्रयत्न करा किंवा ऍडमिन पोर्टलवरून नवीन योजना जोडा.", "Please try searching with another keyword or add new schemes in Admin portal.")}</p>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

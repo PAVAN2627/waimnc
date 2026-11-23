@@ -380,10 +380,14 @@ export const CategoryGroupPage = ({
 }) => {
   const { t, language } = useLanguage();
   const [schemes, setSchemes] = useState<SchemeRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedSchemeForApply, setSelectedSchemeForApply] = useState<SchemeRecord | null>(null);
 
   useEffect(() => {
-    return subscribeToCategorySchemes(category, setSchemes);
+    return subscribeToCategorySchemes(category, (items) => {
+      setSchemes(items);
+      setLoading(false);
+    });
   }, [category]);
 
   return (
@@ -421,10 +425,15 @@ export const CategoryGroupPage = ({
             </div>
 
             {/* Schemes List */}
-            {schemes.length === 0 ? (
+            {loading ? (
+              <div className="bg-card rounded-3xl p-12 text-center border border-border shadow-xl space-y-3">
+                <LoaderCircle className="h-10 w-10 mx-auto text-primary animate-spin" />
+                <h3 className="text-lg font-bold text-foreground">{t("डेटाबेसमधून योजना माहिती लोड होत आहे...", "Loading active schemes from database...")}</h3>
+              </div>
+            ) : schemes.length === 0 ? (
               <div className="bg-card rounded-3xl p-12 text-center border border-border shadow-xl space-y-3">
                 <Gift className="h-12 w-12 mx-auto text-muted-foreground opacity-40" />
-                <h3 className="text-lg font-bold text-foreground">{t("योजना माहिती लोड होत आहे...", "Loading active schemes...")}</h3>
+                <h3 className="text-lg font-bold text-foreground">{t("या वर्गवारीत सध्या कोणतीही सक्रिय योजना उपलब्ध नाही.", "No active schemes found in this category.")}</h3>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 gap-6">
@@ -514,258 +523,15 @@ export const CategoryGroupPage = ({
   );
 };
 
-const schemePagesData: Record<string, SchemeData> = {
-  pmay: {
-    title: "प्रधानमंत्री आवास योजना (PMAY - नागरी २.०)", titleEn: "Pradhan Mantri Awas Yojana (PMAY - Urban 2.0)",
-    subtitle: "सर्वसमावेशक परवडणारी घरे व घरकुल अनुदान", subtitleEn: "Affordable Housing for All in Wai City",
-    desc: "शहरी भागातील बेघर व आर्थिकदृष्ट्या दुर्बल घटकांतील (EWS/LIG) कुटुंबांना हक्काचे पक्के घरकुल उपलब्ध करून देण्यासाठी केंद्र व महाराष्ट्र शासनाचे थेट ₹ २,५०,००० अनुदान वाई नगरपरिषदेद्वारे वितरीत केले जाते.",
-    descEn: "Financial grant up to ₹2,50,000 provided by Central & Maharashtra Government through Wai Municipal Council for constructing permanent houses.",
-    eligibility: [
-      "भारतात इतरत्र कुठेही स्वतःचे किंवा कुटुंबीयांचे पक्के घर नसावे",
-      "आर्थिकदृष्ट्या दुर्बल घटक (EWS - उत्पन्न ₹ ३ लाख) किंवा अल्प उत्पन्न गट (LIG - उत्पन्न ₹ ६ लाख)",
-      "वाई नगरपरिषद हद्दीतील रहिवासी पुरावा",
-      "स्वतःची मालकी जागा / ७/१२ उतारा / नगर भूमापन (City Survey) प्रमाणपत्र",
-      "कुटुंबातील सर्व सदस्यांचे आधार कार्ड व बँक खाते"
-    ],
-    eligibilityEn: [
-      "Must not own a pucca house anywhere in India",
-      "Economically Weaker Section (EWS up to ₹3L) or LIG (up to ₹6L)",
-      "Resident of Wai Municipal Council limits",
-      "Valid land title / 7-12 extract / City Survey property card in Wai",
-      "Aadhaar cards and bank accounts of all family members"
-    ],
-    benefits: [
-      "₹ २,५०,००० पर्यंत थेट बँक खात्यात घरकुल अनुदान (४ टप्प्यांत जिओ-टॅगिंगनुसार)",
-      "स्वस्त गृहकर्ज व्याज सबसिडी (CLSS) सवलत",
-      "वाई पालिकेमार्फत विनामूल्य नळ जोडणी व वीज कनेक्शन प्राधान्य",
-      "महिला कुटुंब प्रमुखाच्या नावावर घरकुल मालकी हक्क"
-    ],
-    benefitsEn: [
-      "Direct grant up to ₹2,50,000 in bank account across 4 stages",
-      "Interest subsidy under Credit Linked Subsidy Scheme (CLSS)",
-      "Priority free tap water connection and electric metering by Wai Council",
-      "Mandatory co-ownership for female head of household"
-    ],
-    schemes: [
-      { name: "घरकुल घटक (BLC)", nameEn: "Beneficiary Led Construction", status: "सक्रिय", statusEn: "Active", beneficiaries: "1,240+ कुटुंबे", beneficiariesEn: "1,240+ Families", desc: "स्वतःच्या जागेवर नवीन घर बांधण्यासाठी ₹ २.५ लाख अनुदान.", descEn: "₹ 2.5 Lakh subsidy for building house on owned land." },
-      { name: "व्याज अनुदान घटक (CLSS)", nameEn: "Credit Linked Subsidy Scheme", status: "सक्रिय", statusEn: "Active", beneficiaries: "850+ नागरिक", beneficiariesEn: "850+ Citizens", desc: "गृहकर्जाच्या व्याजावर सबसिडी सवलत.", descEn: "Subsidy discount on home loan interest." },
-    ],
-  },
-  swachh: {
-    title: "स्वच्छ भारत अभियान (वैयक्तिक शौचालय अनुदान - SBM 2.0)", titleEn: "Swachh Bharat Mission (IHHL Toilet Subsidy - SBM 2.0)",
-    subtitle: "स्वच्छ, सुंदर व हागणदारीमुक्त (ODF++) वाई शहर", subtitleEn: "Clean, Beautiful & Open Defecation Free Wai",
-    desc: "वाई शहरात उघड्यावर शौचास जाणे पूर्णतः बंद करण्यासाठी व १००% स्वच्छता साध्य करण्यासाठी ज्यांच्याकडे वैयक्तिक शौचालय नाही अशा कुटुंबांना थेट ₹ १२,००० ते ₹ १८,००० अनुदान दिले जाते.",
-    descEn: "Subsidy of ₹12,000 to ₹18,000 provided to households in Wai city without individual toilets to ensure 100% ODF++ sanitation.",
-    eligibility: [
-      "वाई नगरपरिषद क्षेत्रातील कायमस्वरूपी रहिवासी कुटुंब",
-      "घरात आधीपासून पक्के वैयक्तिक शौचालय नसावे",
-      "शौचालय बांधकामासाठी जागेची उपलब्धता",
-      "आधार कार्ड, रहिवासी दाखला व बँक पासबुक झेरॉक्स"
-    ],
-    eligibilityEn: [
-      "Resident family within Wai Municipal Council limits",
-      "Household must not already have a functional private toilet",
-      "Adequate space available for toilet construction",
-      "Aadhaar card, residence proof, and bank passbook copy"
-    ],
-    benefits: [
-      "वैयक्तिक शौचालय (IHHL) बांधकामासाठी ₹ १२,००० ते ₹ १८,००० थेट बँक खात्यात अनुदान",
-      "दोन हप्त्यांत थेट रक्कम वितरण (बांधकाम सुरू करताना व पूर्ण झाल्यावर)",
-      "नगरपरिषदेच्या सेप्टिक टँक सक्शन व मलमूत्र प्रक्रिया प्रकल्पाची (FSTP) सवलत सेवा"
-    ],
-    benefitsEn: [
-      "Financial subsidy of ₹12,000 to ₹18,000 directly deposited in bank account",
-      "Disbursed in 2 stages upon geotagged photo verification",
-      "Wai Municipal Council Faecal Sludge Treatment Plant (FSTP) desludging support"
-    ],
-  },
-  amrut: {
-    title: "अमृत योजना २.० (शहरी पाणीपुरवठा व कृष्णा नदी संवर्धन)", titleEn: "AMRUT 2.0 Mission (Urban Water Supply & Krishna River Conservation)",
-    subtitle: "शहर पाणीपुरवठा व जलनिस्सारण पुनरुज्जीवन", subtitleEn: "Urban Water Supply & Drainage Rejuvenation",
-    desc: "वाई शहरातील सर्व १७ प्रभागांतील प्रत्येक घराला शुद्ध पिण्याचे पाणी नळाद्वारे पुरवणे, धोम धरणातून पाणीपुरवठा बळकटीकरण, भूमिगत सांडपाणी वाहिनी व कृष्णा नदीचे प्रदूषण रोखणे.",
-    descEn: "Ensuring 100% functional household tap connections (FHTC) from Dhom Dam source, underground sewerage network, and protecting sacred Krishna river from wastewater.",
-    eligibility: [
-      "वाई शहरातील सर्व १७ प्रभागांमधील घरे, सोसायट्या व व्यावसायिक मिळकती",
-      "मालमत्ता कर व पाणीपट्टीची कोणतीही थकबाकी नसावी",
-      "नियमित नळ जोडणीसाठी अधिकृत अर्ज"
-    ],
-    eligibilityEn: [
-      "All households and properties across all 17 wards of Wai",
-      "No outstanding municipal property tax or water supply dues",
-      "Formal application for meter-based connection"
-    ],
-    benefits: [
-      "२४x७ शुद्ध व सुरक्षित पिण्याचे पाणी (१३५ LPCD मानकानुसार)",
-      "जुन्या गंजलेल्या जलवाहिन्या बदलून नवीन दर्जेदार जलवाहिनी नेटवर्क व डिजिटल मीटर",
-      "भूमिगत गटार व सांडपाणी प्रक्रिया प्रकल्प (STP) द्वारे कृष्णा नदीचे संवर्धन"
-    ],
-    benefitsEn: [
-      "24x7 clean, treated, and safe drinking water as per 135 LPCD urban standard",
-      "Replacement of old pipelines with modern ductile iron network and digital meters",
-      "Krishna riverfront beautification and sewage treatment plant (STP) preventing river pollution"
-    ],
-  },
-  pmsvanidhi: {
-    title: "पीएम स्वनिधी योजना (पंतप्रधान पथविक्रेता आत्मनिर्भर निधी)", titleEn: "PM SVANidhi Scheme (PM Street Vendor's AtmaNirbhar Nidhi)",
-    subtitle: "फेरीवाले व छोटे विक्रेते यांच्यासाठी खेळते भांडवल कर्ज", subtitleEn: "Collateral-free Working Capital Loans for Street Vendors",
-    desc: "वाई शहरातील भाजी मंडई, महागणपती मंदिर परिसर, बस स्थानक व आठवडे बाजारातील फेरीवाले, हातगाडी चालक व छोटे विक्रेते यांच्यासाठी विनातारण ₹ १०,००० ते ₹ ५०,००० पर्यंत खेळते भांडवल कर्ज व ७% व्याज अनुदान योजना.",
-    descEn: "Collateral-free affordable working capital loans up to ₹50,000 and 7% interest subsidy for street vendors, hawkers, and micro-merchants in Wai.",
-    eligibility: [
-      "वाई शहरातील पथविक्रेता / फेरीवाला",
-      "नगरपरिषदेचे फेरीवाला सर्वेक्षण (TVC Survey) नोंदणी किंवा विक्रेता ओळखपत्र (Vendor ID)",
-      "आधार कार्ड व बँक खाते मोबाईलशी लिंक असणे आवश्यक"
-    ],
-    eligibilityEn: [
-      "Street vendors, fruit/vegetable sellers, hawkers operating in Wai",
-      "Possess Vendor ID card or Town Vending Committee (TVC) registration in Wai",
-      "Aadhaar-linked active bank account with mobile number"
-    ],
-    benefits: [
-      "प्रथम टप्प्यात ₹ १०,००० पर्यंत विनातारण सुलभ खेळते भांडवल कर्ज",
-      "वेळेत परतफेडीवर दुसऱ्या टप्प्यात ₹ २०,००० व तिसऱ्या टप्प्यात ₹ ५०,००० पर्यंत कर्ज",
-      "नियमित परतफेडीवर ७% वार्षिक व्याज अनुदान थेट बँक खात्यात जमा",
-      "डिजिटल व्यवहारांवर (UPI/QR Code) दरमहा ₹ १०० पर्यंत कॅशबॅक प्रोत्साहन"
-    ],
-    benefitsEn: [
-      "1st Tranche collateral-free working capital loan up to ₹10,000",
-      "On timely repayment, eligible for 2nd Tranche up to ₹20,000 and 3rd Tranche up to ₹50,000",
-      "7% per annum interest subsidy directly credited via DBT",
-      "Monthly cashback up to ₹100 on accepting digital UPI QR code payments"
-    ],
-  },
-  sanjayGandhi: {
-    title: "संजय गांधी निराधार अनुदान योजना (महाराष्ट्र शासन)", titleEn: "Sanjay Gandhi Niradhar Anudan Yojana (Govt. of Maharashtra)",
-    subtitle: "निराधार, वृद्ध व दुर्धर आजारग्रस्त नागरिकांना मासिक पेन्शन", subtitleEn: "Monthly Pension for Destitute, Widows & Chronically Ill",
-    desc: "अनाथ मुले, निराधार वृद्ध, विधवा, परित्यक्ता महिला, अपंग व्यक्ती व दुर्धर आजाराने ग्रस्त वाई शहरातील गरजू नागरिकांना दरमहा ₹ १,५०० थेट आर्थिक निवृत्तीवेतन मदत.",
-    descEn: "Monthly financial assistance of ₹1,500 by Maharashtra Social Justice Dept to destitute persons, widows, divorced women, chronically ill, and disabled citizens in Wai.",
-    eligibility: [
-      "वय ६५ वर्षांपेक्षा कमी असावे (६५ वर्षांवरील वृद्धांसाठी श्रावणबाळ योजना)",
-      "दारिद्र्यरेषेखालील (BPL) किंवा कौटुंबिक वार्षिक उत्पन्न ₹ ५०,००० च्या आत",
-      "महाराष्ट्र राज्याचा व वाई शहराचा सलग १५ वर्षे रहिवासी",
-      "अनाथ, निराधार, ४०% पेक्षा जास्त दिव्यांग किंवा कर्करोग/टीबी/अर्धांगवायू आजारग्रस्त व्यक्ती"
-    ],
-    eligibilityEn: [
-      "Age below 65 years",
-      "Family living below poverty line (BPL) or annual income not exceeding ₹50,000",
-      "Continuous domicile of at least 15 years in Maharashtra / Wai",
-      "Destitute, widows, divorced/abandoned women, 40%+ disabled, or chronically ill"
-    ],
-    benefits: [
-      "दरमहा ₹ १,५०० थेट आधार लिंक बँक खात्यात जमा",
-      "कुटुंबात एकापेक्षा जास्त पात्र लाभार्थी असल्यास दरमहा ₹ २,५०० पर्यंत अनुदान",
-      "शासकीय व उपजिल्हा रुग्णालयात मोफत उपचार व तपासणी प्राधान्य"
-    ],
-    benefitsEn: [
-      "Monthly pension of ₹1,500 deposited directly into DBT bank account",
-      "Up to ₹2,500 per month if more than one eligible beneficiary in the family",
-      "Free healthcare and diagnostic access at government hospitals"
-    ],
-  },
-  shravanbal: {
-    title: "श्रावणबाळ सेवा राज्य निवृत्तीवेतन योजना (महाराष्ट्र शासन)", titleEn: "Shravanbal Seva Rajya Nivruttivetan Yojana (Govt. of Maharashtra)",
-    subtitle: "ज्येष्ठ नागरिकांसाठी (वय ६५+) दरमहा शासकीय पेन्शन", subtitleEn: "Guaranteed Monthly Pension for Senior Citizens (65+)",
-    desc: "६५ वर्षे किंवा त्याहून अधिक वयाच्या गरीब व वृद्ध नागरिकांना उतारवयात सन्मानाने जगण्यासाठी दरमहा नियमित ₹ १,५०० शासकीय पेन्शन योजना वाई तहसील व पालिकेमार्फत राबवली जाते.",
-    descEn: "Guaranteed monthly social security pension of ₹1,500 by Maharashtra Government for senior citizens aged 65 and above from economically weaker backgrounds.",
-    eligibility: [
-      "अर्जदाराचे वय ६५ वर्षे किंवा त्यापेक्षा जास्त असणे बंधनकारक",
-      "दारिद्र्यरेषेखालील यादीत नाव (गट अ) किंवा वार्षिक कौटुंबिक उत्पन्न ₹ ५०,००० च्या आत (गट ब)",
-      "वाई / महाराष्ट्र राज्यात किमान १५ वर्षे वास्तव्याचा पुरावा"
-    ],
-    eligibilityEn: [
-      "Age must be 65 years or above",
-      "Included in BPL list (Category A) or annual family income below ₹50,000 (Category B)",
-      "Minimum 15 years domicile proof in Wai, Maharashtra"
-    ],
-    benefits: [
-      "दरमहा ₹ १,५०० थेट बँक खात्यात डीबीटी (DBT) द्वारे जमा",
-      "वाई उपजिल्हा रुग्णालय व नागरी प्राथमिक आरोग्य केंद्रात मोफत ओपीडी व औषधे",
-      "वृद्ध नागरिकांसाठी सामाजिक सुरक्षा व आर्थिक स्वावलंबन"
-    ],
-    benefitsEn: [
-      "₹1,500 monthly pension deposited directly into bank account",
-      "Free geriatric OPD consultations, checkups, and medicines at Wai Cottage Hospital",
-      "Dignified social security and independence in old age"
-    ],
-  },
-  divyang: {
-    title: "दिव्यांग कल्याण योजना (वाई नगरपरिषद ५% राखीव निधी)", titleEn: "Divyang Kalyan Yojana (Wai Municipal Council 5% Reserved Budget)",
-    subtitle: "दिव्यांग बंधू-भगिनींसाठी सहाय्य, साधने वाटप व ५०% कर सवलत", subtitleEn: "Assistive Aids, Scholarships & 50% Tax Rebate for Disabled",
-    desc: "वाई नगरपरिषदेच्या वार्षिक अर्थसंकल्पातील ५% विशेष राखीव निधीतून शहरातील दिव्यांग व्यक्तींच्या सक्षमीकरणासाठी सहाय्य, साधने वाटप, शिष्यवृत्ती व मालमत्ता कर सवलत दिली जाते.",
-    descEn: "Statutory 5% municipal budget allocation by Wai Municipal Council for empowerment, assistive equipment, scholarships, and self-employment of differently-abled citizens.",
-    eligibility: [
-      "किमान ४०% किंवा त्याहून अधिक दिव्यांगत्वाचे सक्षम वैद्यकीय मंडळ (Civil Surgeon) किंवा UDID कार्ड",
-      "अर्जदार वाई नगरपरिषद हद्दीतील किमान ३ वर्षे कायमस्वरूपी रहिवासी असावा",
-      "आधार कार्ड, सक्षम अपंगत्व प्रमाणपत्र, बँक पासबुक झेरॉक्स व रहिवासी दाखला"
-    ],
-    eligibilityEn: [
-      "Minimum 40% disability certified by District Civil Surgeon or UDID Smart Card",
-      "Permanent resident of Wai Municipal Council limits for at least 3 years",
-      "Aadhaar card, disability certificate, bank passbook, and proof of residence"
-    ],
-    benefits: [
-      "दरवर्षी ₹ ६,००० ते ₹ १२,००० थेट शैक्षणिक शिष्यवृत्ती / आर्थिक अर्थसहाय्य",
-      "मोफत तीनचाकी सायकल (Tricycle), व्हीलचेअर, श्रवणयंत्र, जयपूर फूट व कृत्रिम अवयव वाटप",
-      "स्वतःच्या मालकीच्या निवासी मालमत्तेवर ५०% घरपट्टी (मालमत्ता कर) सवलत",
-      "शहरात स्वयंरोजगारासाठी नगरपरिषदेच्या जागांवर गाळे/स्टॉल वाटपात प्राधान्य"
-    ],
-    benefitsEn: [
-      "Annual education scholarship / financial aid of ₹6,000 to ₹12,000",
-      "Free distribution of battery tricycles, wheelchairs, hearing aids, and calipers",
-      "50% concession on municipal property tax for self-occupied residential houses in Wai",
-      "Preference in municipal vending stalls and hawker zones for self-employment"
-    ],
-  },
-  mahilaBal: {
-    title: "महिला व बालकल्याण योजना (वाई नगरपरिषद ५% राखीव निधी)", titleEn: "Women & Child Welfare Scheme (Wai Municipal 5% Special Fund)",
-    subtitle: "मोफत शिलाई मशीन, बचत गट फिरता निधी व कौशल्य प्रशिक्षण", subtitleEn: "Free Sewing Machines, SHG Grants & Skill Training for Women",
-    desc: "वाई शहरातील महिलांचे आर्थिक सक्षमीकरण, बचत गटांना फिरता निधी, मोफत शिलाई मशीन वाटप, कौशल्य विकास प्रशिक्षण व विद्यार्थिनींच्या शिक्षणासाठी नगरपरिषदेचा उपक्रम.",
-    descEn: "Empowering women and children in Wai city through revolving funds for Self-Help Groups (SHGs), free sewing machines, skill training, and educational incentives.",
-    eligibility: [
-      "वाई नगरपरिषद क्षेत्रातील महिला व नोंदणीकृत महिला बचत गट (SHG)",
-      "आर्थिक दुर्बल, विधवा, घटस्फोटित व एकल महिलांना प्रथम प्राधान्य",
-      "वाई पालिकेच्या शाळांमधील विद्यार्थिनी किंवा शहरात किमान ३ वर्षे वास्तव्य"
-    ],
-    eligibilityEn: [
-      "Women residents and registered Self-Help Groups (SHGs) within Wai city",
-      "Economically weaker, widowed, divorced, or single mothers given highest priority",
-      "Girl students in municipal schools or residents with at least 3 years domicile"
-    ],
-    benefits: [
-      "पात्र महिलांना मोफत शिलाई मशीन (Sewing Machine) वाटप",
-      "ब्युटी पार्लर, फॅशन डिझायनिंग, अन्न प्रक्रिया व संगणक प्रशिक्षणाचा १००% खर्च नगरपरिषदेमार्फत",
-      "नोंदणीकृत महिला बचत गटांना ₹ १०,००० ते ₹ २५,००० फिरता निधी (Revolving Fund)",
-      "१०वी व १२वी मध्ये गुणवंत ठरलेल्या विद्यार्थिनींना रोख पारितोषिक व गौरव सन्मान"
-    ],
-    benefitsEn: [
-      "Free motorized sewing machines distributed to eligible women",
-      "100% sponsored vocational training in beauty care, tailoring, food processing, and IT",
-      "Revolving funds of ₹10,000 to ₹25,000 for registered Women Self-Help Groups",
-      "Merit awards and cash scholarships for top-scoring female students in 10th and 12th standards"
-    ],
-  },
-};
 
 export const DynamicSchemePage = ({
   keyword,
-  defaultData,
 }: {
   keyword: string;
-  defaultData?: SchemeData;
 }) => {
-  const [data, setData] = useState<SchemeData>(
-    defaultData || {
-      title: "शासकीय जनकल्याण योजना",
-      titleEn: "Government Welfare Scheme",
-      subtitle: "शासकीय योजना सविस्तर माहिती व ऑनलाइन अर्ज",
-      subtitleEn: "Scheme details & online application portal",
-      desc: "शासकीय जनकल्याण योजना माहिती लोड होत आहे...",
-      descEn: "Loading scheme details...",
-      eligibility: [],
-      eligibilityEn: [],
-      benefits: [],
-      benefitsEn: [],
-    }
-  );
+  const { t } = useLanguage();
+  const [scheme, setScheme] = useState<SchemeRecord | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     return subscribeToActiveSchemes((items) => {
@@ -773,40 +539,76 @@ export const DynamicSchemePage = ({
         const full = (s.titleMr + " " + (s.titleEn || "") + " " + s.id).toLowerCase();
         return full.includes(keyword.toLowerCase());
       });
-      if (match) {
-        setData({
-          title: match.titleMr,
-          titleEn: match.titleEn || match.titleMr,
-          subtitle:
-            match.category === "central"
-              ? "केंद्र शासन जनकल्याण योजना २०२६"
-              : match.category === "state"
-              ? "महाराष्ट्र शासन जनकल्याण योजना २०२६"
-              : "वाई नगरपरिषद स्थानिक कल्याण योजना २०२६",
-          subtitleEn:
-            match.category === "central"
-              ? "Central Government Welfare Scheme 2026"
-              : match.category === "state"
-              ? "Maharashtra State Welfare Scheme 2026"
-              : "Wai Municipal Council Welfare Scheme 2026",
-          desc: match.descMr,
-          descEn: match.descEn || match.descMr,
-          eligibility: match.eligibilityMr
-            ? match.eligibilityMr.split("\n").filter(Boolean)
-            : defaultData?.eligibility || [],
-          eligibilityEn: match.eligibilityEn
-            ? match.eligibilityEn.split("\n").filter(Boolean)
-            : defaultData?.eligibilityEn || [],
-          benefits: match.benefitsMr
-            ? match.benefitsMr.split("\n").filter(Boolean)
-            : defaultData?.benefits || [],
-          benefitsEn: match.benefitsEn
-            ? match.benefitsEn.split("\n").filter(Boolean)
-            : defaultData?.benefitsEn || [],
-        });
-      }
+      setScheme(match || null);
+      setLoading(false);
     });
-  }, [keyword, defaultData]);
+  }, [keyword]);
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <div className="py-24 text-center space-y-4">
+          <LoaderCircle className="w-10 h-10 animate-spin text-primary mx-auto" />
+          <h2 className="text-lg font-bold text-foreground">
+            {t("डेटाबेसमधून योजना माहिती लोड होत आहे...", "Loading scheme details from database...")}
+          </h2>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (!scheme) {
+    return (
+      <PageLayout>
+        <div className="py-24 text-center space-y-4">
+          <div className="w-16 h-16 rounded-3xl bg-muted text-muted-foreground mx-auto flex items-center justify-center text-3xl shadow-inner">
+            📁
+          </div>
+          <h2 className="text-xl font-bold text-foreground">
+            {t("योजना आढळली नाही किंवा सध्या निष्क्रिय आहे", "Scheme not found or currently inactive")}
+          </h2>
+          <p className="text-xs text-muted-foreground max-w-md mx-auto">
+            {t(
+              "ही योजना नगरपरिषदेच्या सध्याच्या सक्रिय डेटाबेस यादीत उपलब्ध नाही.",
+              "This scheme is currently not active in the database."
+            )}
+          </p>
+          <div className="pt-2">
+            <Link
+              to="/schemes"
+              className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-xl gov-gradient text-white text-xs font-bold shadow-md hover:shadow-lg transition-all"
+            >
+              <span>{t("सर्व सक्रिय योजनांची यादी पहा", "View Active Schemes")}</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  const data: SchemeData = {
+    title: scheme.titleMr,
+    titleEn: scheme.titleEn || scheme.titleMr,
+    subtitle:
+      scheme.category === "central"
+        ? "केंद्र शासन जनकल्याण योजना २०२६"
+        : scheme.category === "state"
+        ? "महाराष्ट्र शासन जनकल्याण योजना २०२६"
+        : "वाई नगरपरिषद स्थानिक कल्याण योजना २०२६",
+    subtitleEn:
+      scheme.category === "central"
+        ? "Central Government Welfare Scheme 2026"
+        : scheme.category === "state"
+        ? "Maharashtra State Welfare Scheme 2026"
+        : "Wai Municipal Council Welfare Scheme 2026",
+    desc: scheme.descMr,
+    descEn: scheme.descEn || scheme.descMr,
+    eligibility: scheme.eligibilityMr ? scheme.eligibilityMr.split("\n").filter(Boolean) : [],
+    eligibilityEn: scheme.eligibilityEn ? scheme.eligibilityEn.split("\n").filter(Boolean) : [],
+    benefits: scheme.benefitsMr ? scheme.benefitsMr.split("\n").filter(Boolean) : [],
+    benefitsEn: scheme.benefitsEn ? scheme.benefitsEn.split("\n").filter(Boolean) : [],
+  };
 
   return <SchemePage data={data} />;
 };
@@ -816,14 +618,14 @@ export const DynamicSchemeRoute = () => {
   return <DynamicSchemePage keyword={id || ""} />;
 };
 
-export const PMAY = () => <DynamicSchemePage keyword="pmay" defaultData={schemePagesData.pmay} />;
-export const AMRUT = () => <DynamicSchemePage keyword="amrut" defaultData={schemePagesData.amrut} />;
-export const SwachhBharat = () => <DynamicSchemePage keyword="swachh" defaultData={schemePagesData.swachh} />;
-export const PMSVANidhi = () => <DynamicSchemePage keyword="pmsvanidhi" defaultData={schemePagesData.pmsvanidhi} />;
-export const SanjayGandhi = () => <DynamicSchemePage keyword="sanjay" defaultData={schemePagesData.sanjayGandhi} />;
-export const Shravanbal = () => <DynamicSchemePage keyword="shravanbal" defaultData={schemePagesData.shravanbal} />;
-export const DivyangKalyan = () => <DynamicSchemePage keyword="divyang" defaultData={schemePagesData.divyang} />;
-export const MahilaBal = () => <DynamicSchemePage keyword="mahila" defaultData={schemePagesData.mahilaBal} />;
+export const PMAY = () => <DynamicSchemePage keyword="pmay" />;
+export const AMRUT = () => <DynamicSchemePage keyword="amrut" />;
+export const SwachhBharat = () => <DynamicSchemePage keyword="swachh" />;
+export const PMSVANidhi = () => <DynamicSchemePage keyword="pmsvanidhi" />;
+export const SanjayGandhi = () => <DynamicSchemePage keyword="sanjay" />;
+export const Shravanbal = () => <DynamicSchemePage keyword="shravanbal" />;
+export const DivyangKalyan = () => <DynamicSchemePage keyword="divyang" />;
+export const MahilaBal = () => <DynamicSchemePage keyword="mahila" />;
 
 export const CentralSchemes = () => (
   <CategoryGroupPage

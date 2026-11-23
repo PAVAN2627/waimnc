@@ -174,23 +174,19 @@ function mapScheme(item: any): SchemeRecord {
 export function subscribeToSchemes(cb: (items: SchemeRecord[]) => void): () => void {
   let isMounted = true;
 
-  // Initialize with fallback cache while loading
-  cb(DEFAULT_WAI_SCHEMES);
-
-  // Directly fetch live active schemes from PostgreSQL database
+  // Pure dynamic fetch from PostgreSQL database API
   api.fetchPublicSchemes()
     .then((items) => {
       if (!isMounted) return;
-      if (Array.isArray(items) && items.length > 0) {
-        // Pure database items as single source of truth
+      if (Array.isArray(items)) {
         cb(items.map(mapScheme));
       } else {
-        cb(DEFAULT_WAI_SCHEMES);
+        cb([]);
       }
     })
     .catch((err) => {
-      console.warn("Using default Wai schemes fallback:", err);
-      if (isMounted) cb(DEFAULT_WAI_SCHEMES);
+      console.warn("Failed to fetch schemes from database:", err);
+      if (isMounted) cb([]);
     });
 
   return () => {
@@ -208,23 +204,18 @@ export function subscribeToCategorySchemes(
 ): () => void {
   let isMounted = true;
 
-  // Initial category cache
-  cb(DEFAULT_WAI_SCHEMES.filter((s) => s.category === category && s.status === "active"));
-
   api.fetchPublicSchemes(category)
     .then((items) => {
       if (!isMounted) return;
-      if (Array.isArray(items) && items.length > 0) {
+      if (Array.isArray(items)) {
         cb(items.map(mapScheme).filter((s) => s.status === "active"));
       } else {
-        cb(DEFAULT_WAI_SCHEMES.filter((s) => s.category === category && s.status === "active"));
+        cb([]);
       }
     })
     .catch((err) => {
-      console.warn(`Category ${category} fetch fallback:`, err);
-      if (isMounted) {
-        cb(DEFAULT_WAI_SCHEMES.filter((s) => s.category === category && s.status === "active"));
-      }
+      console.warn(`Category ${category} fetch error:`, err);
+      if (isMounted) cb([]);
     });
 
   return () => {
@@ -255,13 +246,5 @@ export async function fetchSchemeByIdOrSlug(idOrSlug: string): Promise<SchemeRec
     }
   } catch {}
 
-  const defMatch = DEFAULT_WAI_SCHEMES.find((s) => {
-    if (s.id === idOrSlug) return true;
-    return (
-      s.titleMr.toLowerCase().includes(normalized) ||
-      s.titleEn.toLowerCase().includes(normalized)
-    );
-  });
-
-  return defMatch || null;
+  return null;
 }
