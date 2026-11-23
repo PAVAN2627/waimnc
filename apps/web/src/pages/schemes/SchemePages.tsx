@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
 import { CheckCircle2, Users, Calendar, ExternalLink, ArrowRight, Gift, ShieldCheck, FileText, Send, X, Copy, Check, LoaderCircle, Building2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { createComplaint } from "@/lib/complaints";
 import { validateMobileInput, sanitizeMobileInput } from "@/lib/validation";
+import { subscribeToActiveSchemes, subscribeToCategorySchemes, type SchemeRecord, type SchemeCategory } from "@/lib/schemes";
+import { ApplySchemeModal } from "./SchemesPage";
 
 interface SchemeData {
   title: string; titleEn: string;
@@ -368,24 +370,37 @@ export const CategoryGroupPage = ({
   subtitleMr,
   subtitleEn,
   icon,
-  schemeKeys,
 }: {
-  category: "central" | "state" | "local";
+  category: SchemeCategory;
   titleMr: string;
   titleEn: string;
   subtitleMr: string;
   subtitleEn: string;
   icon: string;
-  schemeKeys: string[];
 }) => {
-  const { t } = useLanguage();
-  const schemes = schemeKeys.map((k) => ({ key: k, data: schemePagesData[k] })).filter((x) => !!x.data);
+  const { t, language } = useLanguage();
+  const [schemes, setSchemes] = useState<SchemeRecord[]>([]);
+  const [selectedSchemeForApply, setSelectedSchemeForApply] = useState<SchemeRecord | null>(null);
+
+  useEffect(() => {
+    return subscribeToCategorySchemes(category, setSchemes);
+  }, [category]);
 
   return (
     <PageLayout>
       <div className="py-12 bg-gradient-to-b from-background via-muted/30 to-background border-b relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto space-y-8">
+            {/* Scheme Application Modal */}
+            {selectedSchemeForApply && (
+              <ApplySchemeModal
+                scheme={selectedSchemeForApply}
+                language={language}
+                t={t}
+                onClose={() => setSelectedSchemeForApply(null)}
+              />
+            )}
+
             {/* Header */}
             <div className="gov-gradient rounded-3xl p-8 md:p-10 text-primary-foreground shadow-2xl relative overflow-hidden">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -406,64 +421,89 @@ export const CategoryGroupPage = ({
             </div>
 
             {/* Schemes List */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {schemes.map(({ key, data }) => (
-                <div
-                  key={key}
-                  className="bg-card rounded-3xl p-6 border border-border shadow-md hover:shadow-xl transition-all flex flex-col justify-between group"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-black px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                        {category === "central" ? t("केंद्र शासन", "Central") : category === "state" ? t("महाराष्ट्र शासन", "Maharashtra") : t("स्थानिक नगरपरिषद", "Wai Council")}
-                      </span>
-                      <Gift className="w-4 h-4 text-primary" />
-                    </div>
+            {schemes.length === 0 ? (
+              <div className="bg-card rounded-3xl p-12 text-center border border-border shadow-xl space-y-3">
+                <Gift className="h-12 w-12 mx-auto text-muted-foreground opacity-40" />
+                <h3 className="text-lg font-bold text-foreground">{t("योजना माहिती लोड होत आहे...", "Loading active schemes...")}</h3>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-6">
+                {schemes.map((scheme) => {
+                  const title = language === "mr" ? scheme.titleMr : scheme.titleEn || scheme.titleMr;
+                  const desc = language === "mr" ? scheme.descMr : scheme.descEn || scheme.descMr;
+                  const benefits = language === "mr" ? scheme.benefitsMr : scheme.benefitsEn || scheme.benefitsMr;
 
-                    <h3 className="font-extrabold text-base md:text-lg text-foreground group-hover:text-primary transition-colors">
-                      {t(data.title, data.titleEn)}
-                    </h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                      {t(data.desc, data.descEn)}
-                    </p>
-
-                    <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-1">
-                      <span className="text-[11px] font-bold text-primary block">
-                        🎁 {t("प्रमुख लाभ:", "Key Benefit:")}
-                      </span>
-                      <p className="text-xs text-foreground font-semibold">
-                        {t(data.benefits[0] || "", data.benefitsEn[0] || "")}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 mt-4 border-t border-border flex items-center justify-between gap-2">
-                    <Link
-                      to={`/schemes/${key}`}
-                      className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                  return (
+                    <div
+                      key={scheme.id}
+                      className="bg-card rounded-3xl p-6 border border-border shadow-md hover:shadow-xl transition-all flex flex-col justify-between group"
                     >
-                      <span>{t("सविस्तर निकष व माहिती", "View Details")}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-black px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                            {category === "central" ? t("केंद्र शासन", "Central") : category === "state" ? t("महाराष्ट्र शासन", "Maharashtra") : t("स्थानिक नगरपरिषद", "Wai Council")}
+                          </span>
+                          <Gift className="w-4 h-4 text-primary" />
+                        </div>
 
-                    <Link
-                      to={`/schemes/${key}`}
-                      className="px-4 py-2 rounded-xl gov-gradient text-white text-xs font-black shadow-md hover:shadow-lg transition-all flex items-center gap-1"
-                    >
-                      <span>{t("अर्ज करा", "Apply Now")}</span>
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
+                        <h3 className="font-extrabold text-base md:text-lg text-foreground group-hover:text-primary transition-colors">
+                          {title}
+                        </h3>
+                        {desc && (
+                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                            {desc}
+                          </p>
+                        )}
+
+                        {benefits && (
+                          <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-1">
+                            <span className="text-[11px] font-bold text-primary block">
+                              🎁 {t("प्रमुख लाभ:", "Key Benefit:")}
+                            </span>
+                            <p className="text-xs text-foreground font-semibold line-clamp-2">
+                              {benefits.split("\n")[0]}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-4 mt-4 border-t border-border flex items-center justify-between gap-2">
+                        {scheme.externalUrl ? (
+                          <a
+                            href={scheme.externalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                          >
+                            <span>{t("शासन निर्णय / संकेतस्थळ", "Official Portal / GR")}</span>
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        ) : (
+                          <span />
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSchemeForApply(scheme)}
+                          className="px-4 py-2 rounded-xl gov-gradient text-white text-xs font-black shadow-md hover:shadow-lg transition-all flex items-center gap-1 ml-auto"
+                        >
+                          <span>{t("ऑनलाइन अर्ज करा", "Apply Now")}</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Bottom Bar */}
             <div className="text-center pt-4">
               <Link
-                to="/schemes/all"
+                to="/schemes"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-card border border-border text-sm font-bold text-foreground hover:bg-muted shadow-sm hover:shadow"
               >
-                <span>{t("सर्व योजनांची एकत्रित यादी पहा (All 8 Schemes)", "View All Schemes")}</span>
+                <span>{t("सर्व योजनांची एकत्रित यादी पहा", "View All Schemes")}</span>
                 <ArrowRight className="w-4 h-4 text-primary" />
               </Link>
             </div>
@@ -705,14 +745,85 @@ export const schemePagesData: Record<string, SchemeData> = {
   },
 };
 
-export const PMAY = () => <SchemePage data={schemePagesData.pmay} />;
-export const AMRUT = () => <SchemePage data={schemePagesData.amrut} />;
-export const SwachhBharat = () => <SchemePage data={schemePagesData.swachh} />;
-export const PMSVANidhi = () => <SchemePage data={schemePagesData.pmsvanidhi} />;
-export const SanjayGandhi = () => <SchemePage data={schemePagesData.sanjayGandhi} />;
-export const Shravanbal = () => <SchemePage data={schemePagesData.shravanbal} />;
-export const DivyangKalyan = () => <SchemePage data={schemePagesData.divyang} />;
-export const MahilaBal = () => <SchemePage data={schemePagesData.mahilaBal} />;
+export const DynamicSchemePage = ({
+  keyword,
+  defaultData,
+}: {
+  keyword: string;
+  defaultData?: SchemeData;
+}) => {
+  const [data, setData] = useState<SchemeData>(
+    defaultData || {
+      title: "शासकीय जनकल्याण योजना",
+      titleEn: "Government Welfare Scheme",
+      subtitle: "शासकीय योजना सविस्तर माहिती व ऑनलाइन अर्ज",
+      subtitleEn: "Scheme details & online application portal",
+      desc: "शासकीय जनकल्याण योजना माहिती लोड होत आहे...",
+      descEn: "Loading scheme details...",
+      eligibility: [],
+      eligibilityEn: [],
+      benefits: [],
+      benefitsEn: [],
+    }
+  );
+
+  useEffect(() => {
+    return subscribeToActiveSchemes((items) => {
+      const match = items.find((s) => {
+        const full = (s.titleMr + " " + (s.titleEn || "") + " " + s.id).toLowerCase();
+        return full.includes(keyword.toLowerCase());
+      });
+      if (match) {
+        setData({
+          title: match.titleMr,
+          titleEn: match.titleEn || match.titleMr,
+          subtitle:
+            match.category === "central"
+              ? "केंद्र शासन जनकल्याण योजना २०२६"
+              : match.category === "state"
+              ? "महाराष्ट्र शासन जनकल्याण योजना २०२६"
+              : "वाई नगरपरिषद स्थानिक कल्याण योजना २०२६",
+          subtitleEn:
+            match.category === "central"
+              ? "Central Government Welfare Scheme 2026"
+              : match.category === "state"
+              ? "Maharashtra State Welfare Scheme 2026"
+              : "Wai Municipal Council Welfare Scheme 2026",
+          desc: match.descMr,
+          descEn: match.descEn || match.descMr,
+          eligibility: match.eligibilityMr
+            ? match.eligibilityMr.split("\n").filter(Boolean)
+            : defaultData?.eligibility || [],
+          eligibilityEn: match.eligibilityEn
+            ? match.eligibilityEn.split("\n").filter(Boolean)
+            : defaultData?.eligibilityEn || [],
+          benefits: match.benefitsMr
+            ? match.benefitsMr.split("\n").filter(Boolean)
+            : defaultData?.benefits || [],
+          benefitsEn: match.benefitsEn
+            ? match.benefitsEn.split("\n").filter(Boolean)
+            : defaultData?.benefitsEn || [],
+        });
+      }
+    });
+  }, [keyword]);
+
+  return <SchemePage data={data} />;
+};
+
+export const DynamicSchemeRoute = () => {
+  const { id } = useParams<{ id: string }>();
+  return <DynamicSchemePage keyword={id || ""} />;
+};
+
+export const PMAY = () => <DynamicSchemePage keyword="pmay" defaultData={schemePagesData.pmay} />;
+export const AMRUT = () => <DynamicSchemePage keyword="amrut" defaultData={schemePagesData.amrut} />;
+export const SwachhBharat = () => <DynamicSchemePage keyword="swachh" defaultData={schemePagesData.swachh} />;
+export const PMSVANidhi = () => <DynamicSchemePage keyword="pmsvanidhi" defaultData={schemePagesData.pmsvanidhi} />;
+export const SanjayGandhi = () => <DynamicSchemePage keyword="sanjay" defaultData={schemePagesData.sanjayGandhi} />;
+export const Shravanbal = () => <DynamicSchemePage keyword="shravanbal" defaultData={schemePagesData.shravanbal} />;
+export const DivyangKalyan = () => <DynamicSchemePage keyword="divyang" defaultData={schemePagesData.divyang} />;
+export const MahilaBal = () => <DynamicSchemePage keyword="mahila" defaultData={schemePagesData.mahilaBal} />;
 
 export const CentralSchemes = () => (
   <CategoryGroupPage
@@ -722,7 +833,6 @@ export const CentralSchemes = () => (
     subtitleMr="पंतप्रधान आवास योजना, स्वच्छ भारत शौचालय अनुदान, अमृत २.० व पीएम स्वनिधी योजनांची माहिती व ऑनलाइन अर्ज."
     subtitleEn="PMAY Housing, Swachh Bharat Toilet Grant, AMRUT 2.0, and PM SVANidhi Schemes for Wai citizens."
     icon="🏛️"
-    schemeKeys={["pmay", "swachh", "amrut", "pmsvanidhi"]}
   />
 );
 
@@ -734,7 +844,6 @@ export const StateSchemes = () => (
     subtitleMr="संजय गांधी निराधार अनुदान योजना व श्रावणबाळ सेवा निवृत्तीवेतन योजनांची माहिती व अर्ज."
     subtitleEn="Sanjay Gandhi Niradhar Scheme and Shravanbal Senior Citizen Pension Schemes in Wai."
     icon="🏰"
-    schemeKeys={["sanjayGandhi", "shravanbal"]}
   />
 );
 
@@ -746,6 +855,5 @@ export const LocalSchemes = () => (
     subtitleMr="दिव्यांग कल्याण योजना व महिला-बालकल्याण योजना अंतर्गत थेट अनुदान, साधने व कर सवलत."
     subtitleEn="Divyang Empowerment and Women & Child Welfare initiatives funded by Wai Municipal Council."
     icon="🏢"
-    schemeKeys={["divyang", "mahilaBal"]}
   />
 );

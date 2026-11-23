@@ -74,8 +74,12 @@ export async function fetchPublicSabha() {
 
 // Public Schemes
 export async function fetchPublicSchemes(category?: string) {
-  const qStr = category ? `?category=${encodeURIComponent(category)}` : "";
+  const qStr = category && category !== "all" ? `?category=${encodeURIComponent(category)}` : "";
   return request<any[]>(`/schemes/public${qStr}`);
+}
+
+export async function fetchPublicSchemeById(id: string) {
+  return request<any>(`/schemes/public/${encodeURIComponent(id)}`);
 }
 
 // Public Gallery

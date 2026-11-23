@@ -7,9 +7,19 @@ import { SuperAdminGuard } from '../auth/super-admin.guard';
 export class SchemesController {
   constructor(private readonly schemesService: SchemesService) {}
 
+  @Get()
+  async getPublicDefault(@Query('category') category?: string) {
+    return this.schemesService.getPublicSchemes(category);
+  }
+
   @Get('public')
   async getPublic(@Query('category') category?: string) {
     return this.schemesService.getPublicSchemes(category);
+  }
+
+  @Get('public/:id')
+  async getPublicById(@Param('id') id: string) {
+    return this.schemesService.getPublicSchemeById(id);
   }
 
   @UseGuards(JwtAuthGuard, SuperAdminGuard)

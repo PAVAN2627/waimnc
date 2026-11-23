@@ -25,6 +25,7 @@ import {
   Shravanbal,
   DivyangKalyan,
   MahilaBal,
+  DynamicSchemeRoute,
 } from "./pages/schemes/SchemePages";
 import SchemesPage from "./pages/schemes/SchemesPage";
 import Tenders from "./pages/Tenders";
@@ -104,7 +105,9 @@ const App = () => (
                 <Route path="/schemes/shravanbal" element={<Shravanbal />} />
                 <Route path="/schemes/divyang" element={<DivyangKalyan />} />
                 <Route path="/schemes/mahila-bal" element={<MahilaBal />} />
+                <Route path="/schemes" element={<SchemesPage />} />
                 <Route path="/schemes/all" element={<SchemesPage />} />
+                <Route path="/schemes/:id" element={<DynamicSchemeRoute />} />
 
                 {/* Civic & City Information */}
                 <Route path="/tenders" element={<Tenders />} />

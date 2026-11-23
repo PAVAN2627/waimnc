@@ -174,20 +174,16 @@ function mapScheme(item: any): SchemeRecord {
 export function subscribeToSchemes(cb: (items: SchemeRecord[]) => void): () => void {
   let isMounted = true;
 
-  // Initialize immediately with curated official default schemes
+  // Initialize with fallback cache while loading
   cb(DEFAULT_WAI_SCHEMES);
 
+  // Directly fetch live active schemes from PostgreSQL database
   api.fetchPublicSchemes()
     .then((items) => {
       if (!isMounted) return;
       if (Array.isArray(items) && items.length > 0) {
-        const fetched = items.map(mapScheme);
-        // Merge so defaults not in fetched remain visible
-        const existingTitles = new Set(fetched.map((s) => s.titleMr.trim()));
-        const extraDefaults = DEFAULT_WAI_SCHEMES.filter(
-          (d) => !existingTitles.has(d.titleMr.trim())
-        );
-        cb([...fetched, ...extraDefaults]);
+        // Pure database items as single source of truth
+        cb(items.map(mapScheme));
       } else {
         cb(DEFAULT_WAI_SCHEMES);
       }
@@ -204,4 +200,68 @@ export function subscribeToSchemes(cb: (items: SchemeRecord[]) => void): () => v
 
 export function subscribeToActiveSchemes(cb: (items: SchemeRecord[]) => void): () => void {
   return subscribeToSchemes((items) => cb(items.filter((s) => s.status === "active")));
+}
+
+export function subscribeToCategorySchemes(
+  category: SchemeCategory,
+  cb: (items: SchemeRecord[]) => void
+): () => void {
+  let isMounted = true;
+
+  // Initial category cache
+  cb(DEFAULT_WAI_SCHEMES.filter((s) => s.category === category && s.status === "active"));
+
+  api.fetchPublicSchemes(category)
+    .then((items) => {
+      if (!isMounted) return;
+      if (Array.isArray(items) && items.length > 0) {
+        cb(items.map(mapScheme).filter((s) => s.status === "active"));
+      } else {
+        cb(DEFAULT_WAI_SCHEMES.filter((s) => s.category === category && s.status === "active"));
+      }
+    })
+    .catch((err) => {
+      console.warn(`Category ${category} fetch fallback:`, err);
+      if (isMounted) {
+        cb(DEFAULT_WAI_SCHEMES.filter((s) => s.category === category && s.status === "active"));
+      }
+    });
+
+  return () => {
+    isMounted = false;
+  };
+}
+
+export async function fetchSchemeByIdOrSlug(idOrSlug: string): Promise<SchemeRecord | null> {
+  const normalized = idOrSlug.trim().toLowerCase();
+  try {
+    const raw = await api.fetchPublicSchemeById(idOrSlug);
+    if (raw) return mapScheme(raw);
+  } catch {
+    // continue to search in all schemes
+  }
+
+  try {
+    const all = await api.fetchPublicSchemes();
+    if (Array.isArray(all) && all.length > 0) {
+      const match = all.find((item: any) => {
+        if (!item) return false;
+        if (item.id === idOrSlug) return true;
+        const mr = (item.titleMr || "").toLowerCase();
+        const en = (item.titleEn || "").toLowerCase();
+        return mr.includes(normalized) || en.includes(normalized);
+      });
+      if (match) return mapScheme(match);
+    }
+  } catch {}
+
+  const defMatch = DEFAULT_WAI_SCHEMES.find((s) => {
+    if (s.id === idOrSlug) return true;
+    return (
+      s.titleMr.toLowerCase().includes(normalized) ||
+      s.titleEn.toLowerCase().includes(normalized)
+    );
+  });
+
+  return defMatch || null;
 }

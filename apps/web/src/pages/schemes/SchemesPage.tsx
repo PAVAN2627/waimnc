@@ -278,7 +278,7 @@ function SchemeCard({
   );
 }
 
-function ApplySchemeModal({
+export function ApplySchemeModal({
   scheme,
   language,
   t,
