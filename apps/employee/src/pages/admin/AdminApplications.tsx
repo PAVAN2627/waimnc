@@ -232,10 +232,12 @@ export default function AdminApplications() {
     { key: "all", labelMr: "सर्व अर्ज", labelEn: "All Applications" },
     { key: "birth", labelMr: "जन्म दाखला", labelEn: "Birth Certificate", match: "जन्म" },
     { key: "death", labelMr: "मृत्यू दाखला", labelEn: "Death Certificate", match: "मृत्यू" },
+    { key: "marriage", labelMr: "विवाह नोंदणी दाखला", labelEn: "Marriage Certificate", match: "विवाह" },
     { key: "permit", labelMr: "बांधकाम परवानगी", labelEn: "Building Permit", match: "बांधकाम" },
     { key: "water", labelMr: "पाणी नळ जोडणी", labelEn: "Water Tap Connection", match: "पाणी" },
     { key: "tax", labelMr: "मालमत्ता कर नोंद", labelEn: "Property Tax", match: "मालमत्ता" },
-    { key: "scheme", labelMr: "शासकीय योजना", labelEn: "Schemes", match: "योजना" },
+    { key: "pmay", labelMr: "प्रधानमंत्री आवास (PMAY)", labelEn: "PMAY Housing Scheme", match: "pmay" },
+    { key: "scheme", labelMr: "शासकीय योजना (इतर)", labelEn: "Other Schemes", match: "योजना" },
   ];
 
   const userDepts =

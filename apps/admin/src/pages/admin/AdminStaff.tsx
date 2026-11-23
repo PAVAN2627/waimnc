@@ -18,6 +18,7 @@ import {
   Check,
   Layers,
   History,
+  FileCheck2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,30 @@ export const MUNICIPAL_DEPARTMENTS = [
   { value: "सामान्य प्रशासन", labelMr: "सामान्य प्रशासन", labelEn: "General Administration" },
 ];
 
+export const MUNICIPAL_APPLICATIONS = [
+  // १. नागरी सेवा व दाखले अर्ज (Civil Services & Certificates)
+  { value: "जन्म दाखला अर्ज", labelMr: "जन्म दाखला अर्ज", labelEn: "Birth Certificate", category: "service" },
+  { value: "मृत्यू दाखला अर्ज", labelMr: "मृत्यू दाखला अर्ज", labelEn: "Death Certificate", category: "service" },
+  { value: "विवाह नोंदणी दाखला", labelMr: "विवाह नोंदणी दाखला", labelEn: "Marriage Certificate", category: "service" },
+  { value: "नवीन पाणी नळ जोडणी", labelMr: "नवीन पाणी नळ जोडणी व बिल सेवा", labelEn: "New Tap Connection & Billing", category: "service" },
+  { value: "मालमत्ता कर नोंदणी व फेरफार", labelMr: "मालमत्ता कर नोंदणी व फेरफार", labelEn: "Property Tax & Mutation", category: "service" },
+  { value: "बांधकाम परवानगी व नकाशा मंजुरी", labelMr: "बांधकाम परवानगी व नकाशा", labelEn: "Building Permit & Plan", category: "service" },
+  { value: "व्यवसाय परवाना अर्ज", labelMr: "व्यवसाय परवाना (Trade License)", labelEn: "Trade License", category: "service" },
+  { value: "ना हरकत प्रमाणपत्र (NOC)", labelMr: "ना हरकत प्रमाणपत्र (NOC)", labelEn: "No Objection Certificate", category: "service" },
+  { value: "अग्निशमन परवाना (Fire NOC)", labelMr: "अग्निशमन परवाना (Fire NOC)", labelEn: "Fire NOC", category: "service" },
+  { value: "रस्ता खोदाई परवानगी अर्ज", labelMr: "रस्ता खोदाई परवानगी", labelEn: "Road Excavation Permit", category: "service" },
+
+  // २. शासकीय व नागरी कल्याण योजना (Government Welfare Schemes & Yojna)
+  { value: "प्रधानमंत्री आवास योजना (PMAY)", labelMr: "प्रधानमंत्री आवास योजना (PMAY)", labelEn: "PMAY Housing Scheme", category: "scheme" },
+  { value: "स्वच्छ भारत अभियान (शौचालय अनुदान)", labelMr: "स्वच्छ भारत (शौचालय अनुदान)", labelEn: "Swachh Bharat Toilet Scheme", category: "scheme" },
+  { value: "अमृत योजना (AMRUT 2.0)", labelMr: "अमृत योजना (AMRUT 2.0)", labelEn: "AMRUT 2.0 Mission", category: "scheme" },
+  { value: "संजय गांधी निराधार योजना", labelMr: "संजय गांधी निराधार योजना", labelEn: "Sanjay Gandhi Niradhar Yojna", category: "scheme" },
+  { value: "श्रावणबाळ सेवा राज्य निवृत्तीवेतन", labelMr: "श्रावणबाळ सेवा निवृत्तीवेतन", labelEn: "Shravanbal Pension Scheme", category: "scheme" },
+  { value: "दिव्यांग कल्याण योजना", labelMr: "दिव्यांग कल्याण योजना", labelEn: "Disability Welfare Scheme", category: "scheme" },
+  { value: "महिला व बालकल्याण योजना", labelMr: "महिला व बालकल्याण योजना", labelEn: "Women & Child Welfare Scheme", category: "scheme" },
+  { value: "पीएम स्वनिधी योजना (फेरीवाला कर्ज)", labelMr: "पीएम स्वनिधी (फेरीवाला कर्ज)", labelEn: "PM SVANidhi Scheme", category: "scheme" },
+];
+
 export default function AdminStaff() {
   const { t, lang } = useLanguage();
   const { toast } = useToast();
@@ -71,6 +96,7 @@ export default function AdminStaff() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [selectedDepts, setSelectedDepts] = useState<string[]>([MUNICIPAL_DEPARTMENTS[0].value]);
+  const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [role, setRole] = useState<"DEPT_OFFICER" | "SUPER_ADMIN">("DEPT_OFFICER");
   const [accessScope, setAccessScope] = useState<"all" | "complaints" | "applications">("all");
 
@@ -101,6 +127,7 @@ export default function AdminStaff() {
     setEmail("");
     setPassword("");
     setSelectedDepts([MUNICIPAL_DEPARTMENTS[0].value]);
+    setSelectedApps(MUNICIPAL_APPLICATIONS.map((a) => a.value));
     setRole("DEPT_OFFICER");
     setAccessScope("all");
     setShowAddForm(true);
@@ -118,9 +145,33 @@ export default function AdminStaff() {
     } else if (staff.department) {
       depts = staff.department.split(",").map((d) => d.trim()).filter(Boolean);
     }
-    setSelectedDepts(depts.length > 0 ? depts : [MUNICIPAL_DEPARTMENTS[0].value]);
+    const deptVals = MUNICIPAL_DEPARTMENTS.map((d) => d.value);
+    const appVals = MUNICIPAL_APPLICATIONS.map((a) => a.value);
+
+    const matchedDepts = depts.filter((d) => deptVals.includes(d));
+    const matchedApps = depts.filter((d) => appVals.includes(d));
+
+    let parsedScope: "all" | "complaints" | "applications" = "all";
+    if (staff.accessScope) {
+      if (staff.accessScope.startsWith("{")) {
+        try {
+          const parsed = JSON.parse(staff.accessScope);
+          if (Array.isArray(parsed.applications)) {
+            parsed.applications.forEach((a: string) => {
+              if (!matchedApps.includes(a)) matchedApps.push(a);
+            });
+          }
+          if (parsed.scope) parsedScope = parsed.scope;
+        } catch {}
+      } else if (staff.accessScope === "complaints" || staff.accessScope === "applications") {
+        parsedScope = staff.accessScope;
+      }
+    }
+
+    setSelectedDepts(matchedDepts.length > 0 ? matchedDepts : [MUNICIPAL_DEPARTMENTS[0].value]);
+    setSelectedApps(matchedApps.length > 0 ? matchedApps : MUNICIPAL_APPLICATIONS.map((a) => a.value));
     setRole((staff.role as any) || "DEPT_OFFICER");
-    setAccessScope((staff.accessScope as any) || "all");
+    setAccessScope(parsedScope);
     setShowAddForm(true);
   };
 
@@ -145,6 +196,22 @@ export default function AdminStaff() {
 
   const handleClearDepts = () => {
     setSelectedDepts([MUNICIPAL_DEPARTMENTS[0].value]);
+  };
+
+  const toggleApp = (val: string) => {
+    if (selectedApps.includes(val)) {
+      setSelectedApps(selectedApps.filter((a) => a !== val));
+    } else {
+      setSelectedApps([...selectedApps, val]);
+    }
+  };
+
+  const handleSelectAllApps = () => {
+    setSelectedApps(MUNICIPAL_APPLICATIONS.map((a) => a.value));
+  };
+
+  const handleClearApps = () => {
+    setSelectedApps([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -175,8 +242,14 @@ export default function AdminStaff() {
 
     try {
       setSaving(true);
-      const effectiveDepts = role === "SUPER_ADMIN" ? [] : selectedDepts;
-      const joinedDept = role === "SUPER_ADMIN" ? "सर्व विभाग (All)" : effectiveDepts.join(", ");
+      const combinedPermissions = Array.from(new Set([...selectedDepts, ...selectedApps]));
+      const effectiveDepts = role === "SUPER_ADMIN" ? [] : combinedPermissions;
+      const joinedDept = role === "SUPER_ADMIN" ? "सर्व विभाग (All)" : selectedDepts.join(", ");
+      const effectiveScope = role === "SUPER_ADMIN" ? "all" : JSON.stringify({
+        scope: accessScope,
+        applications: selectedApps,
+        departments: selectedDepts,
+      });
 
       if (editingStaff) {
         // UPDATE existing staff
@@ -185,7 +258,7 @@ export default function AdminStaff() {
           department: joinedDept,
           departments: effectiveDepts,
           role,
-          accessScope,
+          accessScope: effectiveScope,
         };
         if (password.trim().length >= 6) {
           updatePayload.password = password.trim();
@@ -210,7 +283,7 @@ export default function AdminStaff() {
           department: joinedDept,
           departments: effectiveDepts,
           role,
-          accessScope,
+          accessScope: effectiveScope,
         };
 
         const newUser = await createStaffUser(payload);
@@ -577,6 +650,117 @@ export default function AdminStaff() {
                 </div>
               )}
 
+              {/* Row 4: APPLICATIONS & GOVERNMENT SCHEMES SELECTOR */}
+              {role === "DEPT_OFFICER" && (
+                <div className="pt-4 border-t space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <label className="block text-xs font-black text-foreground">
+                        {t(
+                          "दाखले व शासकीय योजना अधिकार (निवडलेले अर्ज पाहण्याची परवानगी) *",
+                          "Citizen Applications & Govt. Scheme Permissions *"
+                        )}
+                      </label>
+                      <span className="text-[11px] text-muted-foreground">
+                        {t(
+                          `सध्या ${selectedApps.length} अर्ज / योजना निवडल्या आहेत. या कर्मचाऱ्याला या सर्व अर्जांची पडताळणी व मंजुरी करता येईल.`,
+                          `${selectedApps.length} application(s)/scheme(s) selected.`
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSelectAllApps}
+                        className="text-xs h-7 rounded-lg"
+                      >
+                        {t("सर्व निवडा", "Select All")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleClearApps}
+                        className="text-xs h-7 rounded-lg"
+                      >
+                        {t("साफ करा", "Clear")}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Section A: Civil Services & Certificates */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                      <FileCheck2 className="w-3.5 h-3.5 text-primary" />
+                      {t("१. नागरी दाखले व सेवा अर्ज (Citizen Certificates & Services)", "1. Citizen Certificates & Services")}
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-1 border rounded-2xl bg-muted/20">
+                      {MUNICIPAL_APPLICATIONS.filter((a) => a.category === "service").map((app) => {
+                        const isSelected = selectedApps.includes(app.value);
+                        return (
+                          <button
+                            key={app.value}
+                            type="button"
+                            onClick={() => toggleApp(app.value)}
+                            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all duration-150 text-xs font-bold ${
+                              isSelected
+                                ? "bg-primary/10 border-primary text-primary shadow-sm ring-1 ring-primary/40 font-black"
+                                : "bg-background border-border text-foreground hover:bg-muted/60"
+                            }`}
+                          >
+                            <div
+                              className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
+                                isSelected ? "bg-primary text-white" : "border border-muted-foreground/30"
+                              }`}
+                            >
+                              {isSelected && <Check className="w-3.5 h-3.5" />}
+                            </div>
+                            <span className="truncate">{lang === "mr" ? app.labelMr : app.labelEn}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Section B: Government Welfare Schemes */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                      {t("२. शासकीय व नागरी कल्याण योजना (Govt. Welfare Schemes)", "2. Govt. Welfare Schemes")}
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-1 border rounded-2xl bg-muted/20">
+                      {MUNICIPAL_APPLICATIONS.filter((a) => a.category === "scheme").map((app) => {
+                        const isSelected = selectedApps.includes(app.value);
+                        return (
+                          <button
+                            key={app.value}
+                            type="button"
+                            onClick={() => toggleApp(app.value)}
+                            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all duration-150 text-xs font-bold ${
+                              isSelected
+                                ? "bg-amber-500/15 border-amber-500 text-amber-800 dark:text-amber-400 shadow-sm ring-1 ring-amber-500/40 font-black"
+                                : "bg-background border-border text-foreground hover:bg-muted/60"
+                            }`}
+                          >
+                            <div
+                              className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
+                                isSelected ? "bg-amber-600 text-white" : "border border-muted-foreground/30"
+                              }`}
+                            >
+                              {isSelected && <Check className="w-3.5 h-3.5" />}
+                            </div>
+                            <span className="truncate">{lang === "mr" ? app.labelMr : app.labelEn}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Form Actions */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t">
                 <Button
@@ -674,6 +858,26 @@ export default function AdminStaff() {
                     ? staff.department.split(",").map((d) => d.trim()).filter(Boolean)
                     : [];
 
+                const deptVals = MUNICIPAL_DEPARTMENTS.map((d) => d.value);
+                const appVals = MUNICIPAL_APPLICATIONS.map((a) => a.value);
+
+                let assignedApps: string[] = [];
+                if (staff.accessScope && staff.accessScope.startsWith("{")) {
+                  try {
+                    const parsed = JSON.parse(staff.accessScope);
+                    if (Array.isArray(parsed.applications)) {
+                      assignedApps = parsed.applications;
+                    }
+                  } catch {}
+                }
+                depts.forEach((d) => {
+                  if (appVals.includes(d) && !assignedApps.includes(d)) {
+                    assignedApps.push(d);
+                  }
+                });
+
+                const displayDepts = depts.filter((d) => deptVals.includes(d) || !appVals.includes(d));
+
                 return (
                   <div
                     key={staff.id}
@@ -749,8 +953,8 @@ export default function AdminStaff() {
                           <span className="text-[11px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-md border border-amber-500/20">
                             {t("सर्व नागरी विभाग व कारभार", "All Municipal Departments")}
                           </span>
-                        ) : depts.length > 0 ? (
-                          depts.map((d, idx) => (
+                        ) : displayDepts.length > 0 ? (
+                          displayDepts.map((d, idx) => (
                             <span
                               key={idx}
                               className="inline-flex items-center gap-1 text-[11px] font-bold bg-muted px-2.5 py-0.5 rounded-lg border border-border text-foreground"
@@ -765,6 +969,24 @@ export default function AdminStaff() {
                           </span>
                         )}
                       </div>
+
+                      {/* Assigned Applications & Schemes Pill Badges */}
+                      {!isSuper && assignedApps.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                          <span className="text-[11px] font-bold text-muted-foreground mr-1">
+                            {t("नेमून दिलेले अर्ज / योजना:", "Assigned Services & Schemes:")}
+                          </span>
+                          {assignedApps.map((a, idx) => (
+                            <span
+                              key={idx}
+                              className="inline-flex items-center gap-1 text-[11px] font-bold bg-primary/10 text-primary px-2.5 py-0.5 rounded-lg border border-primary/20"
+                            >
+                              <FileCheck2 className="w-2.5 h-2.5" />
+                              {a}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Right: Actions */}

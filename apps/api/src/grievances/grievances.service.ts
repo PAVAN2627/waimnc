@@ -12,15 +12,60 @@ function matchesDepartment(c: any, targetDept: string): boolean {
   const itemType = (c.type || '').toLowerCase();
 
   if (itemDept.includes(target) || target.includes(itemDept)) return true;
+  if (itemType.includes(target) || target.includes(itemType)) return true;
+  if (itemDesc.includes(target)) return true;
+
+  // Schemes & Yojna matching (PMAY, Swachh Bharat, AMRUT, etc.)
+  if (target.includes('pmay') || target.includes('आवास') || target.includes('घरकुल')) {
+    return itemDesc.includes('pmay') || itemDesc.includes('आवास') || itemDesc.includes('घरकुल') || itemType.includes('pmay') || itemType.includes('आवास');
+  }
+  if (target.includes('स्वच्छ') || target.includes('शौचालय') || target.includes('swachh')) {
+    return itemDesc.includes('शौचालय') || itemType.includes('शौचालय') || itemDesc.includes('स्वच्छ') || itemDept.includes('आरोग्य');
+  }
+  if (target.includes('अमृत') || target.includes('amrut')) {
+    return itemDesc.includes('अमृत') || itemDesc.includes('amrut') || itemType.includes('अमृत');
+  }
+  if (target.includes('निराधार') || target.includes('संजय गांधी')) {
+    return itemDesc.includes('निराधार') || itemDesc.includes('संजय गांधी') || itemType.includes('निराधार');
+  }
+  if (target.includes('श्रावणबाळ')) {
+    return itemDesc.includes('श्रावणबाळ') || itemType.includes('श्रावणबाळ');
+  }
+  if (target.includes('दिव्यांग') || target.includes('अपंग')) {
+    return itemDesc.includes('दिव्यांग') || itemDesc.includes('अपंग') || itemType.includes('दिव्यांग');
+  }
+  if (target.includes('महिला') || target.includes('बालकल्याण')) {
+    return itemDesc.includes('महिला') || itemDesc.includes('बालकल्याण') || itemType.includes('महिला');
+  }
+  if (target.includes('स्वनिधी') || target.includes('फेरीवाला') || target.includes('svanidhi')) {
+    return itemDesc.includes('स्वनिधी') || itemDesc.includes('फेरीवाला') || itemType.includes('स्वनिधी');
+  }
+
+  // Certificates & Specific Applications
+  if (target.includes('जन्म') || target.includes('birth')) {
+    return itemDept.includes('जन्म') || itemDesc.includes('जन्म') || itemType.includes('जन्म');
+  }
+  if (target.includes('मृत्यू') || target.includes('death')) {
+    return itemDept.includes('मृत्यू') || itemDesc.includes('मृत्यू') || itemType.includes('मृत्यू');
+  }
+  if (target.includes('विवाह') || target.includes('marriage')) {
+    return itemDept.includes('विवाह') || itemDesc.includes('विवाह') || itemType.includes('विवाह');
+  }
+  if (target.includes('बांधकाम') || target.includes('नकाशा') || target.includes('permit') || target.includes('रस्ते')) {
+    return itemDept.includes('बांधकाम') || itemDept.includes('रस्ते') || itemType.includes('रस्ता') || itemType.includes('खड्डे') || itemDesc.includes('बांधकाम') || itemDesc.includes('नकाशा');
+  }
+  if (target.includes('परवाना') || target.includes('license') || target.includes('trade')) {
+    return itemDesc.includes('परवाना') || itemType.includes('परवाना') || itemDesc.includes('व्यवसाय');
+  }
+  if (target.includes('ना हरकत') || target.includes('noc')) {
+    return itemDesc.includes('ना हरकत') || itemDesc.includes('noc') || itemType.includes('noc');
+  }
 
   if (target.includes('पाणी') || target.includes('water')) {
-    return itemDept.includes('पाणी') || itemDept.includes('water') || itemType.includes('पाणी') || itemType.includes('नळ');
+    return itemDept.includes('पाणी') || itemDept.includes('water') || itemType.includes('पाणी') || itemType.includes('नळ') || itemDesc.includes('नळ');
   }
   if (target.includes('आरोग्य') || target.includes('स्वच्छता') || target.includes('health') || target.includes('sanitation')) {
     return itemDept.includes('आरोग्य') || itemDept.includes('स्वच्छता') || itemDept.includes('कचरा') || itemType.includes('कचरा');
-  }
-  if (target.includes('बांधकाम') || target.includes('रस्ते') || target.includes('civil') || target.includes('road')) {
-    return itemDept.includes('बांधकाम') || itemDept.includes('रस्ते') || itemType.includes('रस्ता') || itemType.includes('खड्डे');
   }
   if (target.includes('विद्युत') || target.includes('दिवाबत्ती') || target.includes('electrical')) {
     return itemDept.includes('विद्युत') || itemDept.includes('दिवाबत्ती') || itemType.includes('पथदिवे') || itemType.includes('लाईट');
@@ -28,8 +73,8 @@ function matchesDepartment(c: any, targetDept: string): boolean {
   if (target.includes('दाखले') || target.includes('लोकसेवा') || target.includes('हक्क') || target.includes('certificate')) {
     return itemDept.includes('लोकसेवा') || itemDept.includes('दाखले') || itemType.includes('दाखला') || itemType.includes('प्रमाणपत्र');
   }
-  if (target.includes('कर') || target.includes('tax')) {
-    return itemDept.includes('कर') || itemDept.includes('मूल्यांकन') || itemType.includes('कर');
+  if (target.includes('कर') || target.includes('tax') || target.includes('मालमत्ता')) {
+    return itemDept.includes('कर') || itemDept.includes('मूल्यांकन') || itemType.includes('कर') || itemDesc.includes('मालमत्ता');
   }
   if (target.includes('सांडपाणी') || target.includes('गटार') || target.includes('drainage')) {
     return itemDept.includes('सांडपाणी') || itemDept.includes('गटार') || itemType.includes('गटार');
@@ -42,9 +87,6 @@ function matchesDepartment(c: any, targetDept: string): boolean {
   }
   if (target.includes('अग्निशमन') || target.includes('fire')) {
     return itemDept.includes('अग्निशमन') || itemType.includes('अग्निशमन');
-  }
-  if (target.includes('जन्म') || target.includes('मृत्यू') || target.includes('birth') || target.includes('death')) {
-    return itemDept.includes('जन्म') || itemDept.includes('मृत्यू') || itemDesc.includes('जन्म') || itemDesc.includes('मृत्यू');
   }
 
   return false;
