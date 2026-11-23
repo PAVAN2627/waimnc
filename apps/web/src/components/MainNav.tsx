@@ -49,6 +49,7 @@ const getMenuItems = (t: (mr: string, en: string) => string): MenuItem[] => [
       { label: t("महिला व बाल कल्याण", "Women & Child Welfare"), href: "/departments/women" },
       { label: t("निवडणूक विभाग", "Election Department"), href: "/departments/election" },
       { label: t("आस्थापना विभाग", "Establishment Department"), href: "/departments/establishment" },
+      { label: t("सभा विभाग", "Council Meeting Dept."), href: "/departments/sabha" },
     ],
   },
   {
@@ -71,7 +72,6 @@ const getMenuItems = (t: (mr: string, en: string) => string): MenuItem[] => [
       { label: t("नगरपालिकेच्या योजना", "Municipal Schemes"), href: "/schemes/local" },
       { label: t("प्रधानमंत्री आवास योजना", "PM Housing Scheme"), href: "/schemes/pmay" },
       { label: t("स्वच्छ भारत मिशन", "Swachh Bharat Mission"), href: "/schemes/swachh-bharat" },
-      { label: t("विकास योजना (City DP Plan)", "Development Plan"), href: "/vikas-yojna" },
     ],
   },
   { label: t("विकास योजना", "Development Plan"), href: "/vikas-yojna" },

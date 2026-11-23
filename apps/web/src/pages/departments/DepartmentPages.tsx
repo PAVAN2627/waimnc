@@ -6,15 +6,32 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
+export interface DeptOfficer {
+  name: string;
+  nameEn: string;
+  role: string;
+  roleEn: string;
+  phone: string;
+  email?: string;
+}
+
 interface DeptData {
   icon: LucideIcon;
-  title: string; titleEn: string;
-  head: string; headEn: string;
-  role?: string; roleEn?: string;
-  phone: string; email?: string;
-  desc: string; descEn: string;
-  services: string[]; servicesEn: string[];
-  hours: string; hoursEn: string;
+  title: string;
+  titleEn: string;
+  head: string;
+  headEn: string;
+  role?: string;
+  roleEn?: string;
+  phone: string;
+  email?: string;
+  officers?: DeptOfficer[];
+  desc: string;
+  descEn: string;
+  services: string[];
+  servicesEn: string[];
+  hours: string;
+  hoursEn: string;
 }
 
 interface ServiceInfoModalProps {
@@ -204,42 +221,81 @@ const DeptPage = ({ data }: { data: DeptData }) => {
                   <div className="flex items-center justify-between border-b border-border pb-3">
                     <h2 className="text-lg font-black text-foreground flex items-center gap-2">
                       <Users className="w-5 h-5 text-primary" />
-                      <span>{t("विभाग प्रमुख", "Department Head")}</span>
+                      <span>{data.officers && data.officers.length > 1 ? t("विभाग अधिकारी व कर्मचारी", "Department Officers") : t("विभाग प्रमुख", "Department Head")}</span>
                     </h2>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                       OFFICIAL
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-4 pt-1">
-                    <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-3xl shadow-inner group-hover:scale-105 transition-transform">
-                      👤
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-base text-foreground">{t(data.head, data.headEn)}</h3>
-                      <p className="text-xs text-muted-foreground font-semibold mt-0.5">{t(data.role || "प्रशासकीय अधिकारी", data.roleEn || "Administrative Officer")}</p>
-                    </div>
-                  </div>
+                  {data.officers && data.officers.length > 0 ? (
+                    <div className="space-y-4 divide-y divide-border/60">
+                      {data.officers.map((off, idx) => (
+                        <div key={idx} className={idx > 0 ? "pt-4 space-y-2.5" : "space-y-2.5"}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-xl shadow-inner flex-shrink-0">
+                              👤
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="font-extrabold text-sm md:text-base text-foreground truncate">{t(off.name, off.nameEn)}</h3>
+                              <p className="text-xs text-muted-foreground font-semibold truncate">{t(off.role, off.roleEn)}</p>
+                            </div>
+                          </div>
 
-                  {/* Contact Links */}
-                  <div className="space-y-2 pt-2 text-xs">
-                    <a
-                      href={`tel:${data.phone}`}
-                      className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 hover:bg-primary/10 hover:text-primary transition-colors border border-border font-semibold text-foreground"
-                    >
-                      <Phone className="w-4 h-4 text-primary" />
-                      <span>{data.phone}</span>
-                    </a>
-                    {data.email && (
-                      <a
-                        href={`mailto:${data.email}`}
-                        className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 hover:bg-primary/10 hover:text-primary transition-colors border border-border font-semibold text-foreground truncate"
-                      >
-                        <Mail className="w-4 h-4 text-primary flex-shrink-0" />
-                        <span className="truncate">{data.email}</span>
-                      </a>
-                    )}
-                  </div>
+                          <div className="space-y-1.5 text-xs">
+                            <a
+                              href={`tel:${off.phone}`}
+                              className="flex items-center gap-2 p-2 rounded-xl bg-muted/60 hover:bg-primary/10 hover:text-primary transition-colors border border-border font-semibold text-foreground"
+                            >
+                              <Phone className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                              <span>{off.phone}</span>
+                            </a>
+                            {off.email && (
+                              <a
+                                href={`mailto:${off.email}`}
+                                className="flex items-center gap-2 p-2 rounded-xl bg-muted/60 hover:bg-primary/10 hover:text-primary transition-colors border border-border font-semibold text-foreground truncate"
+                              >
+                                <Mail className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                                <span className="truncate">{off.email}</span>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-4 pt-1">
+                        <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-3xl shadow-inner group-hover:scale-105 transition-transform">
+                          👤
+                        </div>
+                        <div>
+                          <h3 className="font-extrabold text-base text-foreground">{t(data.head, data.headEn)}</h3>
+                          <p className="text-xs text-muted-foreground font-semibold mt-0.5">{t(data.role || "प्रशासकीय अधिकारी", data.roleEn || "Administrative Officer")}</p>
+                        </div>
+                      </div>
+
+                      {/* Contact Links */}
+                      <div className="space-y-2 pt-2 text-xs">
+                        <a
+                          href={`tel:${data.phone}`}
+                          className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 hover:bg-primary/10 hover:text-primary transition-colors border border-border font-semibold text-foreground"
+                        >
+                          <Phone className="w-4 h-4 text-primary" />
+                          <span>{data.phone}</span>
+                        </a>
+                        {data.email && (
+                          <a
+                            href={`mailto:${data.email}`}
+                            className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 hover:bg-primary/10 hover:text-primary transition-colors border border-border font-semibold text-foreground truncate"
+                          >
+                            <Mail className="w-4 h-4 text-primary flex-shrink-0" />
+                            <span className="truncate">{data.email}</span>
+                          </a>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Office Hours Badge */}
@@ -301,134 +357,307 @@ const DeptPage = ({ data }: { data: DeptData }) => {
 
 const depts: Record<string, DeptData> = {
   "general-admin": {
-    icon: Building2, title: "सामान्य प्रशासन विभाग", titleEn: "General Administration Department",
-    head: "श्री. हर्षवर्धन शिवाजीराव मोहिते", headEn: "Mr. Harshvardhan Shivajirao Mohite",
-    role: "कर व प्रशासकीय अधिकारी", roleEn: "Tax and Administrative Officer",
-    phone: "8149225859", email: "harshamohite1234@gmail.com",
+    icon: Building2,
+    title: "सामान्य प्रशासन विभाग",
+    titleEn: "General Administration Department",
+    head: "श्री. हर्षवर्धन शिवाजीराव मोहिते",
+    headEn: "Mr. Harshvardhan Shivajirao Mohite",
+    role: "कर व प्रशासकीय अधिकारी",
+    roleEn: "Tax and Administrative Officer",
+    phone: "8149225859",
+    email: "harshamohite1@gmail.com",
     desc: "नगरपरिषदेचा प्रशासकीय व कार्यात्मक कारभार महाराष्ट्र नगरपरिषदा अधिनियम १९६५ नुसार चालविणे. नगरपरिषदेच्या सर्व ठरावांची अमलबजावणी, लेखे व अभिलेखे ठेवणे, अंदाजपत्रक तयार करणे व सर्व कर्मचाऱ्यांवर नियंत्रण ठेवणे.",
     descEn: "Administration of the municipality under Maharashtra Municipal Councils Act 1965. Implementation of all resolutions, maintaining accounts and records, preparing budgets and controlling all staff.",
     services: ["नगरपरिषद ठरावांची अमलबजावणी", "लेखे व अभिलेखे व्यवस्थापन", "वार्षिक अंदाजपत्रक तयार करणे", "कर्मचारी नियंत्रण व व्यवस्थापन", "माहिती अधिकार (RTI) अर्ज", "सभा आयोजन व इतिवृत्त", "ना-हरकत दाखले"],
     servicesEn: ["Implementation of council resolutions", "Accounts & records management", "Annual budget preparation", "Staff control & management", "Right to Information (RTI)", "Meeting organization & minutes", "No-objection certificates"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   health: {
-    icon: HeartPulse, title: "आरोग्य व स्वच्छता विभाग", titleEn: "Health and Sanitation Department",
-    head: "श्री. विजय मारुडा", headEn: "Mr. Vijay Maruda", phone: "9823447878", email: "waimunicipalcouncil@gmail.com",
+    icon: HeartPulse,
+    title: "आरोग्य व स्वच्छता विभाग",
+    titleEn: "Health and Sanitation Department",
+    head: "श्री. विजय मारूडा",
+    headEn: "Mr. Vijay Maruda",
+    role: "स्वच्छता निरीक्षक",
+    roleEn: "Sanitation Inspector",
+    phone: "9823447878",
+    email: "vjmaruda@gmail.com",
+    officers: [
+      {
+        name: "श्री. विजय मारूडा",
+        nameEn: "Mr. Vijay Maruda",
+        role: "स्वच्छता निरीक्षक",
+        roleEn: "Sanitation Inspector",
+        phone: "9823447878",
+        email: "vjmaruda@gmail.com",
+      },
+      {
+        name: "श्री. प्रशांत गंजीवाले",
+        nameEn: "Mr. Prashant Ganjiwale",
+        role: "स्वच्छता निरीक्षक",
+        roleEn: "Sanitation Inspector",
+        phone: "9405564595",
+        email: "pbganjiwale@rediffmail.com",
+      },
+    ],
     desc: "गावातील रस्ते, बाजार, गटारी यांची साफसफाई सकाळी ६ ते ११ व दुपारी ३ ते ४ दरम्यान केली जाते. कचरा ट्रॅक्टर व ऑटोरिक्षाद्वारे कचरा डेपोत नेला जातो. सण/उत्सव/यात्रा प्रसंगी विशेष साफसफाई व जंतूनाशक फवारणी केली जाते.",
     descEn: "Cleaning of roads, markets and drains from 6-11 AM and 3-4 PM. Waste transported to depot via tractor and auto-rickshaw. Special cleaning and disinfection during festivals and fairs.",
     services: ["रस्ते व बाजार साफसफाई", "कचरा संकलन व विल्हेवाट", "गटारी सफाई", "मुताऱ्या व संडास सफाई", "जंतूनाशक फवारणी", "अन्न परवाना", "रोग प्रतिबंधक उपाययोजना"],
     servicesEn: ["Road & market cleaning", "Waste collection & disposal", "Drain cleaning", "Toilet & urinal cleaning", "Disinfectant spraying", "Food license", "Disease prevention measures"],
-    hours: "सकाळी 6:00 - दुपारी 4:00", hoursEn: "6:00 AM - 4:00 PM",
+    hours: "सकाळी 6:00 - दुपारी 4:00",
+    hoursEn: "6:00 AM - 4:00 PM",
   },
   water: {
-    icon: Droplets, title: "पाणी पुरवठा विभाग", titleEn: "Water Supply Department",
-    head: "श्रीमती. शीतल जाधव", headEn: "Mrs. Shital Jadhav", phone: "8668994187", email: "waimunicipalcouncil@gmail.com",
-    desc: "शहराला सुरळीत पाणी पुरवठा होण्यासाठी लागणारी यंत्रणा राबविणे. जलशुद्धीकरण केंद्रावरील इलेक्ट्रॉनिक पंपाची निगा राखणे. नळ जोडणी धारकांचे पाणीपट्टी रजिस्टर ठेवणे व वसुली करणे.",
-    descEn: "Operating the water supply system for the city. Maintaining electronic pumps at the water purification center. Maintaining water connection registers and collecting water charges.",
+    icon: Droplets,
+    title: "पाणी पुरवठा विभाग",
+    titleEn: "Water Supply Department",
+    head: "श्री. परेश राजाराम साळवी",
+    headEn: "Mr. Paresh Rajaram Salvi",
+    role: "विद्युत अभियंता",
+    roleEn: "Electrical Engineer",
+    phone: "9403101401",
+    email: "paresh.ee.dma@gmail.com",
+    desc: "शहराला सुरळीत पाणी पुरवठा होण्यासाठी लागणारी यंत्रणा राबविणे. धोम धरण व जलशुद्धीकरण केंद्रावरील इलेक्ट्रॉनिक पंपाची निगा राखणे. नळ जोडणी धारकांचे पाणीपट्टी रजिस्टर ठेवणे व वसुली करणे.",
+    descEn: "Operating the water supply system for the city. Maintaining electronic pumps at Dhom Dam and water treatment plant. Maintaining water connection registers and collecting water charges.",
     services: ["नवीन नळ जोडणी", "पाणी बिल भरणा व वसुली", "जलशुद्धीकरण केंद्र देखभाल", "पंप देखभाल व दुरुस्ती", "पाणी गुणवत्ता तपासणी", "टँकर फी भरणा", "जलवाहिनी दुरुस्ती"],
     servicesEn: ["New water connection", "Water bill payment & collection", "Water purification center maintenance", "Pump maintenance & repair", "Water quality testing", "Tanker fee payment", "Pipeline repair"],
-    hours: "24/7 आणीबाणी सेवा", hoursEn: "24/7 Emergency Service",
+    hours: "24/7 आणीबाणी सेवा",
+    hoursEn: "24/7 Emergency Service",
   },
   civil: {
-    icon: HardHat, title: "बांधकाम (सिव्हिल) विभाग", titleEn: "Civil Department",
-    head: "श्रीमती. कोमल सबाळे", headEn: "Mrs. Komal Sabale", phone: "8796469477", email: "komalsabale5@gmail.com",
+    icon: HardHat,
+    title: "बांधकाम विभाग",
+    titleEn: "Civil Works Department",
+    head: "श्रीमती. कोमल साबळे",
+    headEn: "Mrs. Komal Sabale",
+    role: "स्थापत्य अभियंता",
+    roleEn: "Civil Engineer",
+    phone: "8796469477",
+    email: "komalsabale5@gmail.com",
     desc: "रस्ते, गटार, पूल, इमारती, दुकान केंद्रे यांचे बांधकाम व दुरुस्तीसाठी आराखडे व अंदाजपत्रक तयार करणे. निविदा मागवणे, कार्यादेश देणे, बांधकामावर नियंत्रण ठेवणे व मोजमाप घेणे.",
     descEn: "Preparing plans and estimates for construction and repair of roads, drains, bridges, buildings and shops. Inviting tenders, issuing work orders, supervising construction and taking measurements.",
     services: ["रस्ते बांधकाम व दुरुस्ती", "गटार व पूल बांधकाम", "बांधकाम परवाना", "इमारत नकाशा मंजुरी", "निविदा प्रक्रिया", "रस्ता खोदाई परवानगी", "शासन योजना प्रस्ताव"],
     servicesEn: ["Road construction & repair", "Drain & bridge construction", "Construction permit", "Building plan approval", "Tender process", "Road excavation permission", "Government scheme proposals"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   planning: {
-    icon: Map, title: "नगररचना विभाग", titleEn: "Town Planning Department",
-    head: "श्री. सर्वेश खाडे", headEn: "Mr. Sarvesh Khade", phone: "7057431200", email: "sskhade2141@gmail.com",
+    icon: Map,
+    title: "नगररचना विभाग",
+    titleEn: "Town Planning Department",
+    head: "श्री. सर्वेश खाडे",
+    headEn: "Mr. Sarvesh Khade",
+    role: "नगर रचनाकार",
+    roleEn: "Town Planner",
+    phone: "7057431200",
+    email: "sskhade2141@gmail.com",
     desc: "नगरपरिषद अंतर्गत सर्व विकास कामांच्या परवानग्या, विकास योजना प्रस्ताव छाननी, विकास आराखडा विषयक बाबी, आरक्षण जागा संपादन/हस्तांतरण, अनधिकृत बांधकामावर कार्यवाही व मालमत्ता मूल्यनिर्धारण.",
     descEn: "Permissions for all development works, scrutiny of development scheme proposals, development plan matters, reservation land acquisition/transfer, action on unauthorized constructions and property valuation.",
     services: ["विकास परवानगी", "विकास आराखडा माहिती", "आरक्षण जागा संपादन", "अनधिकृत बांधकाम कारवाई", "मालमत्ता मूल्यनिर्धारण", "ना-हरकत प्रमाणपत्र", "भूखंड वापर बदल"],
     servicesEn: ["Development permission", "Development plan information", "Reservation land acquisition", "Action on unauthorized construction", "Property valuation", "No objection certificate", "Land use change"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   tax: {
-    icon: Receipt, title: "कर व मूल्यांकन विभाग", titleEn: "Tax and Assessment Department",
-    head: "श्री. वैभव गोळे", headEn: "Mr. Vaibhav Gole",
-    role: "प्रशासकीय अधिकारी", roleEn: "Administrative Officer",
-    phone: "9623025193", email: "waimunicipalcouncil@gmail.com",
+    icon: Receipt,
+    title: "कर व मूल्यांकन विभाग",
+    titleEn: "Tax and Assessment Department",
+    head: "श्री. वैभव गोळे",
+    headEn: "Mr. Vaibhav Gole",
+    role: "कर निर्धारण व प्रशासकीय अधिकारी",
+    roleEn: "Tax Assessment & Administrative Officer",
+    phone: "9623025193",
+    email: "waimunicipalcouncil@gmail.com",
     desc: "महाराष्ट्र नगरपरिषदा अधिनियम १९६५ कलम १०५ ते १२७ व १४९ ते १७२ नुसार इमारतींवर कर आकारणी, आकारणी रजिस्टर, मालमत्ता कर वसुली, बिल वितरण, मागणी नोटीसा व जप्ती कारवाई.",
     descEn: "Property tax assessment under Maharashtra Municipal Councils Act 1965 sections 105-127 and 149-172. Maintaining assessment registers, collecting property tax, issuing bills, demand notices and seizure action.",
     services: ["मालमत्ता कर आकारणी", "मालमत्ता कर भरणा", "कर दाखला", "नवीन मालमत्ता नोंदणी", "थकबाकी वसुली", "दर चतुर्थ वार्षिक फेर आकारणी", "कर माफी अर्ज"],
     servicesEn: ["Property tax assessment", "Property tax payment", "Tax certificate", "New property registration", "Arrears collection", "Quadrennial reassessment", "Tax exemption application"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   electrical: {
-    icon: Zap, title: "विद्युत विभाग", titleEn: "Electrical Department",
-    head: "श्री. महेश सावळकर", headEn: "Mr. Mahesh Sawalkar", phone: "9922097539", email: "maheshsawalkar700@gmail.com",
+    icon: Zap,
+    title: "विद्युत विभाग",
+    titleEn: "Electrical Department",
+    head: "श्री. परेश राजाराम साळवी",
+    headEn: "Mr. Paresh Rajaram Salvi",
+    role: "विद्युत अभियंता",
+    roleEn: "Electrical Engineer",
+    phone: "9403101401",
+    email: "paresh.ee.dma@gmail.com",
     desc: "शहरातील पथदिव्यांची देखभाल व दुरुस्ती करणे. नगरपरिषद मालकीच्या सर्व आस्थापना व पाणीपुरवठा यंत्रणेची विद्युत देखभाल व दुरुस्ती करणे.",
     descEn: "Maintenance and repair of street lights in the city. Electrical maintenance and repair of all municipal establishments and water supply systems.",
     services: ["पथदिवे देखभाल व दुरुस्ती", "नवीन दिवे बसवणे", "LED रूपांतरण", "नगरपरिषद आस्थापना विद्युत देखभाल", "पाणीपुरवठा विद्युत देखभाल", "विद्युत तक्रार निवारण"],
     servicesEn: ["Street light maintenance & repair", "New light installation", "LED conversion", "Municipal establishment electrical maintenance", "Water supply electrical maintenance", "Electrical complaint resolution"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   computer: {
-    icon: Monitor, title: "संगणक विभाग", titleEn: "Computer Department",
-    head: "श्री. नीलेश काळे", headEn: "Mr. Nilesh Kale", phone: "8329764633", email: "kalenilesh02@gmail.com",
+    icon: Monitor,
+    title: "संगणक विभाग",
+    titleEn: "Computer Department",
+    head: "श्री. निलेश काळे",
+    headEn: "Mr. Nilesh Kale",
+    role: "संगणक अभियंता",
+    roleEn: "Computer Engineer",
+    phone: "8329764633",
+    email: "kalenilesh02@gmail.com",
     desc: "नगरपरिषदेकडील संगणक प्रणाली, वेब पोर्टल तसेच संबंधित हार्डवेअर व्यवस्थापन व देखभाल करणे. e-Governance, GIS व इतर ऑनलाइन सेवांचे कामकाज पाहणे.",
     descEn: "Management and maintenance of the municipality's computer systems, web portal and related hardware. Handling e-Governance, GIS and other online services.",
     services: ["संगणक प्रणाली देखभाल", "वेब पोर्टल व्यवस्थापन", "e-Governance सेवा", "GIS व्यवस्थापन", "ऑनलाइन सेवा", "डिजिटल अभिलेख", "हार्डवेअर देखभाल"],
     servicesEn: ["Computer system maintenance", "Web portal management", "e-Governance services", "GIS management", "Online services", "Digital records", "Hardware maintenance"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   fire: {
-    icon: Flame, title: "अग्निशमन विभाग", titleEn: "Fire Department",
-    head: "श्री. सुमित वाघ", headEn: "Mr. Sumit Wagh", phone: "9595139494", email: "waimunicipalcouncil@gmail.com",
+    icon: Flame,
+    title: "अग्निशमन विभाग",
+    titleEn: "Fire Department",
+    head: "श्री. सुमित वाघ",
+    headEn: "Mr. Sumit Wagh",
+    role: "अग्निशमन अधिकारी",
+    roleEn: "Fire Officer",
+    phone: "9595139494",
+    email: "waimunicipalcouncil@gmail.com",
     desc: "नगरपरिषद परिसरात अचानक लागलेल्या सार्वजनिक व खाजगी मालमत्तेची आग विझविणे. अग्निशमन अधिकारी यांच्या नियंत्रणाखाली 24/7 सेवा उपलब्ध.",
     descEn: "Extinguishing fires in public and private properties within the municipal area. 24/7 service under the control of the Fire Officer.",
     services: ["अग्निशमन सेवा (24/7)", "अग्निसुरक्षा प्रमाणपत्र", "इमारत अग्निसुरक्षा तपासणी", "आपत्ती व्यवस्थापन", "जनजागृती कार्यक्रम"],
     servicesEn: ["Fire fighting service (24/7)", "Fire safety certificate", "Building fire safety inspection", "Disaster management", "Awareness programs"],
-    hours: "24/7 आणीबाणी सेवा", hoursEn: "24/7 Emergency Service",
+    hours: "24/7 आणीबाणी सेवा",
+    hoursEn: "24/7 Emergency Service",
   },
   "birth-death": {
-    icon: FileCheck, title: "जन्म-मृत्यू नोंदणी विभाग", titleEn: "Birth-Death Registration Department",
-    head: "नोंदणी अधिकारी", headEn: "Registration Officer", phone: "02167-220019",
+    icon: FileCheck,
+    title: "जन्म-नोंदणी विभाग",
+    titleEn: "Birth-Death Registration Department",
+    head: "श्रीमती. कविता मुळीक",
+    headEn: "Mrs. Kavita Mulik",
+    role: "वरिष्ठ लिपिक",
+    roleEn: "Senior Clerk",
+    phone: "9850221389",
+    email: "waimunicipalcouncil@gmail.com",
     desc: "जन्म-मृत्यू अधिनियमानुसार नगरपरिषदेमध्ये घडणाऱ्या जन्म व मृत्यूची नोंद विहित अभिलेखात घेणे. मासिक अहवाल मुख्य निबंधक, आरोग्य विभाग पुणे यांना पाठवणे व नागरिकांना प्रमाणपत्र देणे.",
     descEn: "Recording births and deaths in prescribed records under the Birth-Death Act. Sending monthly reports to the Chief Registrar, Health Dept. Pune and issuing certificates to citizens.",
     services: ["जन्म नोंदणी", "मृत्यू नोंदणी", "जन्म दाखला", "मृत्यू दाखला", "उपजत मृत्यू नोंद", "दाखला दुरुस्ती", "मासिक अहवाल"],
     servicesEn: ["Birth registration", "Death registration", "Birth certificate", "Death certificate", "Still birth record", "Certificate correction", "Monthly reports"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   accounts: {
-    icon: Wallet, title: "लेखा विभाग", titleEn: "Accounts Department",
-    head: "लेखाधिकारी", headEn: "Accounts Officer", phone: "02167-220020",
+    icon: Wallet,
+    title: "लेखा विभाग",
+    titleEn: "Accounts Department",
+    head: "श्री. अक्षय गुरव",
+    headEn: "Mr. Akshay Gurav",
+    role: "लेखापाल व लेखापरीक्षक",
+    roleEn: "Accountant & Auditor",
+    phone: "7350751372",
+    email: "waimunicipalcouncil@gmail.com",
+    officers: [
+      {
+        name: "श्री. अक्षय गुरव",
+        nameEn: "Mr. Akshay Gurav",
+        role: "लेखापाल व लेखापरीक्षक",
+        roleEn: "Accountant & Auditor",
+        phone: "7350751372",
+        email: "waimunicipalcouncil@gmail.com",
+      },
+      {
+        name: "श्री. शिवाजी नगरे",
+        nameEn: "Mr. Shivaji Nagare",
+        role: "लेखापाल व लेखापरीक्षक",
+        roleEn: "Accountant & Auditor",
+        phone: "9921818058",
+        email: "waimunicipalcouncil@gmail.com",
+      },
+    ],
     desc: "महाराष्ट्र लेखासंहिता नियम १९७१ नुसार नगरपरिषदेचे वित्तीय अभिलेख ठेवणे. मालमत्ता कर, पाणीपट्टी, बांधकाम परवानगी शुल्क, बाजार फी इत्यादी उत्पन्न स्वीकारणे व बँकेत जमा करणे.",
     descEn: "Maintaining financial records under Maharashtra Accounts Code Rules 1971. Accepting income from property tax, water charges, construction fees, market fees etc. and depositing in bank.",
     services: ["मालमत्ता कर भरणा स्वीकारणे", "पाणीपट्टी भरणा", "बांधकाम परवानगी शुल्क", "बाजार फी वसुली", "कर्मचारी वेतन बिल", "भविष्य निर्वाह निधी", "वार्षिक अंदाजपत्रक", "लेखापरिक्षण पूर्तता"],
     servicesEn: ["Property tax collection", "Water charge payment", "Construction permission fee", "Market fee collection", "Staff salary bills", "Provident fund", "Annual budget", "Audit compliance"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   records: {
-    icon: Archive, title: "अभिलेख कक्ष विभाग", titleEn: "Records Department",
-    head: "अभिलेख लिपिक", headEn: "Records Clerk", phone: "02167-220021",
+    icon: Archive,
+    title: "अभिलेख कक्ष",
+    titleEn: "Records Department",
+    head: "श्री. मनोज मारुती बारटक्के",
+    headEn: "Mr. Manoj Maruti Bartakke",
+    role: "कर निर्धारण व प्रशासकीय अधिकारी",
+    roleEn: "Tax Assessment & Administrative Officer",
+    phone: "9822068069",
+    email: "manojbartakke1984@gmail.com",
     desc: "कार्यालयीन दफ्तर, नस्ती, दस्तऐवज, नोंदणी दस्त, नमुन्यांच्या नोंदवह्या सुरक्षित ठेवणे व देखभाल करणे. अ.ब.क.ड. वर्गीकरण करणे व सुरक्षित ठेवणे.",
     descEn: "Safe keeping and maintenance of office files, documents, registration deeds and record books. Classification into A, B, C, D categories and safe storage.",
     services: ["दफ्तर व नस्ती व्यवस्थापन", "दस्तऐवज सुरक्षित ठेवणे", "अ.ब.क.ड. वर्गीकरण", "नोंदणी दस्त देखभाल", "जुने अभिलेख उपलब्ध करणे"],
     servicesEn: ["File & document management", "Safe document storage", "A,B,C,D classification", "Registration deed maintenance", "Providing old records"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   disabled: {
-    icon: Accessibility, title: "दिव्यांग विभाग", titleEn: "Disabled Persons Department",
-    head: "समाज कल्याण अधिकारी", headEn: "Social Welfare Officer", phone: "02167-220022",
+    icon: Accessibility,
+    title: "दिव्यांग विभाग",
+    titleEn: "Disabled Persons Department",
+    head: "श्री. हर्षवर्धन मोहिते",
+    headEn: "Mr. Harshvardhan Mohite",
+    role: "कर निर्धारण व प्रशासकीय अधिकारी",
+    roleEn: "Tax Assessment & Administrative Officer",
+    phone: "8149225859",
+    email: "harshamohite1@gmail.com",
     desc: "नगरपरिषद हद्दीतील दिव्यांग नागरिकांना ५% मदत देण्याची कार्यवाही करणे तसेच इतर शासकीय लाभ मिळवून देण्यास मदत करणे.",
     descEn: "Processing 5% assistance for disabled citizens within the municipal limits and helping them avail other government benefits.",
     services: ["दिव्यांग ५% मदत अर्ज", "शासकीय योजना लाभ", "दिव्यांग प्रमाणपत्र सहाय्य", "पुनर्वसन मदत"],
     servicesEn: ["Disabled 5% assistance application", "Government scheme benefits", "Disability certificate assistance", "Rehabilitation assistance"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   women: {
-    icon: Baby, title: "महिला व बाल कल्याण विभाग", titleEn: "Women & Child Welfare Department",
-    head: "महिला कल्याण अधिकारी", headEn: "Women Welfare Officer", phone: "02167-220023",
+    icon: Baby,
+    title: "महिला व बालकल्याण विभाग",
+    titleEn: "Women & Child Welfare Department",
+    head: "श्रीमती. जयश्री भोईटे",
+    headEn: "Mrs. Jayashri Bhoite",
+    role: "राष्ट्रीय शहरी रोजगार अभियान प्रकल्प अधिकारी",
+    roleEn: "NULM Project Officer",
+    phone: "9527473768",
+    email: "waimunicipalcouncil@gmail.com",
     desc: "नगरपरिषद परिसरात महिला व बाल कल्याण विषयक योजना राबविणे. महिलांच्या विकासाच्या अनुषंगाने कामे करणे.",
     descEn: "Implementing women and child welfare schemes in the municipal area. Working towards women's development.",
     services: ["महिला कल्याण योजना", "बाल कल्याण योजना", "महिला सक्षमीकरण कार्यक्रम", "शासकीय योजना लाभ", "जनजागृती कार्यक्रम"],
     servicesEn: ["Women welfare schemes", "Child welfare schemes", "Women empowerment programs", "Government scheme benefits", "Awareness programs"],
-    hours: "सकाळी 10:00 - संध्याकाळी 5:45", hoursEn: "9:45 AM - 6:15 PM",
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
+  },
+  sabha: {
+    icon: Users,
+    title: "सभा विभाग",
+    titleEn: "Council Meeting Department",
+    head: "श्रीमती. कोमल तानाजी नलवडे",
+    headEn: "Mrs. Komal Tanaji Nalawade",
+    role: "कर निर्धारण व प्रशासकीय अधिकारी",
+    roleEn: "Tax Assessment & Administrative Officer",
+    phone: "7218989776",
+    email: "waimunicipalcouncil@gmail.com",
+    desc: "वाई नगरपरिषद सर्वसाधारण सभा, विशेष सभा व विषय समित्यांच्या सभांचे आयोजन, विषयपत्रिका (अजेंडा) तयार करणे, नगरसेवकांना सूचना देणे व सभा इतिवृत्त / ठराव (Resolutions) नोंदविणे व जतन करणे.",
+    descEn: "Organizing General Body, Special and Committee meetings of Wai Municipal Council, preparing agendas, notifying councillors, and recording and archiving meeting resolutions and minutes.",
+    services: [
+      "सर्वसाधारण सभा आयोजन व नियोजन",
+      "विषयपत्रिका (Agenda) तयार करणे व वाटप",
+      "सभा इतिवृत्त व ठराव (Resolutions) नोंद",
+      "नागरिकांसाठी ठराव प्रती उपलब्ध करणे",
+      "समिती सभा समन्वय",
+    ],
+    servicesEn: [
+      "General Body meeting organization",
+      "Agenda preparation & distribution",
+      "Meeting minutes & resolution recording",
+      "Providing resolution copies to citizens",
+      "Committee meeting coordination",
+    ],
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
   },
   election: {
     icon: Vote,
@@ -463,10 +692,12 @@ const depts: Record<string, DeptData> = {
     icon: Briefcase,
     title: "आस्थापना विभाग",
     titleEn: "Establishment Department",
-    head: "मुख्याधिकारी / आस्थापना अधीक्षक",
-    headEn: "Chief Officer / Establishment Superintendent",
-    phone: "02167-220022",
-    email: "waimunicipalcouncil@gmail.com",
+    head: "श्री. गणेश चव्हाण",
+    headEn: "Mr. Ganesh Chavan",
+    role: "कर निर्धारण व प्रशासकीय अधिकारी",
+    roleEn: "Tax Assessment & Administrative Officer",
+    phone: "9561412471",
+    email: "chavanganesh988@gmail.com",
     desc: "नगरपरिषद अधिकारी व कर्मचारी यांच्या सेवाविषयक बाबी, भरती, पदोन्नती, रजा, भविष्य निर्वाह निधी (GPF/NPS), निवृत्तीवेतन, गोपनीय अहवाल, रोस्टर नोंदवही आणि शिस्तभंग विषयक कामकाजाचे व्यवस्थापन.",
     descEn: "Management of municipal personnel service matters, recruitment, promotions, leaves, provident fund (GPF/NPS), pensions, confidential reports, roster registers, and departmental disciplinary procedures.",
     services: [
@@ -508,4 +739,4 @@ export const Disabled = () => <DeptPage data={depts.disabled} />;
 export const WomenChild = () => <DeptPage data={depts.women} />;
 export const Election = () => <DeptPage data={depts.election} />;
 export const Establishment = () => <DeptPage data={depts.establishment} />;
-
+export const SabhaDept = () => <DeptPage data={depts.sabha} />;
