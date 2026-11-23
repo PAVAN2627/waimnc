@@ -228,7 +228,7 @@ const Gallery = () => {
           )}
           <div className="max-w-4xl max-h-[75vh] p-2 flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
             {active.imageBase64 && (
-              <img src={active.imageBase64} alt={title(active)} className="max-h-[65vh] max-w-full object-contain rounded-2xl shadow-2xl border border-white/20" />
+              <img src={active.imageBase64} alt={lang === "mr" ? active.titleMr : (active.titleEn || active.titleMr)} className="max-h-[65vh] max-w-full object-contain rounded-2xl shadow-2xl border border-white/20" />
             )}
             <div className="text-center mt-4 text-white">
               <p className="text-lg font-black">{lang === "mr" ? active.titleMr : (active.titleEn || active.titleMr)}</p>

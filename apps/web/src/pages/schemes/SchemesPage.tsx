@@ -30,7 +30,7 @@ const SchemesPage = () => {
 
   useEffect(() => {
     if (queryCat && ["central", "state", "local", "all"].includes(queryCat)) {
-      setActiveCategory(queryCat as any);
+      setActiveCategory(queryCat as SchemeCategory | "all");
     }
   }, [queryCat]);
 

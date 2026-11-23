@@ -514,7 +514,7 @@ export const CategoryGroupPage = ({
   );
 };
 
-export const schemePagesData: Record<string, SchemeData> = {
+const schemePagesData: Record<string, SchemeData> = {
   pmay: {
     title: "प्रधानमंत्री आवास योजना (PMAY - नागरी २.०)", titleEn: "Pradhan Mantri Awas Yojana (PMAY - Urban 2.0)",
     subtitle: "सर्वसमावेशक परवडणारी घरे व घरकुल अनुदान", subtitleEn: "Affordable Housing for All in Wai City",
@@ -806,7 +806,7 @@ export const DynamicSchemePage = ({
         });
       }
     });
-  }, [keyword]);
+  }, [keyword, defaultData]);
 
   return <SchemePage data={data} />;
 };

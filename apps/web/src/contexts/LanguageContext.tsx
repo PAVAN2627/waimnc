@@ -4,12 +4,14 @@ type Lang = "mr" | "en";
 
 interface LanguageContextType {
   lang: Lang;
+  language: Lang;
   setLang: (lang: Lang) => void;
   t: (mr: string, en: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
   lang: "mr",
+  language: "mr",
   setLang: () => {},
   t: (mr) => mr,
 });
@@ -26,7 +28,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const t = (mr: string, en: string) => (lang === "mr" ? mr : en);
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={{ lang, language: lang, setLang, t }}>
       {children}
     </LanguageContext.Provider>
   );
