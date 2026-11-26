@@ -139,40 +139,20 @@ export default function WardSelector({
 
             {/* Scrollable Body */}
             <div className="p-3 sm:p-4 overflow-y-auto space-y-3">
-              {/* Quick Options */}
-              {(includeAllOption || includeUnknownOption) && !query.trim() && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {includeAllOption && (
-                    <button
-                      type="button"
-                      onClick={() => handleSelect("all")}
-                      className={`flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs font-bold transition-all ${
-                        value === "all"
-                          ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                          : "bg-muted/40 hover:bg-muted border-border text-foreground"
-                      }`}
-                    >
-                      <span>{t("सर्व प्रभाग / वार्ड", "All Wards")}</span>
-                      {value === "all" && <Check className="w-4 h-4 shrink-0" />}
-                    </button>
-                  )}
-                  {includeUnknownOption && (
-                    <button
-                      type="button"
-                      onClick={() => handleSelect(unknownValue)}
-                      className={`flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs font-bold transition-all ${
-                        value === unknownValue || (unknownValue === "माहिती नाही" && isUnknownWard(value))
-                          ? "bg-amber-600 text-white border-amber-600 shadow-sm"
-                          : "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-800 dark:text-amber-300"
-                      }`}
-                    >
-                      <span>{t("माहिती नाही / अज्ञात", "Don't know / Unknown")}</span>
-                      {(value === unknownValue || (unknownValue === "माहिती नाही" && isUnknownWard(value))) && (
-                        <Check className="w-4 h-4 shrink-0" />
-                      )}
-                    </button>
-                  )}
-                </div>
+              {/* All Wards Quick Option (Filter Mode) */}
+              {includeAllOption && !query.trim() && (
+                <button
+                  type="button"
+                  onClick={() => handleSelect("all")}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs font-bold transition-all ${
+                    value === "all"
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "bg-muted/40 hover:bg-muted border-border text-foreground"
+                  }`}
+                >
+                  <span>{t("सर्व प्रभाग / वार्ड", "All Wards")}</span>
+                  {value === "all" && <Check className="w-4 h-4 shrink-0" />}
+                </button>
               )}
 
               {/* Compact Ward Grid */}
@@ -213,6 +193,26 @@ export default function WardSelector({
                   </div>
                 )}
               </div>
+
+              {/* Unknown Ward Option at Bottom */}
+              {includeUnknownOption && !query.trim() && (
+                <div className="pt-2 border-t border-border">
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(unknownValue)}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs font-bold transition-all ${
+                      value === unknownValue || (unknownValue === "माहिती नाही" && isUnknownWard(value))
+                        ? "bg-amber-600 text-white border-amber-600 shadow-sm"
+                        : "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-800 dark:text-amber-300"
+                    }`}
+                  >
+                    <span>{t("माहिती नाही / अज्ञात प्रभाग", "Don't know / Unknown Ward")}</span>
+                    {(value === unknownValue || (unknownValue === "माहिती नाही" && isUnknownWard(value))) && (
+                      <Check className="w-4 h-4 shrink-0" />
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

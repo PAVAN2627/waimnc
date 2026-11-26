@@ -1,5 +1,5 @@
 import PageLayout from "@/components/PageLayout";
-import { Building2, Users, MapPin, Phone, Award, Landmark, BookOpen, Crown, Shield, UserCheck, Calendar, ArrowRight } from "lucide-react";
+import { Building2, Users, MapPin, Phone, Award, Landmark, BookOpen, Crown, Shield, UserCheck, Calendar, ArrowRight, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import React from "react";
 import { subscribeToActiveOfficials, type OfficialRecord } from "@/lib/officials";
@@ -356,6 +356,7 @@ export const Corporators = () => {
 
   const [allMembers, setAllMembers] = React.useState<OfficialRecord[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [selectedMember, setSelectedMember] = React.useState<OfficialRecord | null>(null);
 
   React.useEffect(() => {
     return subscribeToActiveOfficials((items) => {
@@ -421,7 +422,16 @@ export const Corporators = () => {
     return (
       <div
         key={c.id || c.order}
-        className="bg-card rounded-2xl p-5 border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between"
+        onClick={() => setSelectedMember(c)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setSelectedMember(c);
+          }
+        }}
+        className="bg-card rounded-2xl p-5 border border-border shadow-sm hover:shadow-lg hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between cursor-pointer text-left"
       >
         <div className="space-y-3">
           {/* Header Strip with Order & Party */}
@@ -448,7 +458,7 @@ export const Corporators = () => {
               <img
                 src={c.photoBase64}
                 alt={c.nameMr}
-                className="w-12 h-12 rounded-full object-cover border-2 border-primary/40 shrink-0 shadow-xs"
+                className="w-14 h-14 rounded-full object-cover border-2 border-primary/40 shrink-0 shadow-xs"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).style.display = "none";
                 }}
@@ -483,6 +493,7 @@ export const Corporators = () => {
           {c.phone ? (
             <a
               href={`tel:${c.phone}`}
+              onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-1 text-xs font-mono font-bold text-primary hover:underline bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 hover:bg-primary/20 transition-colors"
             >
               <Phone className="w-3 h-3" />
@@ -672,6 +683,112 @@ export const Corporators = () => {
       </div>
     </div>
   </div>
+
+  {/* Member Detail Popup Modal */}
+  {selectedMember && (
+    <div
+      className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+      onClick={() => setSelectedMember(null)}
+    >
+      <div
+        className="bg-card border border-border w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="gov-gradient px-5 py-4 flex items-center justify-between text-white">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            <span className="text-sm font-bold">
+              {selectedMember.ward
+                ? t(`प्रभाग ${selectedMember.ward}`, `Ward ${selectedMember.ward}`)
+                : lang === "mr"
+                ? selectedMember.designationMr
+                : selectedMember.designationEn}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSelectedMember(null)}
+            className="p-1.5 rounded-full bg-white/15 hover:bg-white/25 transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5 text-center">
+          {selectedMember.photoBase64 ? (
+            <img
+              src={selectedMember.photoBase64}
+              alt={selectedMember.nameMr}
+              className="w-40 h-40 sm:w-44 sm:h-44 mx-auto rounded-2xl object-cover border-2 border-primary/30 shadow-lg"
+            />
+          ) : (
+            <div className="w-32 h-32 mx-auto rounded-2xl bg-muted border-2 border-border flex items-center justify-center text-5xl">
+              👤
+            </div>
+          )}
+
+          <div className="space-y-1">
+            <h3 className="text-xl font-black text-foreground">
+              {lang === "mr" ? selectedMember.nameMr : selectedMember.nameEn || selectedMember.nameMr}
+            </h3>
+            <p className="text-sm text-muted-foreground font-medium">
+              {lang === "mr" ? selectedMember.nameEn : selectedMember.nameMr}
+            </p>
+            <div className="flex items-center justify-center gap-2 flex-wrap pt-2">
+              {(selectedMember.designationMr || selectedMember.designationEn) && (
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                  {lang === "mr" ? selectedMember.designationMr : selectedMember.designationEn}
+                </span>
+              )}
+              {(selectedMember.partyMr || selectedMember.party) && (
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-muted text-foreground border border-border">
+                  {lang === "mr"
+                    ? selectedMember.partyMr || selectedMember.party
+                    : selectedMember.partyEn || selectedMember.party}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2.5 text-left bg-muted/40 rounded-2xl p-4 border border-border text-sm">
+            {(selectedMember.addressMr || selectedMember.addressEn) && (
+              <div className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-[11px] font-bold text-muted-foreground">{t("पत्ता", "Address")}</p>
+                  <p className="text-foreground font-medium">
+                    {lang === "mr"
+                      ? selectedMember.addressMr || selectedMember.addressEn
+                      : selectedMember.addressEn || selectedMember.addressMr}
+                  </p>
+                </div>
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <div className="flex items-center gap-2.5">
+                <Phone className="w-4 h-4 text-primary shrink-0" />
+                <div>
+                  <p className="text-[11px] font-bold text-muted-foreground">{t("मोबाइल", "Mobile")}</p>
+                  <p className="font-mono font-bold text-foreground">
+                    {selectedMember.phone || t("उपलब्ध नाही", "Not listed")}
+                  </p>
+                </div>
+              </div>
+              {selectedMember.phone && (
+                <a
+                  href={`tel:${selectedMember.phone}`}
+                  className="px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-opacity"
+                >
+                  {t("कॉल करा", "Call")}
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
 </PageLayout>
   );
 };
