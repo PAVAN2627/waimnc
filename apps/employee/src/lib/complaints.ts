@@ -166,10 +166,98 @@ export function matchesEmployeeDepartment(
   return userDepts.some((dept) => {
     const target = dept.toLowerCase().trim();
     const itemDept = (record.department || "").toLowerCase().trim();
+
+    // Primary Check: If the complaint has an assigned department
+    if (itemDept) {
+      if (itemDept === target || itemDept.includes(target) || target.includes(itemDept)) return true;
+
+      if (
+        (target.includes("पाणी") || target.includes("water")) &&
+        (itemDept.includes("पाणी") || itemDept.includes("water"))
+      ) return true;
+      if (
+        (target.includes("आरोग्य") || target.includes("स्वच्छता") || target.includes("health") || target.includes("sanitation")) &&
+        (itemDept.includes("आरोग्य") || itemDept.includes("स्वच्छता") || itemDept.includes("health") || itemDept.includes("sanitation"))
+      ) return true;
+      if (
+        (target.includes("बांधकाम") || target.includes("रस्ते") || target.includes("civil") || target.includes("road")) &&
+        (itemDept.includes("बांधकाम") || itemDept.includes("रस्ते") || itemDept.includes("civil") || itemDept.includes("road"))
+      ) return true;
+      if (
+        (target.includes("विद्युत") || target.includes("दिवाबत्ती") || target.includes("electrical") || target.includes("light")) &&
+        (itemDept.includes("विद्युत") || itemDept.includes("दिवाबत्ती") || itemDept.includes("electrical") || itemDept.includes("light"))
+      ) return true;
+      if (
+        (target.includes("सांडपाणी") || target.includes("गटार") || target.includes("drainage")) &&
+        (itemDept.includes("सांडपाणी") || itemDept.includes("गटार") || itemDept.includes("drainage"))
+      ) return true;
+      if (
+        (target.includes("कर") || target.includes("मूल्यांकन") || target.includes("tax")) &&
+        (itemDept.includes("कर") || itemDept.includes("मूल्यांकन") || itemDept.includes("tax"))
+      ) return true;
+      if (
+        (target.includes("नगररचना") || target.includes("town") || target.includes("planning")) &&
+        (itemDept.includes("नगररचना") || itemDept.includes("town") || itemDept.includes("planning"))
+      ) return true;
+      if (
+        (target.includes("अतिक्रमण") || target.includes("encroach")) &&
+        (itemDept.includes("अतिक्रमण") || itemDept.includes("encroach"))
+      ) return true;
+      if (
+        (target.includes("अग्निशमन") || target.includes("fire")) &&
+        (itemDept.includes("अग्निशमन") || itemDept.includes("fire"))
+      ) return true;
+      if (
+        (target.includes("जन्म") || target.includes("मृत्यू") || target.includes("birth") || target.includes("death")) &&
+        (itemDept.includes("जन्म") || itemDept.includes("मृत्यू") || itemDept.includes("birth") || itemDept.includes("death"))
+      ) return true;
+      if (
+        (target.includes("लेखा") || target.includes("वित्त") || target.includes("account") || target.includes("finance")) &&
+        (itemDept.includes("लेखा") || itemDept.includes("वित्त") || itemDept.includes("account") || itemDept.includes("finance"))
+      ) return true;
+      if (
+        (target.includes("दिव्यांग") || target.includes("अपंग") || target.includes("disab")) &&
+        (itemDept.includes("दिव्यांग") || itemDept.includes("अपंग") || itemDept.includes("disab"))
+      ) return true;
+      if (
+        (target.includes("महिला") || target.includes("बालकल्याण") || target.includes("women")) &&
+        (itemDept.includes("महिला") || itemDept.includes("बालकल्याण") || itemDept.includes("women"))
+      ) return true;
+      if (
+        (target.includes("संगणक") || target.includes("computer") || target.includes("it")) &&
+        (itemDept.includes("संगणक") || itemDept.includes("computer") || itemDept.includes("it"))
+      ) return true;
+      if (
+        (target.includes("निवडणूक") || target.includes("election")) &&
+        (itemDept.includes("निवडणूक") || itemDept.includes("election"))
+      ) return true;
+      if (
+        (target.includes("आस्थापना") || target.includes("establishment")) &&
+        (itemDept.includes("आस्थापना") || itemDept.includes("establishment"))
+      ) return true;
+      if (
+        (target.includes("सभा") || target.includes("sabha")) &&
+        (itemDept.includes("सभा") || itemDept.includes("sabha"))
+      ) return true;
+      if (
+        (target.includes("अभिलेख") || target.includes("record")) &&
+        (itemDept.includes("अभिलेख") || itemDept.includes("record"))
+      ) return true;
+
+      const isGenericDept =
+        itemDept === "सामान्य प्रशासन" ||
+        itemDept === "सामान्य प्रशासन / इतर" ||
+        itemDept === "general" ||
+        itemDept === "general administration / other" ||
+        itemDept === "other";
+      if (!isGenericDept) {
+        return false;
+      }
+    }
+
     const itemDesc = (record.description || "").toLowerCase();
     const itemType = (record.type || "").toLowerCase();
 
-    if (itemDept.includes(target) || target.includes(itemDept)) return true;
     if (itemType.includes(target) || target.includes(itemType)) return true;
     if (itemDesc.includes(target)) return true;
 
@@ -212,13 +300,13 @@ export function matchesEmployeeDepartment(
 
     // Certificates & Specific Applications
     if (target.includes("जन्म") || target.includes("birth")) {
-      return itemDept.includes("जन्म") || itemDesc.includes("जन्म") || itemType.includes("जन्म");
+      return itemDesc.includes("जन्म") || itemType.includes("जन्म");
     }
     if (target.includes("मृत्यू") || target.includes("death")) {
-      return itemDept.includes("मृत्यू") || itemDesc.includes("मृत्यू") || itemType.includes("मृत्यू");
+      return itemDesc.includes("मृत्यू") || itemType.includes("मृत्यू");
     }
     if (target.includes("विवाह") || target.includes("marriage")) {
-      return itemDept.includes("विवाह") || itemDesc.includes("विवाह") || itemType.includes("विवाह");
+      return itemDesc.includes("विवाह") || itemType.includes("विवाह");
     }
     if (
       target.includes("बांधकाम") ||
@@ -229,8 +317,6 @@ export function matchesEmployeeDepartment(
       target.includes("road")
     ) {
       return (
-        itemDept.includes("बांधकाम") ||
-        itemDept.includes("रस्ते") ||
         itemType.includes("रस्ता") ||
         itemType.includes("खड्डे") ||
         itemDesc.includes("बांधकाम") ||

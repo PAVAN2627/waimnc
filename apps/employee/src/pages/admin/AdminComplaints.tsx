@@ -86,6 +86,7 @@ const AdminComplaints = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [wardFilter, setWardFilter] = useState<string>("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [tabFilter, setTabFilter] = useState<"all" | "pending" | "in-progress" | "resolved">("all");
   const [previewAttachment, setPreviewAttachment] = useState<{
     url: string;
@@ -660,6 +661,34 @@ const AdminComplaints = () => {
     </div>
   );
 
+  const matchesDepartmentFilter = (c: { department?: string }, filterDept: string): boolean => {
+    if (!filterDept || filterDept === "all") return true;
+    const target = filterDept.toLowerCase().trim();
+    const itemDept = (c.department || "").toLowerCase().trim();
+    if (itemDept === target || itemDept.includes(target) || target.includes(itemDept)) return true;
+
+    if ((target.includes("पाणी") || target.includes("water")) && (itemDept.includes("पाणी") || itemDept.includes("water"))) return true;
+    if ((target.includes("आरोग्य") || target.includes("स्वच्छता") || target.includes("health") || target.includes("sanitation")) && (itemDept.includes("आरोग्य") || itemDept.includes("स्वच्छता") || itemDept.includes("health") || itemDept.includes("sanitation"))) return true;
+    if ((target.includes("बांधकाम") || target.includes("रस्ते") || target.includes("civil") || target.includes("road")) && (itemDept.includes("बांधकाम") || itemDept.includes("रस्ते") || itemDept.includes("civil") || itemDept.includes("road"))) return true;
+    if ((target.includes("विद्युत") || target.includes("दिवाबत्ती") || target.includes("electrical") || target.includes("light")) && (itemDept.includes("विद्युत") || itemDept.includes("दिवाबत्ती") || itemDept.includes("electrical") || itemDept.includes("light"))) return true;
+    if ((target.includes("सांडपाणी") || target.includes("गटार") || target.includes("drainage")) && (itemDept.includes("सांडपाणी") || itemDept.includes("गटार") || itemDept.includes("drainage"))) return true;
+    if ((target.includes("कर") || target.includes("मूल्यांकन") || target.includes("tax")) && (itemDept.includes("कर") || itemDept.includes("मूल्यांकन") || itemDept.includes("tax"))) return true;
+    if ((target.includes("नगररचना") || target.includes("town") || target.includes("planning")) && (itemDept.includes("नगररचना") || itemDept.includes("town") || itemDept.includes("planning"))) return true;
+    if ((target.includes("अतिक्रमण") || target.includes("encroach")) && (itemDept.includes("अतिक्रमण") || itemDept.includes("encroach"))) return true;
+    if ((target.includes("अग्निशमन") || target.includes("fire")) && (itemDept.includes("अग्निशमन") || itemDept.includes("fire"))) return true;
+    if ((target.includes("जन्म") || target.includes("मृत्यू") || target.includes("birth") || target.includes("death")) && (itemDept.includes("जन्म") || itemDept.includes("मृत्यू") || itemDept.includes("birth") || itemDept.includes("death"))) return true;
+    if ((target.includes("लेखा") || target.includes("वित्त") || target.includes("account") || target.includes("finance")) && (itemDept.includes("लेखा") || itemDept.includes("वित्त") || itemDept.includes("account") || itemDept.includes("finance"))) return true;
+    if ((target.includes("दिव्यांग") || target.includes("अपंग") || target.includes("disab")) && (itemDept.includes("दिव्यांग") || itemDept.includes("अपंग") || itemDept.includes("disab"))) return true;
+    if ((target.includes("महिला") || target.includes("बालकल्याण") || target.includes("women")) && (itemDept.includes("महिला") || itemDept.includes("बालकल्याण") || itemDept.includes("women"))) return true;
+    if ((target.includes("संगणक") || target.includes("computer") || target.includes("it")) && (itemDept.includes("संगणक") || itemDept.includes("computer") || itemDept.includes("it"))) return true;
+    if ((target.includes("निवडणूक") || target.includes("election")) && (itemDept.includes("निवडणूक") || itemDept.includes("election"))) return true;
+    if ((target.includes("आस्थापना") || target.includes("establishment")) && (itemDept.includes("आस्थापना") || itemDept.includes("establishment"))) return true;
+    if ((target.includes("सभा") || target.includes("sabha")) && (itemDept.includes("सभा") || itemDept.includes("sabha"))) return true;
+    if ((target.includes("अभिलेख") || target.includes("record")) && (itemDept.includes("अभिलेख") || itemDept.includes("record"))) return true;
+
+    return false;
+  };
+
   const userDepts =
     user?.departments && user.departments.length > 0
       ? user.departments
@@ -671,6 +700,7 @@ const AdminComplaints = () => {
     if (userDepts.length > 0 && !matchesEmployeeDepartment(c, userDepts)) return false;
     if (tabFilter !== "all" && c.status !== tabFilter) return false;
     if (wardFilter !== "all" && c.ward !== wardFilter) return false;
+    if (departmentFilter !== "all" && !matchesDepartmentFilter(c, departmentFilter)) return false;
     if (!search.trim()) return true;
     const q = search.trim().toLowerCase();
     const tId = (c.trackingId || "").toLowerCase();
@@ -818,7 +848,7 @@ const AdminComplaints = () => {
         </p>
       )}
 
-      {/* Search + Ward Filter */}
+      {/* Search + Ward Filter + Department Filter */}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[200px] max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -839,15 +869,27 @@ const AdminComplaints = () => {
           onChange={(e) => setWardFilter(e.target.value)}
           className="border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
         >
-          <option value="all">{t("सर्व वार्ड", "All Wards")}</option>
+          <option value="all">{t("सर्व प्रभाग / वार्ड", "All Wards")}</option>
           {Array.from({ length: 17 }, (_, i) => i + 1).map((w) => (
             <option key={w} value={String(w)}>
               {t(`वार्ड ${w}`, `Ward ${w}`)}
             </option>
           ))}
         </select>
+        <select
+          value={departmentFilter}
+          onChange={(e) => setDepartmentFilter(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+        >
+          <option value="all">{t("सर्व विभाग (All Depts)", "All Departments")}</option>
+          {OFFICIAL_DEPARTMENTS.map((dept) => (
+            <option key={dept} value={dept}>
+              {dept}
+            </option>
+          ))}
+        </select>
       </div>
-      {(search || wardFilter !== "all") && (
+      {(search || wardFilter !== "all" || departmentFilter !== "all") && (
         <p className="text-xs text-muted-foreground">
           {filtered.length} {t("तक्रारी सापडल्या", "complaints found")}
         </p>

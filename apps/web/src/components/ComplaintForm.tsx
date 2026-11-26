@@ -18,14 +18,21 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
   const { t, lang } = useLanguage();
 
   const departments = [
-    t("पाणी पुरवठा विभाग", "Water Supply Dept."),
-    t("रस्ते व बांधकाम विभाग", "Roads & Civil Works"),
-    t("आरोग्य व स्वच्छता विभाग", "Health & Sanitation Dept."),
-    t("दिवाबत्ती व विद्युत विभाग", "Street Lights & Electrical"),
-    t("सांडपाणी व गटार व्यवस्था", "Drainage & Sewerage"),
-    t("अतिक्रमण निर्मूलन विभाग", "Encroachment Dept."),
-    t("कर व मूल्यांकन विभाग", "Taxation Dept."),
-    t("सामान्य प्रशासन / इतर", "General Administration / Other"),
+    { value: "पाणी पुरवठा विभाग", labelMr: "पाणी पुरवठा विभाग", labelEn: "Water Supply Dept." },
+    { value: "रस्ते व बांधकाम विभाग", labelMr: "रस्ते व बांधकाम विभाग", labelEn: "Roads & Civil Works (PWD)" },
+    { value: "आरोग्य व स्वच्छता विभाग", labelMr: "आरोग्य व स्वच्छता विभाग", labelEn: "Health & Sanitation Dept." },
+    { value: "दिवाबत्ती व विद्युत विभाग", labelMr: "दिवाबत्ती व विद्युत विभाग", labelEn: "Street Lights & Electrical" },
+    { value: "सांडपाणी व गटार व्यवस्था", labelMr: "सांडपाणी व गटार व्यवस्था", labelEn: "Drainage & Sewerage" },
+    { value: "नगररचना व नियोजन विभाग", labelMr: "नगररचना व नियोजन विभाग", labelEn: "Town Planning Dept." },
+    { value: "कर व मूल्यांकन विभाग", labelMr: "कर व मूल्यांकन विभाग", labelEn: "Property Tax & Assessment" },
+    { value: "संगणक व आयटी विभाग", labelMr: "संगणक व आयटी विभाग", labelEn: "Computer & IT Dept." },
+    { value: "अतिक्रमण निर्मूलन विभाग", labelMr: "अतिक्रमण निर्मूलन विभाग", labelEn: "Encroachment Dept." },
+    { value: "जन्म-मृत्यू नोंदणी विभाग", labelMr: "जन्म-मृत्यू नोंदणी विभाग", labelEn: "Birth & Death Registration" },
+    { value: "अग्निशमन विभाग", labelMr: "अग्निशमन विभाग", labelEn: "Fire & Disaster Management" },
+    { value: "लेखा व वित्त विभाग", labelMr: "लेखा व वित्त विभाग", labelEn: "Accounts & Finance" },
+    { value: "दिव्यांग कल्याण विभाग", labelMr: "दिव्यांग कल्याण विभाग", labelEn: "Disability Welfare Dept." },
+    { value: "महिला व बालकल्याण विभाग", labelMr: "महिला व बालकल्याण विभाग", labelEn: "Women & Child Welfare Dept." },
+    { value: "सामान्य प्रशासन / इतर", labelMr: "सामान्य प्रशासन / इतर", labelEn: "General Administration / Other" },
   ];
 
   const complaintTypes = [
@@ -245,7 +252,9 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
               >
                 <option value="">{t("निवडा...", "Select...")}</option>
                 {departments.map((d) => (
-                  <option key={d}>{d}</option>
+                  <option key={d.value} value={d.value}>
+                    {lang === "mr" ? d.labelMr : d.labelEn}
+                  </option>
                 ))}
               </select>
             </div>
