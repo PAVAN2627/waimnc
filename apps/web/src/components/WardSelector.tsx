@@ -38,7 +38,11 @@ export default function WardSelector({
   const [query, setQuery] = useState("");
 
   const numberedWards = useMemo(
-    () => MUNICIPAL_WARDS.filter((w) => !isUnknownWard(w.value)),
+    () =>
+      MUNICIPAL_WARDS.filter((w) => !isUnknownWard(w.value)).map((w, idx) => ({
+        ...w,
+        index: idx + 1,
+      })),
     []
   );
 
@@ -46,7 +50,7 @@ export default function WardSelector({
     const q = normalizeDigits(query.trim());
     if (!q) return numberedWards;
     return numberedWards.filter((w) => {
-      const hay = normalizeDigits(`${w.value} ${w.labelMr} ${w.labelEn}`);
+      const hay = normalizeDigits(`${w.index}. ${w.value} ${w.labelMr} ${w.labelEn}`);
       return hay.includes(q);
     });
   }, [numberedWards, query]);
@@ -165,7 +169,7 @@ export default function WardSelector({
                     {t("कोणताही प्रभाग सापडला नाही.", "No matching ward found.")}
                   </p>
                 ) : (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {filteredWards.map((w) => {
                       const active = value === w.value;
                       return (
@@ -173,20 +177,25 @@ export default function WardSelector({
                           key={w.value}
                           type="button"
                           onClick={() => handleSelect(w.value)}
-                          className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border text-center transition-all ${
+                          className={`flex items-center justify-between gap-1.5 py-2.5 px-3 rounded-xl border text-left transition-all ${
                             active
-                              ? "bg-primary text-primary-foreground border-primary shadow-md scale-[1.02]"
+                              ? "bg-primary text-primary-foreground border-primary shadow-md"
                               : "bg-card hover:bg-primary/10 hover:border-primary/40 border-border text-foreground"
                           }`}
                         >
-                          <span className="text-sm font-extrabold leading-tight">{w.value}</span>
-                          <span
-                            className={`text-[10px] mt-0.5 leading-tight ${
-                              active ? "text-primary-foreground/85" : "text-muted-foreground"
-                            }`}
-                          >
-                            {lang === "mr" ? w.labelMr : w.labelEn}
-                          </span>
+                          <div className="min-w-0">
+                            <span className="text-xs sm:text-sm font-extrabold block truncate">
+                              {w.index}. {lang === "mr" ? w.labelMr : w.labelEn}
+                            </span>
+                            <span
+                              className={`text-[10px] block truncate ${
+                                active ? "text-primary-foreground/80" : "text-muted-foreground"
+                              }`}
+                            >
+                              {lang === "mr" ? w.labelEn : w.labelMr}
+                            </span>
+                          </div>
+                          {active && <Check className="w-3.5 h-3.5 shrink-0" />}
                         </button>
                       );
                     })}
