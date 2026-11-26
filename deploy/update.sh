@@ -25,7 +25,13 @@ npm run build:employee
 
 echo "⚡ 3. Building NestJS API..."
 npm --prefix apps/api run build
-npx prisma db push --schema=apps/api/prisma/schema.prisma --accept-data-loss --skip-generate || true
+if [ -f "apps/api/.env" ]; then
+    set -a
+    . "apps/api/.env"
+    set +a
+fi
+export DIRECT_URL="${DIRECT_URL:-$DATABASE_URL}"
+(cd apps/api && npx prisma db push --accept-data-loss --skip-generate) || true
 
 echo "⚡ 3.5 Ensuring Redis & Persistent Storage..."
 mkdir -p apps/api/data
@@ -36,7 +42,7 @@ if command -v systemctl &> /dev/null; then
 fi
 
 echo "🔄 4. Restarting API via PM2 (0.2s)..."
-pm2 restart wmc-api
+pm2 restart wmc-api --update-env
 
 echo "🔄 5. Reloading Nginx..."
 sudo systemctl reload nginx
