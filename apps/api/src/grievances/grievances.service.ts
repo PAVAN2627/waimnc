@@ -15,7 +15,11 @@ function matchesDepartment(c: any, targetDept: string): boolean {
     if (itemDept === target || itemDept.includes(target) || target.includes(itemDept)) return true;
 
     // Bilingual equivalences for municipal departments:
+    const isDrainage = (s: string) => s.includes('सांडपाणी') || s.includes('गटार') || s.includes('drainage');
+    if (isDrainage(target) && isDrainage(itemDept)) return true;
     if (
+      !isDrainage(target) &&
+      !isDrainage(itemDept) &&
       (target.includes('पाणी') || target.includes('water')) &&
       (itemDept.includes('पाणी') || itemDept.includes('water'))
     ) return true;
@@ -153,6 +157,9 @@ function matchesDepartment(c: any, targetDept: string): boolean {
     return itemDesc.includes('ना हरकत') || itemDesc.includes('noc') || itemType.includes('noc');
   }
 
+  if (target.includes('सांडपाणी') || target.includes('गटार') || target.includes('drainage')) {
+    return itemType.includes('गटार') || itemDesc.includes('सांडपाणी') || itemDesc.includes('गटार');
+  }
   if (target.includes('पाणी') || target.includes('water')) {
     return itemType.includes('पाणी') || itemType.includes('नळ') || itemDesc.includes('नळ');
   }

@@ -197,7 +197,11 @@ export function matchesEmployeeDepartment(
     if (itemDept) {
       if (itemDept === target || itemDept.includes(target) || target.includes(itemDept)) return true;
 
+      const isDrainage = (s: string) => s.includes("सांडपाणी") || s.includes("गटार") || s.includes("drainage");
+      if (isDrainage(target) && isDrainage(itemDept)) return true;
       if (
+        !isDrainage(target) &&
+        !isDrainage(itemDept) &&
         (target.includes("पाणी") || target.includes("water")) &&
         (itemDept.includes("पाणी") || itemDept.includes("water"))
       ) return true;
@@ -357,13 +361,25 @@ export function matchesEmployeeDepartment(
       return itemDesc.includes("ना हरकत") || itemDesc.includes("noc") || itemType.includes("noc");
     }
 
+    if (
+      target.includes("सांडपाणी") ||
+      target.includes("गटार") ||
+      target.includes("drainage")
+    ) {
+      return (
+        itemDept.includes("सांडपाणी") ||
+        itemDept.includes("गटार") ||
+        itemType.includes("गटार") ||
+        itemDesc.includes("सांडपाणी") ||
+        itemDesc.includes("गटार")
+      );
+    }
+
     if (target.includes("पाणी") || target.includes("water")) {
       return (
-        itemDept.includes("पाणी") ||
-        itemDept.includes("water") ||
+        (!itemDept.includes("सांडपाणी") && (itemDept.includes("पाणी") || itemDept.includes("water"))) ||
         itemType.includes("पाणी") ||
         itemType.includes("नळ") ||
-        itemDesc.includes("पाणी") ||
         itemDesc.includes("नळ")
       );
     }

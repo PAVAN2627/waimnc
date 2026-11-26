@@ -880,7 +880,9 @@ const AdminComplaints = () => {
     const itemDept = (c.department || "").toLowerCase().trim();
     if (itemDept === target || itemDept.includes(target) || target.includes(itemDept)) return true;
 
-    if ((target.includes("पाणी") || target.includes("water")) && (itemDept.includes("पाणी") || itemDept.includes("water"))) return true;
+    const isDrainage = (s: string) => s.includes("सांडपाणी") || s.includes("गटार") || s.includes("drainage");
+    if (isDrainage(target) && isDrainage(itemDept)) return true;
+    if (!isDrainage(target) && !isDrainage(itemDept) && (target.includes("पाणी") || target.includes("water")) && (itemDept.includes("पाणी") || itemDept.includes("water"))) return true;
     if ((target.includes("आरोग्य") || target.includes("स्वच्छता") || target.includes("health") || target.includes("sanitation")) && (itemDept.includes("आरोग्य") || itemDept.includes("स्वच्छता") || itemDept.includes("health") || itemDept.includes("sanitation"))) return true;
     if ((target.includes("बांधकाम") || target.includes("रस्ते") || target.includes("civil") || target.includes("road")) && (itemDept.includes("बांधकाम") || itemDept.includes("रस्ते") || itemDept.includes("civil") || itemDept.includes("road"))) return true;
     if ((target.includes("विद्युत") || target.includes("दिवाबत्ती") || target.includes("electrical") || target.includes("light")) && (itemDept.includes("विद्युत") || itemDept.includes("दिवाबत्ती") || itemDept.includes("electrical") || itemDept.includes("light"))) return true;
