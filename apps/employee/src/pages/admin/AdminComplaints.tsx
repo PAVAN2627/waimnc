@@ -32,7 +32,7 @@ import {
   type ComplaintAttachment,
 } from "@/lib/complaints";
 import { fetchAdminComplaints, uploadMedia } from "@/lib/api";
-import { MUNICIPAL_WARDS, isUnknownWard, matchesWard, translateDepartment, translateDepartments } from "@wmc/types";
+import { MUNICIPAL_WARDS, isUnknownWard, matchesWard, translateDepartment, translateDepartments, parseEmployeeAccess } from "@wmc/types";
 
 const statusColors: Record<ComplaintStatus, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -128,6 +128,7 @@ const OFFICIAL_DEPARTMENTS = [
   "अभिलेख कक्ष",
   "दिव्यांग कल्याण विभाग",
   "महिला व बालकल्याण विभाग",
+  "प्रधानमंत्री आवास योजना (PMAY) विभाग",
   "अतिक्रमण निर्मूलन विभाग",
   "निवडणूक विभाग",
   "आस्थापना विभाग",
@@ -904,12 +905,7 @@ const AdminComplaints = () => {
     return false;
   };
 
-  const userDepts =
-    user?.departments && user.departments.length > 0
-      ? user.departments
-      : user?.department
-      ? user.department.split(",").map((d: string) => d.trim()).filter(Boolean)
-      : [];
+  const { departments: userDepts } = parseEmployeeAccess(user);
 
   const filtered = complaints.filter((c) => {
     // Nagarsevak Ward Scoping (Frontend reinforcement of backend filtering)

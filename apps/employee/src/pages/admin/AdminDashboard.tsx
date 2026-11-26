@@ -22,7 +22,7 @@ import {
   type ComplaintRecord,
 } from "@/lib/complaints";
 import { Link } from "react-router-dom";
-import { isFakeMobile, isUnknownWard, matchesWard, translateDepartment } from "@wmc/types";
+import { isFakeMobile, isUnknownWard, matchesWard, translateDepartment, parseEmployeeAccess } from "@wmc/types";
 
 const statusColors: Record<"pending" | "in-progress" | "resolved", string> = {
   pending: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
@@ -42,13 +42,8 @@ const AdminDashboard = () => {
     return () => unsub();
   }, [user]);
 
-  // Extract assigned departments for this staff member
-  const userDepts =
-    user?.departments && user.departments.length > 0
-      ? user.departments
-      : user?.department
-      ? user.department.split(",").map((d: string) => d.trim()).filter(Boolean)
-      : [];
+  // Extract assigned departments & ticked applications for this staff member
+  const { departments: userDepts, applications: tickedApps, hasExplicitApps } = parseEmployeeAccess(user);
 
   const isNagarsevak = user?.role === "NAGARSEVAK";
   const isUnknownWardDesk = isNagarsevak && isUnknownWard(user?.ward);
@@ -82,7 +77,11 @@ const AdminDashboard = () => {
   };
 
   const grievances = deptComplaints.filter((c) => !isServiceRecord(c));
-  const applications = deptComplaints.filter(isServiceRecord);
+  const applications = hasExplicitApps
+    ? tickedApps.length === 0
+      ? []
+      : rawList.filter((c) => isServiceRecord(c) && matchesEmployeeDepartment(c, tickedApps))
+    : deptComplaints.filter(isServiceRecord);
 
   const totalGrievances = grievances.length;
   const pendingGrievances = grievances.filter((c) => c.status === "pending").length;

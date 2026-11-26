@@ -91,6 +91,14 @@ function matchesDepartment(c: any, targetDept: string): boolean {
       (target.includes('अभिलेख') || target.includes('record')) &&
       (itemDept.includes('अभिलेख') || itemDept.includes('record'))
     ) return true;
+    if (
+      (target.includes('pmay') || target.includes('आवास') || target.includes('घरकुल')) &&
+      (itemDept.includes('pmay') || itemDept.includes('आवास') || itemDept.includes('घरकुल'))
+    ) return true;
+    if (
+      (target.includes('ना हरकत') || target.includes('noc')) &&
+      (itemDept.includes('ना हरकत') || itemDept.includes('noc'))
+    ) return true;
 
     // If an explicit department was set and is not a generic fallback, respect the assigned department!
     const isGenericDept =

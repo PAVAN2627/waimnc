@@ -55,6 +55,7 @@ export const MUNICIPAL_DEPARTMENTS = [
   { value: "अभिलेख कक्ष", labelMr: "अभिलेख कक्ष", labelEn: "Records Cell" },
   { value: "दिव्यांग कल्याण विभाग", labelMr: "दिव्यांग कल्याण विभाग", labelEn: "Disability Welfare Dept." },
   { value: "महिला व बालकल्याण विभाग", labelMr: "महिला व बालकल्याण विभाग", labelEn: "Women & Child Welfare Dept." },
+  { value: "प्रधानमंत्री आवास योजना (PMAY) विभाग", labelMr: "प्रधानमंत्री आवास योजना (PMAY) विभाग", labelEn: "PMAY Housing Scheme Dept." },
   { value: "निवडणूक विभाग", labelMr: "निवडणूक विभाग", labelEn: "Election Dept." },
   { value: "आस्थापना विभाग", labelMr: "आस्थापना विभाग", labelEn: "Establishment Dept." },
   { value: "सभा विभाग", labelMr: "सभा विभाग", labelEn: "Council Meeting Dept." },
@@ -166,14 +167,15 @@ export default function AdminStaff() {
     const matchedApps = depts.filter((d) => appVals.includes(d));
 
     let parsedScope: "all" | "complaints" | "applications" = "all";
+    let hasExplicitApps = false;
+    let explicitApps: string[] = [];
     if (staff.accessScope) {
       if (staff.accessScope.startsWith("{")) {
         try {
           const parsed = JSON.parse(staff.accessScope);
           if (Array.isArray(parsed.applications)) {
-            parsed.applications.forEach((a: string) => {
-              if (!matchedApps.includes(a)) matchedApps.push(a);
-            });
+            hasExplicitApps = true;
+            explicitApps = parsed.applications;
           }
           if (parsed.scope) parsedScope = parsed.scope;
         } catch {}
@@ -183,7 +185,7 @@ export default function AdminStaff() {
     }
 
     setSelectedDepts(matchedDepts.length > 0 ? matchedDepts : [MUNICIPAL_DEPARTMENTS[0].value]);
-    setSelectedApps(matchedApps.length > 0 ? matchedApps : MUNICIPAL_APPLICATIONS.map((a) => a.value));
+    setSelectedApps(hasExplicitApps ? explicitApps : (matchedApps.length > 0 ? matchedApps : MUNICIPAL_APPLICATIONS.map((a) => a.value)));
     setRole((staff.role as any) || "DEPT_OFFICER");
     setAccessScope(parsedScope);
     setShowAddForm(true);

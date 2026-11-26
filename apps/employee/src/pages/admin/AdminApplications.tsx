@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import FormattedDescription from "@/components/FormattedDescription";
 import WardSelector from "@/components/WardSelector";
-import { isUnknownWard, matchesWard, translateDepartments } from "@wmc/types";
+import { isUnknownWard, matchesWard, translateDepartments, parseEmployeeAccess } from "@wmc/types";
 
 import {
   subscribeToAllComplaints,
@@ -243,27 +243,28 @@ export default function AdminApplications() {
     { key: "scheme", labelMr: "शासकीय योजना (इतर)", labelEn: "Other Schemes", match: "योजना", deptKeywords: ["योजना", "scheme", "कल्याण", "welfare", "महिला", "दिव्यांग"] },
   ];
 
-  const userDepts =
-    user?.departments && user.departments.length > 0
-      ? user.departments
-      : user?.department
-      ? user.department.split(",").map((d: string) => d.trim()).filter(Boolean)
-      : [];
+  const { departments: parsedDepts, applications: tickedApps, hasExplicitApps } = parseEmployeeAccess(user);
+  const userDepts = parsedDepts;
+  const effectiveAppFilters = hasExplicitApps ? tickedApps : userDepts;
 
   const visibleCategories =
-    userDepts.length === 0
+    !hasExplicitApps && userDepts.length === 0
       ? SERVICE_CATEGORIES
       : SERVICE_CATEGORIES.filter((cat) => {
           if (cat.key === "all") return true;
-          return userDepts.some((dept) => {
-            const d = dept.toLowerCase();
+          return effectiveAppFilters.some((appOrDept) => {
+            const d = appOrDept.toLowerCase();
             if (cat.excludeKeywords?.some((ex) => d.includes(ex.toLowerCase()))) return false;
             return cat.deptKeywords.some((kw) => d.includes(kw.toLowerCase()));
           });
         });
 
   const deptApplications =
-    userDepts.length > 0
+    hasExplicitApps
+      ? tickedApps.length === 0
+        ? []
+        : applications.filter((c) => matchesEmployeeDepartment(c, tickedApps))
+      : userDepts.length > 0
       ? applications.filter((c) => matchesEmployeeDepartment(c, userDepts))
       : applications;
 

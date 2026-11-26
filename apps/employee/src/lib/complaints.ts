@@ -273,6 +273,14 @@ export function matchesEmployeeDepartment(
         (target.includes("अभिलेख") || target.includes("record")) &&
         (itemDept.includes("अभिलेख") || itemDept.includes("record"))
       ) return true;
+      if (
+        (target.includes("pmay") || target.includes("आवास") || target.includes("घरकुल")) &&
+        (itemDept.includes("pmay") || itemDept.includes("आवास") || itemDept.includes("घरकुल"))
+      ) return true;
+      if (
+        (target.includes("ना हरकत") || target.includes("noc")) &&
+        (itemDept.includes("ना हरकत") || itemDept.includes("noc"))
+      ) return true;
 
       const isGenericDept =
         itemDept === "सामान्य प्रशासन" ||

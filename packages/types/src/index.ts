@@ -91,6 +91,7 @@ export const DEPARTMENT_LABEL_MAP: Array<{ mr: string; en: string; keywords: str
   { mr: "अभिलेख कक्ष", en: "Records Cell", keywords: ["अभिलेख", "record"] },
   { mr: "दिव्यांग कल्याण विभाग", en: "Disability Welfare Dept.", keywords: ["दिव्यांग", "अपंग", "disab"] },
   { mr: "महिला व बालकल्याण विभाग", en: "Women & Child Welfare Dept.", keywords: ["महिला", "बालकल्याण", "women"] },
+  { mr: "प्रधानमंत्री आवास योजना (PMAY) विभाग", en: "PMAY Housing Scheme Dept.", keywords: ["pmay", "आवास", "घरकुल", "housing"] },
   { mr: "निवडणूक विभाग", en: "Election Dept.", keywords: ["निवडणूक", "election"] },
   { mr: "आस्थापना विभाग", en: "Establishment Dept.", keywords: ["आस्थापना", "establishment"] },
   { mr: "सभा विभाग", en: "Council Meeting Dept.", keywords: ["सभा", "sabha", "meeting"] },
@@ -117,6 +118,56 @@ export function translateDepartment(dept?: string | null, lang: "mr" | "en" = "m
 
 export function translateDepartments(depts: string[], lang: "mr" | "en" = "mr"): string {
   return depts.map((d) => translateDepartment(d, lang)).join(", ");
+}
+
+export interface ParsedEmployeeAccess {
+  scope: "all" | "complaints" | "applications";
+  departments: string[];
+  applications: string[];
+  hasExplicitApps: boolean;
+}
+
+export function parseEmployeeAccess(user?: {
+  department?: string | null;
+  departments?: string[];
+  accessScope?: string | null;
+} | null): ParsedEmployeeAccess {
+  const fallbackDepts =
+    user?.departments && user.departments.length > 0
+      ? user.departments
+      : user?.department
+      ? user.department.split(",").map((d) => d.trim()).filter(Boolean)
+      : [];
+
+  let scope: "all" | "complaints" | "applications" = "all";
+  let departments = fallbackDepts;
+  let applications: string[] = [];
+  let hasExplicitApps = false;
+
+  const rawScope = user?.accessScope;
+  if (rawScope) {
+    if (rawScope.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(rawScope);
+        if (parsed.scope === "complaints" || parsed.scope === "applications" || parsed.scope === "all") {
+          scope = parsed.scope;
+        }
+        if (Array.isArray(parsed.departments) && parsed.departments.length > 0) {
+          departments = parsed.departments;
+        }
+        if (Array.isArray(parsed.applications)) {
+          applications = parsed.applications;
+          hasExplicitApps = true;
+        }
+      } catch {
+        // ignore invalid JSON
+      }
+    } else if (rawScope === "complaints" || rawScope === "applications") {
+      scope = rawScope;
+    }
+  }
+
+  return { scope, departments, applications, hasExplicitApps };
 }
 
 export interface Official {
