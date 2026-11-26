@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   CheckCircle, Clock, AlertTriangle, Eye, LoaderCircle,
-  Download, FileText, Image as ImageIcon, Paperclip, Search, X, Trash2, RefreshCw, ExternalLink, ZoomIn, FileCheck2, Building2
+  Download, FileText, Image as ImageIcon, Paperclip, Search, X, Trash2, RefreshCw, ExternalLink, ZoomIn, FileCheck2, Building2, ArrowRightLeft
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +15,7 @@ import FormattedDescription from "@/components/FormattedDescription";
 import {
   subscribeToAllComplaints,
   updateComplaintStatus,
+  updateComplaintDepartment,
   deleteComplaint,
   formatComplaintDate,
   normalizeAttachment,
@@ -41,6 +42,28 @@ const statusIcons: Record<ComplaintStatus, typeof Clock> = {
   resolved: CheckCircle,
 };
 
+const OFFICIAL_DEPARTMENTS = [
+  "आरोग्य व स्वच्छता विभाग",
+  "पाणी पुरवठा विभाग",
+  "रस्ते व बांधकाम विभाग",
+  "दिवाबत्ती व विद्युत विभाग",
+  "सांडपाणी व गटार व्यवस्था",
+  "नगररचना व नियोजन विभाग",
+  "कर व मूल्यांकन विभाग",
+  "संगणक व आयटी विभाग",
+  "अग्निशमन विभाग",
+  "जन्म-नोंदणी व मृत्यू विभाग",
+  "लेखा व वित्त विभाग",
+  "अभिलेख कक्ष",
+  "दिव्यांग कल्याण विभाग",
+  "महिला व बालकल्याण विभाग",
+  "अतिक्रमण निर्मूलन विभाग",
+  "निवडणूक विभाग",
+  "आस्थापना विभाग",
+  "सभा विभाग",
+  "सामान्य प्रशासन विभाग",
+];
+
 const AdminComplaints = () => {
   const { t, lang } = useLanguage();
   const { toast } = useToast();
@@ -54,6 +77,11 @@ const AdminComplaints = () => {
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [proofNotes, setProofNotes] = useState<string>("");
   const [uploadingProof, setUploadingProof] = useState(false);
+  const [shiftDeptModalOpen, setShiftDeptModalOpen] = useState(false);
+  const [targetShiftComplaint, setTargetShiftComplaint] = useState<ComplaintRecord | null>(null);
+  const [selectedDept, setSelectedDept] = useState<string>("");
+  const [customDept, setCustomDept] = useState<string>("");
+  const [shiftingDept, setShiftingDept] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [wardFilter, setWardFilter] = useState<string>("all");
@@ -204,6 +232,65 @@ const AdminComplaints = () => {
     }
   };
 
+  const handleOpenShiftDeptModal = (c: ComplaintRecord) => {
+    setTargetShiftComplaint(c);
+    setSelectedDept(c.department || OFFICIAL_DEPARTMENTS[0]);
+    setCustomDept("");
+    setShiftDeptModalOpen(true);
+  };
+
+  const handleConfirmShiftDept = async () => {
+    if (!targetShiftComplaint) return;
+    const finalDept = (selectedDept === "OTHER" ? customDept : selectedDept).trim();
+    if (!finalDept) {
+      toast({
+        title: t("त्रुटी", "Error"),
+        description: t("कृपया विभाग निवडा किंवा प्रविष्ट करा.", "Please select or enter department."),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setShiftingDept(true);
+      await updateComplaintDepartment(targetShiftComplaint.id, finalDept);
+
+      setComplaints((prev) =>
+        prev.map((c) =>
+          c.id === targetShiftComplaint.id
+            ? { ...c, department: finalDept, updatedAt: Date.now() }
+            : c
+        )
+      );
+
+      setSelected((prev) =>
+        prev && prev.id === targetShiftComplaint.id
+          ? { ...prev, department: finalDept, updatedAt: Date.now() }
+          : prev
+      );
+
+      toast({
+        title: t("विभाग बदल यशस्वी", "Department Shifted"),
+        description: t(
+          `तक्रार यशस्वीरित्या "${finalDept}" विभागाकडे वर्ग करण्यात आली आहे.`,
+          `Complaint successfully shifted to "${finalDept}".`
+        ),
+      });
+
+      setShiftDeptModalOpen(false);
+      setTargetShiftComplaint(null);
+    } catch (err: any) {
+      console.error("Shift department error:", err);
+      toast({
+        title: t("त्रुटी", "Error"),
+        description: err?.message || t("विभाग बदलता आला नाही.", "Failed to shift department."),
+        variant: "destructive",
+      });
+    } finally {
+      setShiftingDept(false);
+    }
+  };
+
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (!confirm(t("ही तक्रार हटवायची आहे का?", "Are you sure you want to delete this complaint?"))) return;
@@ -298,6 +385,279 @@ const AdminComplaints = () => {
       isPdf: isPdfAttachment(attachment),
     });
   };
+
+  const renderComplaintDetailsContent = (c: ComplaintRecord, isMobile: boolean) => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 text-sm bg-muted/20 p-3.5 rounded-2xl border border-border">
+        <div>
+          <span className="text-muted-foreground text-xs font-semibold">{t("नाव", "Name")}:</span>
+          <p className="font-extrabold text-foreground text-sm mt-0.5">{c.name}</p>
+        </div>
+        <div>
+          <span className="text-muted-foreground text-xs font-semibold">{t("मोबाइल", "Mobile")}:</span>
+          <p className="font-mono font-bold text-foreground text-sm mt-0.5">
+            <a href={`tel:${c.mobile}`} className="hover:underline text-primary">{c.mobile}</a>
+          </p>
+        </div>
+        <div>
+          <span className="text-muted-foreground text-xs font-semibold">{t("वार्ड क्र.", "Ward No.")}:</span>
+          <p className="font-bold text-foreground mt-0.5">{c.ward ? t(`वार्ड ${c.ward}`, `Ward ${c.ward}`) : "—"}</p>
+        </div>
+        <div>
+          <span className="text-muted-foreground text-xs font-semibold">{t("तारीख", "Date")}:</span>
+          <p className="font-bold text-foreground mt-0.5">{formatComplaintDate(c.createdAt, lang)}</p>
+        </div>
+        <div className="col-span-2">
+          <span className="text-muted-foreground text-xs font-semibold">{t("विभाग (Department)", "Department")}:</span>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <span className="font-bold text-xs px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
+              {c.department}
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-7 px-2.5 text-xs font-bold text-amber-700 dark:text-amber-300 border-amber-500/40 hover:bg-amber-500/10 gap-1.5 rounded-lg shadow-sm"
+              onClick={() => handleOpenShiftDeptModal(c)}
+              title={t("तक्रार दुसऱ्या विभागाकडे वर्ग करा", "Shift complaint to another department")}
+            >
+              <ArrowRightLeft className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span>{t("विभाग बदला", "Shift Dept")}</span>
+            </Button>
+          </div>
+        </div>
+        {c.type && (
+          <div className="col-span-2">
+            <span className="text-muted-foreground text-xs font-semibold">{t("तक्रार प्रकार", "Complaint Type")}:</span>
+            <p className="font-medium text-xs text-foreground mt-0.5">{c.type}</p>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        <span className="text-xs font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          {t("तक्रारीचा सविस्तर तपशील", "Complaint Specifications")}
+        </span>
+        <FormattedDescription description={c.description} />
+      </div>
+
+      {c.attachments.length > 0 && (
+        <div className="space-y-3 pt-2 border-t">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+              <Paperclip className="h-4 w-4 text-primary" />
+              {t("संलग्न कागदपत्रे व छायाचित्रे", "Attached Documents & Photos")} ({c.attachments.length})
+            </span>
+          </div>
+
+          {/* Image Gallery Cards */}
+          {c.attachments.some(isImageAttachment) && (
+            <div className="grid grid-cols-2 gap-2.5">
+              {c.attachments.filter(isImageAttachment).map((att, idx) => {
+                const fileUrl = getAttachmentUrl(att);
+                return (
+                  <div
+                    key={idx}
+                    className="group relative rounded-xl overflow-hidden border border-border bg-muted/40 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                  >
+                    <div className="w-full h-28 relative overflow-hidden bg-black/5 flex items-center justify-center">
+                      <img
+                        src={fileUrl}
+                        alt={att.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLElement).style.display = "none";
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="h-7 px-2 text-xs font-bold gap-1 rounded-lg"
+                          onClick={(e) => handleViewFile(e, att)}
+                          title={t("मोठे करून पहा", "Preview")}
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>{t("पहा", "View")}</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="h-7 px-2 text-xs font-bold gap-1 rounded-lg"
+                          onClick={(e) => handleDownloadFile(e, att)}
+                          title={t("डाउनलोड", "Download")}
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="p-1.5 px-2 bg-card/90 backdrop-blur-sm border-t border-border/50 text-[11px] truncate font-medium text-foreground">
+                      {att.name}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Complete List of all attached files with View & Download */}
+          <div className="space-y-2">
+            {c.attachments.map((att, idx) => {
+              const isImg = isImageAttachment(att);
+              const isPdf = isPdfAttachment(att);
+              return (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-border bg-card hover:bg-muted/40 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    {isImg ? (
+                      <ImageIcon className="h-4 w-4 text-primary flex-shrink-0" />
+                    ) : isPdf ? (
+                      <FileText className="h-4 w-4 text-destructive flex-shrink-0" />
+                    ) : (
+                      <Paperclip className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-foreground truncate">{att.name}</p>
+                      <span className="text-[10px] text-muted-foreground uppercase">
+                        {isImg ? t("छायाचित्र (Image)", "Image") : isPdf ? "PDF दस्तऐवज" : t("कागदपत्र", "Document")}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-xs font-bold gap-1 rounded-lg hover:bg-primary hover:text-white"
+                      onClick={(e) => handleViewFile(e, att)}
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>{t("पहा", "View")}</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-xs font-bold gap-1 rounded-lg hover:bg-primary hover:text-white"
+                      onClick={(e) => handleDownloadFile(e, att)}
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{t("डाउनलोड", "Download")}</span>
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Resolution Proof Photo Display (If marked Resolved) */}
+      {c.status === "resolved" && (
+        <div className="space-y-2 pt-2 border-t">
+          {c.resolutionProof?.url ? (
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/30 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs md:text-sm text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  {t("काम पूर्ण झाल्याचा पुरावा / निराकरण छायाचित्र", "Resolution Proof Photo")}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs font-bold border-emerald-500 text-emerald-700 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
+                  onClick={() => handleOpenResolveModal(c)}
+                >
+                  <ImageIcon className="w-3.5 h-3.5 mr-1" />
+                  {t("फोटो बदला", "Change Photo")}
+                </Button>
+              </div>
+              <div className="bg-card/70 rounded-xl p-2 border border-emerald-500/20 max-w-sm mx-auto text-center">
+                <a href={c.resolutionProof.url} target="_blank" rel="noopener noreferrer" className="block relative group overflow-hidden rounded-lg">
+                  <img src={c.resolutionProof.url} alt="Proof" className="max-h-56 w-full object-contain mx-auto group-hover:scale-105 transition-transform" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>{t("पूर्ण आकारात पहा", "View Full")}</span>
+                  </div>
+                </a>
+              </div>
+              {c.resolutionProof.notes && (
+                <p className="text-xs text-foreground bg-card/60 p-2 rounded-lg italic border border-emerald-500/20">
+                  📝 {c.resolutionProof.notes}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+              <span className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+                {t("निराकरण पुरावा फोटो जोडलेला नाही.", "No resolution proof photo attached.")}
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs font-bold border-amber-500 text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-950/50"
+                onClick={() => handleOpenResolveModal(c)}
+              >
+                <ImageIcon className="w-3.5 h-3.5 mr-1" />
+                {t("फोटो जोडा (पर्यायी)", "Add Photo (Optional)")}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Status Action Buttons */}
+      <div className="flex gap-2 flex-wrap items-center pt-3 border-t">
+        <Button
+          size="sm"
+          variant={c.status === "pending" ? "default" : "outline"}
+          className={c.status === "pending" ? "bg-yellow-500 hover:bg-yellow-600 text-white font-bold" : "border-yellow-400 text-yellow-700 hover:bg-yellow-50"}
+          disabled={updating === c.id}
+          onClick={() => changeStatus(c.id, "pending")}
+        >
+          {updating === c.id && (
+            <LoaderCircle className="h-3 w-3 animate-spin mr-1" />
+          )}
+          {t("प्रलंबित", "Pending")}
+        </Button>
+        <Button
+          size="sm"
+          variant={c.status === "in-progress" ? "default" : "outline"}
+          className={c.status === "in-progress" ? "bg-blue-600 hover:bg-blue-700 text-white font-bold" : "border-blue-400 text-blue-700 hover:bg-blue-50"}
+          disabled={updating === c.id}
+          onClick={() => changeStatus(c.id, "in-progress")}
+        >
+          {t("कार्यवाही सुरू", "In Progress")}
+        </Button>
+        <Button
+          size="sm"
+          variant={c.status === "resolved" ? "default" : "outline"}
+          className={c.status === "resolved" ? "bg-green-600 hover:bg-green-700 text-white font-bold" : "border-green-500 text-green-700 hover:bg-green-50"}
+          disabled={updating === c.id}
+          onClick={() => handleOpenResolveModal(c)}
+        >
+          <CheckCircle className="h-3.5 w-3.5 mr-1" />
+          {t("निराकरण", "Resolved")}
+        </Button>
+        <Button
+          size="sm"
+          variant="destructive"
+          className="ml-auto"
+          disabled={updating === c.id}
+          onClick={(e) => handleDelete(e, c.id)}
+        >
+          <Trash2 className="h-3.5 w-3.5 mr-1" />
+          {t("तक्रार हटवा", "Delete Complaint")}
+        </Button>
+      </div>
+    </div>
+  );
 
   const filtered = complaints.filter((c) => {
     if (tabFilter !== "all" && c.status !== tabFilter) return false;
@@ -539,278 +899,190 @@ const AdminComplaints = () => {
           ))}
         </div>
 
-        {selected && (
-          <Card className="sticky top-6">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Eye className="h-5 w-5 text-primary" />
-                <span>{t("तक्रार / अर्ज तपशील", "Application / Grievance Details")} — {selected.trackingId || shortId(selected.id)}</span>
-              </CardTitle>
+        {/* Desktop Details Panel (Side-by-Side sticky) */}
+        <div className="hidden md:block">
+          {selected ? (
+            <Card className="sticky top-6 rounded-3xl border border-border shadow-xl overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between pb-3 bg-muted/40 border-b border-border">
+                <CardTitle className="text-base font-black flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-primary" />
+                  <span>{t("तक्रार तपशील", "Complaint Details")} — {selected.trackingId || shortId(selected.id)}</span>
+                </CardTitle>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 rounded-full hover:bg-muted"
+                  onClick={() => setSelected(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="p-5 space-y-4">
+                {renderComplaintDetailsContent(selected, false)}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="sticky top-6 border-2 border-dashed border-border/80 rounded-3xl p-8 text-center bg-muted/10">
+              <div className="max-w-xs mx-auto space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
+                  <Eye className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-sm text-foreground">
+                  {t("तक्रार तपशील पहा", "View Complaint Details")}
+                </h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {t(
+                    "सविस्तर तपशील, कागदपत्रे, विभाग बदल किंवा स्थिती अद्यतनित करण्यासाठी डावीकडील कोणत्याही तक्रारीवर क्लिक करा.",
+                    "Click on any complaint from the list to view specifications, inspect attachments, shift department, or update status."
+                  )}
+                </p>
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Pop-up Modal (Opened on tapping any complaint) */}
+      {selected && (
+        <div className="md:hidden fixed inset-0 z-[9990] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-card text-card-foreground rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] flex flex-col border border-border shadow-2xl overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="gov-gradient p-4 text-white flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Eye className="w-5 h-5 text-white/90 flex-shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="font-extrabold text-sm truncate">
+                    {selected.trackingId || shortId(selected.id)}
+                  </h3>
+                  <p className="text-[11px] text-white/80 truncate">{selected.name} · {selected.type}</p>
+                </div>
+              </div>
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 rounded-lg"
+                className="rounded-full text-white hover:bg-white/20 h-8 w-8 flex-shrink-0"
                 onClick={() => setSelected(null)}
               >
-                <X className="h-4 w-4" />
+                <X className="w-5 h-5" />
               </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-muted-foreground">{t("नाव", "Name")}:</span>
-                  <br />
-                  {selected.name}
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4">
+              {renderComplaintDetailsContent(selected, true)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Department Shift Modal */}
+      {shiftDeptModalOpen && targetShiftComplaint && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-card text-card-foreground rounded-3xl max-w-md w-full border border-border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="gov-gradient p-5 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ArrowRightLeft className="w-5 h-5 text-amber-300" />
+                <h3 className="font-extrabold text-base md:text-lg">
+                  {t("तक्रार विभाग बदल / वर्ग करणे", "Shift / Reassign Department")}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShiftDeptModalOpen(false)}
+                className="p-1 rounded-full hover:bg-white/20 text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="p-3.5 rounded-2xl bg-muted/60 border border-border text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-muted-foreground">{t("तक्रार क्र.: ", "Tracking ID: ")}</span>
+                  <span className="font-mono font-bold text-primary">{targetShiftComplaint.trackingId || targetShiftComplaint.id}</span>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">{t("मोबाइल", "Mobile")}:</span>
-                  <br />
-                  {selected.mobile}
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-muted-foreground">{t("नागरिकाचे नाव: ", "Citizen Name: ")}</span>
+                  <span className="font-semibold text-foreground">{targetShiftComplaint.name}</span>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">{t("वार्ड क्र.", "Ward No.")}:</span>
-                  <br />
-                  {selected.ward ? t(`वार्ड ${selected.ward}`, `Ward ${selected.ward}`) : "—"}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">{t("प्रकार", "Type")}:</span>
-                  <br />
-                  {selected.type}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">{t("विभाग", "Department")}:</span>
-                  <br />
-                  {selected.department}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">{t("तारीख", "Date")}:</span>
-                  <br />
-                  {formatComplaintDate(selected.createdAt, lang)}
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-muted-foreground">{t("सध्याचा विभाग: ", "Current Department: ")}</span>
+                  <span className="font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                    {targetShiftComplaint.department}
+                  </span>
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <span className="text-xs font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  {t("तक्रारीचा सविस्तर तपशील", "Complaint Specifications")}
-                </span>
-                <FormattedDescription description={selected.description} />
+
+              <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-900 dark:text-blue-200 font-medium leading-relaxed">
+                ℹ️ {t(
+                  "नागरिकाने चुकून चुकीचा विभाग निवडला असल्यास, आपण ही तक्रार योग्य संबंधित विभागाकडे हस्तांतरित करू शकता.",
+                  "If the citizen mistakenly selected the wrong department, you can shift this complaint to the appropriate department."
+                )}
               </div>
-              {selected.attachments.length > 0 && (
-                <div className="space-y-3 pt-2 border-t">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-                      <Paperclip className="h-4 w-4 text-primary" />
-                      {t("संलग्न कागदपत्रे व छायाचित्रे", "Attached Documents & Photos")} ({selected.attachments.length})
-                    </span>
-                  </div>
 
-                  {/* Image Gallery Cards */}
-                  {selected.attachments.some(isImageAttachment) && (
-                    <div className="grid grid-cols-2 gap-2.5">
-                      {selected.attachments.filter(isImageAttachment).map((att, idx) => {
-                        const fileUrl = getAttachmentUrl(att);
-                        return (
-                          <div
-                            key={idx}
-                            className="group relative rounded-xl overflow-hidden border border-border bg-muted/40 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
-                          >
-                            <div className="w-full h-28 relative overflow-hidden bg-black/5 flex items-center justify-center">
-                              <img
-                                src={fileUrl}
-                                alt={att.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                loading="lazy"
-                                onError={(e) => {
-                                  (e.currentTarget as HTMLElement).style.display = "none";
-                                }}
-                              />
-                              <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="secondary"
-                                  className="h-7 px-2 text-xs font-bold gap-1 rounded-lg"
-                                  onClick={(e) => handleViewFile(e, att)}
-                                  title={t("मोठे करून पहा", "Preview")}
-                                >
-                                  <Eye className="w-3.5 h-3.5" />
-                                  <span>{t("पहा", "View")}</span>
-                                </Button>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="secondary"
-                                  className="h-7 px-2 text-xs font-bold gap-1 rounded-lg"
-                                  onClick={(e) => handleDownloadFile(e, att)}
-                                  title={t("डाउनलोड", "Download")}
-                                >
-                                  <Download className="w-3.5 h-3.5" />
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="p-1.5 px-2 bg-card/90 backdrop-blur-sm border-t border-border/50 text-[11px] truncate font-medium text-foreground">
-                              {att.name}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+              {/* Department Selection */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <Building2 className="w-4 h-4 text-primary" />
+                  <span>{t("नवीन विभाग निवडा (Target Department) *", "Select Target Department *")}</span>
+                </label>
+                <select
+                  value={selectedDept}
+                  onChange={(e) => setSelectedDept(e.target.value)}
+                  className="w-full border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm bg-background text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                >
+                  {OFFICIAL_DEPARTMENTS.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                  <option value="OTHER">{t("इतर विभाग प्रविष्ट करा...", "Enter other department...")}</option>
+                </select>
 
-                  {/* Complete List of all attached files with View & Download */}
-                  <div className="space-y-2">
-                    {selected.attachments.map((att, idx) => {
-                      const isImg = isImageAttachment(att);
-                      const isPdf = isPdfAttachment(att);
-                      return (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-border bg-card hover:bg-muted/40 transition-colors"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            {isImg ? (
-                              <ImageIcon className="h-4 w-4 text-primary flex-shrink-0" />
-                            ) : isPdf ? (
-                              <FileText className="h-4 w-4 text-destructive flex-shrink-0" />
-                            ) : (
-                              <Paperclip className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                            )}
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-bold text-foreground truncate">{att.name}</p>
-                              <span className="text-[10px] text-muted-foreground uppercase">
-                                {isImg ? t("छायाचित्र (Image)", "Image") : isPdf ? "PDF दस्तऐवज" : t("कागदपत्र", "Document")}
-                              </span>
-                            </div>
-                          </div>
+                {selectedDept === "OTHER" && (
+                  <Input
+                    value={customDept}
+                    onChange={(e) => setCustomDept(e.target.value)}
+                    placeholder={t("नवीन विभागाचे नाव लिहा", "Enter department name")}
+                    className="text-xs sm:text-sm mt-2"
+                  />
+                )}
+              </div>
 
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="h-7 px-2 text-xs font-bold gap-1 rounded-lg hover:bg-primary hover:text-white"
-                              onClick={(e) => handleViewFile(e, att)}
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                              <span>{t("पहा", "View")}</span>
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="h-7 px-2 text-xs font-bold gap-1 rounded-lg hover:bg-primary hover:text-white"
-                              onClick={(e) => handleDownloadFile(e, att)}
-                            >
-                              <Download className="w-3.5 h-3.5" />
-                              <span>{t("डाउनलोड", "Download")}</span>
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-              {/* Resolution Proof Photo Display (If marked Resolved) */}
-              {selected.status === "resolved" && (
-                <div className="space-y-2 pt-2 border-t">
-                  {selected.resolutionProof?.url ? (
-                    <div className="p-4 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/30 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs md:text-sm text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                          {t("काम पूर्ण झाल्याचा पुरावा / निराकरण छायाचित्र", "Resolution Proof Photo")}
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-xs font-bold border-emerald-500 text-emerald-700 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
-                          onClick={() => handleOpenResolveModal(selected)}
-                        >
-                          <ImageIcon className="w-3.5 h-3.5 mr-1" />
-                          {t("फोटो बदला", "Change Photo")}
-                        </Button>
-                      </div>
-                      <div className="bg-card/70 rounded-xl p-2 border border-emerald-500/20 max-w-sm mx-auto text-center">
-                        <a href={selected.resolutionProof.url} target="_blank" rel="noopener noreferrer" className="block relative group overflow-hidden rounded-lg">
-                          <img src={selected.resolutionProof.url} alt="Proof" className="max-h-56 w-full object-contain mx-auto group-hover:scale-105 transition-transform" />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            <span>{t("पूर्ण आकारात पहा", "View Full")}</span>
-                          </div>
-                        </a>
-                      </div>
-                      {selected.resolutionProof.notes && (
-                        <p className="text-xs text-foreground bg-card/60 p-2 rounded-lg italic border border-emerald-500/20">
-                          📝 {selected.resolutionProof.notes}
-                        </p>
-                      )}
-                    </div>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 text-xs font-bold"
+                  onClick={() => setShiftDeptModalOpen(false)}
+                  disabled={shiftingDept}
+                >
+                  {t("रद्द करा", "Cancel")}
+                </Button>
+
+                <Button
+                  type="button"
+                  className="flex-1 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white gap-1.5 shadow-md"
+                  onClick={handleConfirmShiftDept}
+                  disabled={shiftingDept}
+                >
+                  {shiftingDept ? (
+                    <LoaderCircle className="w-4 h-4 animate-spin" />
                   ) : (
-                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
-                      <span className="text-xs text-amber-800 dark:text-amber-300 font-medium">
-                        {t("निराकरण पुरावा फोटो जोडलेला नाही.", "No resolution proof photo attached.")}
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs font-bold border-amber-500 text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-950/50"
-                        onClick={() => handleOpenResolveModal(selected)}
-                      >
-                        <ImageIcon className="w-3.5 h-3.5 mr-1" />
-                        {t("फोटो जोडा (पर्यायी)", "Add Photo (Optional)")}
-                      </Button>
-                    </div>
+                    <ArrowRightLeft className="w-4 h-4" />
                   )}
-                </div>
-              )}
-
-              <div className="flex gap-2 flex-wrap items-center pt-2 border-t">
-                <Button
-                  size="sm"
-                  variant={selected.status === "pending" ? "default" : "outline"}
-                  className={selected.status === "pending" ? "bg-yellow-500 hover:bg-yellow-600 text-white font-bold" : "border-yellow-400 text-yellow-700 hover:bg-yellow-50"}
-                  disabled={updating === selected.id}
-                  onClick={() => changeStatus(selected.id, "pending")}
-                >
-                  {updating === selected.id && (
-                    <LoaderCircle className="h-3 w-3 animate-spin mr-1" />
-                  )}
-                  {t("प्रलंबित", "Pending")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant={selected.status === "in-progress" ? "default" : "outline"}
-                  className={selected.status === "in-progress" ? "bg-blue-600 hover:bg-blue-700 text-white font-bold" : "border-blue-400 text-blue-700 hover:bg-blue-50"}
-                  disabled={updating === selected.id}
-                  onClick={() => changeStatus(selected.id, "in-progress")}
-                >
-                  {t("कार्यवाही सुरू", "In Progress")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant={selected.status === "resolved" ? "default" : "outline"}
-                  className={selected.status === "resolved" ? "bg-green-600 hover:bg-green-700 text-white font-bold" : "border-green-500 text-green-700 hover:bg-green-50"}
-                  disabled={updating === selected.id}
-                  onClick={() => handleOpenResolveModal(selected)}
-                >
-                  <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                  {t("निराकरण", "Resolved")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  className="ml-auto"
-                  disabled={updating === selected.id}
-                  onClick={(e) => handleDelete(e, selected.id)}
-                >
-                  <Trash2 className="h-3.5 w-3.5 mr-1" />
-                  {t("तक्रार हटवा", "Delete Complaint")}
+                  <span>
+                    {shiftingDept
+                      ? t("वर्ग करत आहे...", "Shifting...")
+                      : t("नवीन विभागात वर्ग करा", "Confirm Department Shift")}
+                  </span>
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Full-Screen Attachment Preview Modal */}
       {previewAttachment && (

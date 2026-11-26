@@ -252,6 +252,15 @@ export async function updateComplaintStatus(
     body: JSON.stringify({ status, resolutionProofUrl, resolutionProofNotes }),
   });
 }
+export async function updateComplaintDepartment(
+  id: string,
+  department: string,
+) {
+  return request<any>(`/complaints/${id}/department`, {
+    method: "PATCH",
+    body: JSON.stringify({ department }),
+  });
+}
 export async function deleteComplaint(id: string) {
   return request<any>(`/complaints/${id}`, { method: "DELETE" });
 }

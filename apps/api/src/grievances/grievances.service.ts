@@ -357,6 +357,71 @@ export class GrievancesService {
     };
   }
 
+  async updateDepartment(
+    id: string,
+    department: string,
+    currentUser?: any,
+  ) {
+    if (!department || typeof department !== 'string' || !department.trim()) {
+      throw new BadRequestException('विभाग नाव आवश्यक आहे (Department name is required).');
+    }
+
+    const trimmedDept = department.trim();
+    const existing = await this.prisma.complaint.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Complaint not found');
+
+    // IDOR / BOLA Prevention: Verify Department Officer has permission
+    if (currentUser && currentUser.role === 'DEPT_OFFICER') {
+      let allowedDepts: string[] = [];
+      if (Array.isArray(currentUser.departments) && currentUser.departments.length > 0) {
+        allowedDepts = currentUser.departments;
+      } else if (currentUser.department) {
+        allowedDepts = currentUser.department.split(',').map((d: string) => d.trim()).filter(Boolean);
+      }
+
+      const isAllowed = allowedDepts.length > 0 && allowedDepts.some((dept) => matchesDepartment(existing, dept));
+      if (!isAllowed) {
+        throw new ForbiddenException(
+          'तुम्हाला केवळ तुमच्या नियुक्त विभागाच्या तक्रारी दुसऱ्या विभागाकडे वर्ग करण्याची परवानगी आहे (Access denied).',
+        );
+      }
+    }
+
+    const previousDept = existing.department;
+    const updated = await this.prisma.complaint.update({
+      where: { id },
+      data: {
+        department: trimmedDept,
+      },
+    });
+
+    const isApp = existing.type === 'service_request' || (existing.description && existing.description.includes('अर्ज'));
+    await this.auditLogsService.logAction({
+      adminId: currentUser?.id,
+      adminEmail: currentUser?.email,
+      adminName: currentUser?.name,
+      action: 'REASSIGN_DEPARTMENT',
+      resource: isApp ? 'APPLICATIONS' : 'COMPLAINTS',
+      resourceId: id,
+      details: {
+        trackingId: existing.trackingId,
+        previousDepartment: previousDept,
+        newDepartment: trimmedDept,
+        citizenName: existing.name,
+      },
+    });
+
+    const attachments = Array.isArray(updated.attachments) ? updated.attachments : [];
+    const resolutionProof = attachments.find((a: any) => a.type === 'resolution_proof') || null;
+    const citizenAttachments = attachments.filter((a: any) => a.type !== 'resolution_proof');
+
+    return {
+      ...updated,
+      attachments: citizenAttachments,
+      resolutionProof,
+    };
+  }
+
   async deleteGrievance(id: string, currentUser?: any) {
     // Only Super Admin can delete complaints / applications permanently
     if (currentUser && currentUser.role !== 'SUPER_ADMIN') {

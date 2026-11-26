@@ -204,6 +204,13 @@ export async function updateComplaintStatus(
   await api.updateComplaintStatus(id, status, resolutionProofUrl, resolutionProofNotes);
 }
 
+export async function updateComplaintDepartment(
+  id: string,
+  department: string,
+): Promise<void> {
+  await api.updateComplaintDepartment(id, department);
+}
+
 export async function deleteComplaint(id: string): Promise<void> {
   await api.deleteComplaint(id);
 }
