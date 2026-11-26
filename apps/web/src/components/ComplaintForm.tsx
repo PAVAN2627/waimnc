@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { createComplaint } from "@/lib/complaints";
 import { validateMobileInput, sanitizeMobileInput } from "@/lib/validation";
-import { MUNICIPAL_WARDS } from "@wmc/types";
+import WardSelector from "./WardSelector";
 
 const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
   const [submitting, setSubmitting] = useState(false);
@@ -295,21 +295,12 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
                   ({t("ऐच्छिक / माहिती असल्यास निवडा", "Optional")})
                 </span>
               </div>
-              <select
+              <WardSelector
                 name="ward"
                 value={selectedWard}
-                onChange={(e) => setSelectedWard(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
-              >
-                {MUNICIPAL_WARDS.filter((w) => w.value !== "माहिती नाही").map((w) => (
-                  <option key={w.value} value={w.value}>
-                    {lang === "mr" ? w.labelMr : w.labelEn}
-                  </option>
-                ))}
-                <option value="माहिती नाही">
-                  {t("माहिती नाही / अज्ञात (Don't know ward)", "Don't know / Unknown Ward")}
-                </option>
-              </select>
+                onChange={setSelectedWard}
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">

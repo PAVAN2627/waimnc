@@ -11,6 +11,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import FormattedDescription from "@/components/FormattedDescription";
+import WardSelector from "@/components/WardSelector";
 
 import {
   subscribeToAllComplaints,
@@ -1101,19 +1102,13 @@ const AdminComplaints = () => {
             </button>
           )}
         </div>
-        <select
+        <WardSelector
           value={wardFilter}
-          onChange={(e) => setWardFilter(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
-        >
-          <option value="all">{t("सर्व प्रभाग / वार्ड", "All Wards")}</option>
-          <option value="unknown">{t("माहिती नाही / अज्ञात वॉर्ड", "Don't know / Unknown Ward")}</option>
-          {MUNICIPAL_WARDS.filter((w) => !isUnknownWard(w.value)).map((w) => (
-            <option key={w.value} value={w.value}>
-              {w.labelMr}
-            </option>
-          ))}
-        </select>
+          onChange={setWardFilter}
+          includeAllOption
+          unknownValue="unknown"
+          className="min-w-[180px]"
+        />
         <select
           value={departmentFilter}
           onChange={(e) => setDepartmentFilter(e.target.value)}
@@ -1472,17 +1467,11 @@ const AdminComplaints = () => {
                   <Building2 className="w-3.5 h-3.5 text-primary" />
                   <span>{t("नवीन प्रभाग / वॉर्ड निवडा:", "Select New Ward:")}</span>
                 </label>
-                <select
+                <WardSelector
                   value={selectedNewWard}
-                  onChange={(e) => setSelectedNewWard(e.target.value)}
-                  className="w-full p-2.5 text-sm rounded-xl border border-input bg-background focus:ring-2 focus:ring-ring focus:outline-none"
-                >
-                  {MUNICIPAL_WARDS.map((w) => (
-                    <option key={w.value} value={w.value}>
-                      {w.labelMr} ({w.labelEn})
-                    </option>
-                  ))}
-                </select>
+                  onChange={setSelectedNewWard}
+                  className="w-full p-2.5 rounded-xl"
+                />
                 <p className="text-[11px] text-muted-foreground">
                   {t(
                     "वॉर्ड बदलल्यानंतर ही तक्रार संबंधित वॉर्डच्या नगरसेवकाच्या डॅशबोर्डमध्ये थेट दिसेल.",

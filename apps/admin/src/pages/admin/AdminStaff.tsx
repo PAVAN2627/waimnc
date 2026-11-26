@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { MUNICIPAL_WARDS, isUnknownWard } from "@wmc/types";
+import WardSelector from "@/components/WardSelector";
 import {
   fetchStaffUsers,
   createStaffUser,
@@ -618,17 +619,11 @@ export default function AdminStaff() {
                     <label className="block text-xs font-black text-foreground mb-1.5">
                       {t("नगरसेवकांचा नियुक्त प्रभाग / वॉर्ड निवडा *", "Select Assigned Ward for Nagarsevak *")}
                     </label>
-                    <select
+                    <WardSelector
                       value={selectedWard}
-                      onChange={(e) => setSelectedWard(e.target.value)}
-                      className="w-full border rounded-xl px-3.5 py-2.5 text-sm bg-background font-bold focus:ring-2 focus:ring-primary focus:outline-none"
-                    >
-                      {MUNICIPAL_WARDS.map((w) => (
-                        <option key={w.value} value={w.value}>
-                          {lang === "mr" ? w.labelMr : w.labelEn}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={setSelectedWard}
+                      className="w-full rounded-xl px-3.5 py-2.5 font-bold"
+                    />
                   </div>
 
                   <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1">
