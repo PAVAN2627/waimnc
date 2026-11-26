@@ -19,18 +19,30 @@ export interface MunicipalWard {
 }
 
 export const MUNICIPAL_WARDS: MunicipalWard[] = [
-  { value: "माहिती नाही", labelMr: "माहिती नाही / अज्ञात प्रभाग (Don't know ward)", labelEn: "Don't know / Unknown Prabhag" },
-  { value: "1", labelMr: "प्रभाग क्र. १", labelEn: "Prabhag / Ward 1" },
-  { value: "2", labelMr: "प्रभाग क्र. २", labelEn: "Prabhag / Ward 2" },
-  { value: "3", labelMr: "प्रभाग क्र. ३", labelEn: "Prabhag / Ward 3" },
-  { value: "4", labelMr: "प्रभाग क्र. ४", labelEn: "Prabhag / Ward 4" },
-  { value: "5", labelMr: "प्रभाग क्र. ५", labelEn: "Prabhag / Ward 5" },
-  { value: "6", labelMr: "प्रभाग क्र. ६", labelEn: "Prabhag / Ward 6" },
-  { value: "7", labelMr: "प्रभाग क्र. ७", labelEn: "Prabhag / Ward 7" },
-  { value: "8", labelMr: "प्रभाग क्र. ८", labelEn: "Prabhag / Ward 8" },
-  { value: "9", labelMr: "प्रभाग क्र. ९", labelEn: "Prabhag / Ward 9" },
-  { value: "10", labelMr: "प्रभाग क्र. १०", labelEn: "Prabhag / Ward 10" },
-  { value: "11", labelMr: "प्रभाग क्र. ११", labelEn: "Prabhag / Ward 11" },
+  { value: "१(अ)", labelMr: "प्रभाग १(अ)", labelEn: "Ward 1(A)" },
+  { value: "१(ब)", labelMr: "प्रभाग १(ब)", labelEn: "Ward 1(B)" },
+  { value: "२(अ)", labelMr: "प्रभाग २(अ)", labelEn: "Ward 2(A)" },
+  { value: "२(ब)", labelMr: "प्रभाग २(ब)", labelEn: "Ward 2(B)" },
+  { value: "३(अ)", labelMr: "प्रभाग ३(अ)", labelEn: "Ward 3(A)" },
+  { value: "३(ब)", labelMr: "प्रभाग ३(ब)", labelEn: "Ward 3(B)" },
+  { value: "४(अ)", labelMr: "प्रभाग ४(अ)", labelEn: "Ward 4(A)" },
+  { value: "४(ब)", labelMr: "प्रभाग ४(ब)", labelEn: "Ward 4(B)" },
+  { value: "५(अ)", labelMr: "प्रभाग ५(अ)", labelEn: "Ward 5(A)" },
+  { value: "५(ब)", labelMr: "प्रभाग ५(ब)", labelEn: "Ward 5(B)" },
+  { value: "६(अ)", labelMr: "प्रभाग ६(अ)", labelEn: "Ward 6(A)" },
+  { value: "६(ब)", labelMr: "प्रभाग ६(ब)", labelEn: "Ward 6(B)" },
+  { value: "७(अ)", labelMr: "प्रभाग ७(अ)", labelEn: "Ward 7(A)" },
+  { value: "७(ब)", labelMr: "प्रभाग ७(ब)", labelEn: "Ward 7(B)" },
+  { value: "८(अ)", labelMr: "प्रभाग ८(अ)", labelEn: "Ward 8(A)" },
+  { value: "८(ब)", labelMr: "प्रभाग ८(ब)", labelEn: "Ward 8(B)" },
+  { value: "९(अ)", labelMr: "प्रभाग ९(अ)", labelEn: "Ward 9(A)" },
+  { value: "९(ब)", labelMr: "प्रभाग ९(ब)", labelEn: "Ward 9(B)" },
+  { value: "१०(अ)", labelMr: "प्रभाग १०(अ)", labelEn: "Ward 10(A)" },
+  { value: "१०(ब)", labelMr: "प्रभाग १०(ब)", labelEn: "Ward 10(B)" },
+  { value: "११(अ)", labelMr: "प्रभाग ११(अ)", labelEn: "Ward 11(A)" },
+  { value: "११(ब)", labelMr: "प्रभाग ११(ब)", labelEn: "Ward 11(B)" },
+  { value: "११(क)", labelMr: "प्रभाग ११(क)", labelEn: "Ward 11(C)" },
+  { value: "माहिती नाही", labelMr: "माहिती नाही / अज्ञात प्रभाग", labelEn: "Don't know / Unknown Ward" },
 ];
 
 export function isUnknownWard(ward?: string | null): boolean {
@@ -51,15 +63,14 @@ export function isUnknownWard(ward?: string | null): boolean {
 
 export function matchesWard(itemWard?: string | null, targetWard?: string | null): boolean {
   if (!itemWard || !targetWard) return false;
-  const w1 = itemWard.trim().toLowerCase();
-  const w2 = targetWard.trim().toLowerCase();
+  const w1 = itemWard.trim();
+  const w2 = targetWard.trim();
   if (w1 === w2) return true;
-
-  const d1 = w1.match(/\d+/)?.[0];
-  const d2 = w2.match(/\d+/)?.[0];
-  if (d1 && d2 && d1 === d2) return true;
-
-  return w1.includes(w2) || w2.includes(w1);
+  // case-insensitive exact
+  if (w1.toLowerCase() === w2.toLowerCase()) return true;
+  // substring match (e.g. "प्रभाग १(अ)" contains "१(अ)")
+  if (w1.includes(w2) || w2.includes(w1)) return true;
+  return false;
 }
 
 export interface Official {
