@@ -16,11 +16,11 @@ import { RolesGuard } from './roles.guard';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         const secret = config.get<string>('JWT_SECRET');
-        if (!secret && process.env.NODE_ENV === 'production') {
-          throw new Error('FATAL: JWT_SECRET environment variable is required in production.');
+        if (!secret) {
+          throw new Error('FATAL: JWT_SECRET environment variable is required.');
         }
         return {
-          secret: secret || 'wmc_local_dev_jwt_secret_only',
+          secret,
           signOptions: { expiresIn: '7d' },
         };
       },

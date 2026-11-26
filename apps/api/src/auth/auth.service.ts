@@ -325,24 +325,26 @@ export class AuthService {
     });
 
     // Record audit log
-    await this.auditLogsService.logAction({
-      adminId: creator?.id,
-      adminEmail: creator?.email,
-      adminName: creator?.name,
-      action: 'CREATE_STAFF',
-      resource: 'STAFF',
-      resourceId: user.id,
-      details: {
-        createdStaffName: user.name,
-        createdStaffEmail: user.email,
-        role: user.role,
-        ward: user.ward,
-        departments: deptList,
-        department: joinedDept,
-        accessScope: user.accessScope,
-      },
-      ipAddress,
-    });
+    try {
+      await this.auditLogsService.logAction({
+        adminId: creator?.id,
+        adminEmail: creator?.email,
+        adminName: creator?.name,
+        action: 'CREATE_STAFF',
+        resource: 'STAFF',
+        resourceId: user.id,
+        details: {
+          createdStaffName: user.name,
+          createdStaffEmail: user.email,
+          role: user.role,
+          ward: user.ward,
+          departments: deptList,
+          department: joinedDept,
+          accessScope: user.accessScope,
+        },
+        ipAddress,
+      });
+    } catch { /* non-critical */ }
 
     return user;
   }
@@ -404,26 +406,28 @@ export class AuthService {
     });
 
     // Record audit log
-    await this.auditLogsService.logAction({
-      adminId: updater?.id,
-      adminEmail: updater?.email,
-      adminName: updater?.name,
-      action: 'UPDATE_STAFF',
-      resource: 'STAFF',
-      resourceId: id,
-      details: {
-        staffEmail: updated.email,
-        staffName: updated.name,
-        changes: {
-          role: updateData.role,
-          departments: updateData.departments,
-          accessScope: updateData.accessScope,
-          isActive: updateData.isActive,
-          passwordChanged: !!updateData.passwordHash,
+    try {
+      await this.auditLogsService.logAction({
+        adminId: updater?.id,
+        adminEmail: updater?.email,
+        adminName: updater?.name,
+        action: 'UPDATE_STAFF',
+        resource: 'STAFF',
+        resourceId: id,
+        details: {
+          staffEmail: updated.email,
+          staffName: updated.name,
+          changes: {
+            role: updateData.role,
+            departments: updateData.departments,
+            accessScope: updateData.accessScope,
+            isActive: updateData.isActive,
+            passwordChanged: !!updateData.passwordHash,
+          },
         },
-      },
-      ipAddress,
-    });
+        ipAddress,
+      });
+    } catch { /* non-critical */ }
 
     return updated;
   }
@@ -439,21 +443,23 @@ export class AuthService {
     const deleted = await (this.prisma.admin as any).delete({ where: { id } });
 
     // Record audit log
-    await this.auditLogsService.logAction({
-      adminId: currentAdmin?.id,
-      adminEmail: currentAdmin?.email,
-      adminName: currentAdmin?.name,
-      action: 'DELETE_STAFF',
-      resource: 'STAFF',
-      resourceId: id,
-      details: {
-        deletedStaffName: existing.name,
-        deletedStaffEmail: existing.email,
-        role: existing.role,
-        department: existing.department,
-      },
-      ipAddress,
-    });
+    try {
+      await this.auditLogsService.logAction({
+        adminId: currentAdmin?.id,
+        adminEmail: currentAdmin?.email,
+        adminName: currentAdmin?.name,
+        action: 'DELETE_STAFF',
+        resource: 'STAFF',
+        resourceId: id,
+        details: {
+          deletedStaffName: existing.name,
+          deletedStaffEmail: existing.email,
+          role: existing.role,
+          department: existing.department,
+        },
+        ipAddress,
+      });
+    } catch { /* non-critical */ }
 
     return deleted;
   }

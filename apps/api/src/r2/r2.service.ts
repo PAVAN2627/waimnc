@@ -12,9 +12,9 @@ export class R2Service {
 
   constructor(private readonly configService: ConfigService) {
     const cleanStr = (val?: string) => (val || '').replace(/^["']|["']$/g, '').trim();
-    const accountId = cleanStr(this.configService.get<string>('R2_ACCOUNT_ID')) || 'placeholder_account_id';
-    const accessKeyId = cleanStr(this.configService.get<string>('R2_ACCESS_KEY_ID')) || 'placeholder_access_key';
-    const secretAccessKey = cleanStr(this.configService.get<string>('R2_SECRET_ACCESS_KEY')) || 'placeholder_secret';
+    const accountId = cleanStr(this.configService.get<string>('R2_ACCOUNT_ID'));
+    const accessKeyId = cleanStr(this.configService.get<string>('R2_ACCESS_KEY_ID'));
+    const secretAccessKey = cleanStr(this.configService.get<string>('R2_SECRET_ACCESS_KEY'));
 
     this.bucketName = cleanStr(this.configService.get<string>('R2_BUCKET_NAME')) || 'waimuncipal';
     this.publicDomain = cleanStr(this.configService.get<string>('R2_PUBLIC_DOMAIN') || 'https://media.waimunicipalcouncil.org').replace(/\/+$/, '');

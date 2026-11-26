@@ -28,8 +28,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly prisma: PrismaService,
   ) {
     const jwtSecret = configService.get<string>('JWT_SECRET');
-    if (!jwtSecret && process.env.NODE_ENV === 'production') {
-      throw new Error('FATAL: JWT_SECRET environment variable is required in production.');
+    if (!jwtSecret) {
+      throw new Error('FATAL: JWT_SECRET environment variable is required.');
     }
 
     super({
@@ -43,7 +43,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: jwtSecret || 'wmc_local_dev_jwt_secret_only',
+      secretOrKey: jwtSecret,
     });
   }
 

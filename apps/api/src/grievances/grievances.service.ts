@@ -438,22 +438,24 @@ export class GrievancesService {
     });
 
     const isApp = existing.type === 'service_request' || (existing.description && existing.description.includes('अर्ज'));
-    await this.auditLogsService.logAction({
-      adminId: currentUser?.id,
-      adminEmail: currentUser?.email,
-      adminName: currentUser?.name,
-      action: 'UPDATE_STATUS',
-      resource: isApp ? 'APPLICATIONS' : 'COMPLAINTS',
-      resourceId: id,
-      details: {
-        trackingId: existing.trackingId,
-        department: existing.department,
-        previousStatus: existing.status,
-        newStatus: updateData.status,
-        citizenName: existing.name,
-        hasResolutionProof: !!updateData.resolutionProofUrl,
-      },
-    });
+    try {
+      await this.auditLogsService.logAction({
+        adminId: currentUser?.id,
+        adminEmail: currentUser?.email,
+        adminName: currentUser?.name,
+        action: 'UPDATE_STATUS',
+        resource: isApp ? 'APPLICATIONS' : 'COMPLAINTS',
+        resourceId: id,
+        details: {
+          trackingId: existing.trackingId,
+          department: existing.department,
+          previousStatus: existing.status,
+          newStatus: updateData.status,
+          citizenName: existing.name,
+          hasResolutionProof: !!updateData.resolutionProofUrl,
+        },
+      });
+    } catch { /* non-critical */ }
 
     const attachments = Array.isArray(updated.attachments) ? updated.attachments : [];
     const resolutionProof = attachments.find((a: any) => a.type === 'resolution_proof') || null;
@@ -510,20 +512,22 @@ export class GrievancesService {
     });
 
     const isApp = existing.type === 'service_request' || (existing.description && existing.description.includes('अर्ज'));
-    await this.auditLogsService.logAction({
-      adminId: currentUser?.id,
-      adminEmail: currentUser?.email,
-      adminName: currentUser?.name,
-      action: 'REASSIGN_DEPARTMENT',
-      resource: isApp ? 'APPLICATIONS' : 'COMPLAINTS',
-      resourceId: id,
-      details: {
-        trackingId: existing.trackingId,
-        previousDepartment: previousDept,
-        newDepartment: trimmedDept,
-        citizenName: existing.name,
-      },
-    });
+    try {
+      await this.auditLogsService.logAction({
+        adminId: currentUser?.id,
+        adminEmail: currentUser?.email,
+        adminName: currentUser?.name,
+        action: 'REASSIGN_DEPARTMENT',
+        resource: isApp ? 'APPLICATIONS' : 'COMPLAINTS',
+        resourceId: id,
+        details: {
+          trackingId: existing.trackingId,
+          previousDepartment: previousDept,
+          newDepartment: trimmedDept,
+          citizenName: existing.name,
+        },
+      });
+    } catch { /* non-critical */ }
 
     const attachments = Array.isArray(updated.attachments) ? updated.attachments : [];
     const resolutionProof = attachments.find((a: any) => a.type === 'resolution_proof') || null;
@@ -565,20 +569,22 @@ export class GrievancesService {
     });
 
     const isApp = existing.type === 'service_request' || (existing.description && existing.description.includes('अर्ज'));
-    await this.auditLogsService.logAction({
-      adminId: currentUser?.id,
-      adminEmail: currentUser?.email,
-      adminName: currentUser?.name,
-      action: 'UPDATE_WARD',
-      resource: isApp ? 'APPLICATIONS' : 'COMPLAINTS',
-      resourceId: id,
-      details: {
-        trackingId: existing.trackingId,
-        previousWard,
-        newWard: trimmedWard,
-        citizenName: existing.name,
-      },
-    });
+    try {
+      await this.auditLogsService.logAction({
+        adminId: currentUser?.id,
+        adminEmail: currentUser?.email,
+        adminName: currentUser?.name,
+        action: 'UPDATE_WARD',
+        resource: isApp ? 'APPLICATIONS' : 'COMPLAINTS',
+        resourceId: id,
+        details: {
+          trackingId: existing.trackingId,
+          previousWard,
+          newWard: trimmedWard,
+          citizenName: existing.name,
+        },
+      });
+    } catch { /* non-critical */ }
 
     const attachments = Array.isArray(updated.attachments) ? updated.attachments : [];
     const resolutionProof = attachments.find((a: any) => a.type === 'resolution_proof') || null;
@@ -606,19 +612,21 @@ export class GrievancesService {
     }
 
     const isApp = existing.type === 'service_request' || (existing.description && existing.description.includes('अर्ज'));
-    await this.auditLogsService.logAction({
-      adminId: currentUser?.id,
-      adminEmail: currentUser?.email,
-      adminName: currentUser?.name,
-      action: 'DELETE',
-      resource: isApp ? 'APPLICATIONS' : 'COMPLAINTS',
-      resourceId: id,
-      details: {
-        trackingId: existing.trackingId,
-        department: existing.department,
-        status: existing.status,
-      },
-    });
+    try {
+      await this.auditLogsService.logAction({
+        adminId: currentUser?.id,
+        adminEmail: currentUser?.email,
+        adminName: currentUser?.name,
+        action: 'DELETE',
+        resource: isApp ? 'APPLICATIONS' : 'COMPLAINTS',
+        resourceId: id,
+        details: {
+          trackingId: existing.trackingId,
+          department: existing.department,
+          status: existing.status,
+        },
+      });
+    } catch { /* non-critical */ }
 
     // Delete any attached images/files from Cloudflare R2 / storage
     if (existing.attachments) {
