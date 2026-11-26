@@ -31,7 +31,7 @@ import {
   type ComplaintAttachment,
 } from "@/lib/complaints";
 import { fetchAdminComplaints, uploadMedia } from "@/lib/api";
-import { MUNICIPAL_WARDS, isUnknownWard, matchesWard } from "@wmc/types";
+import { MUNICIPAL_WARDS, isUnknownWard, matchesWard, translateDepartment } from "@wmc/types";
 
 const statusColors: Record<ComplaintStatus, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -1067,7 +1067,7 @@ const AdminComplaints = () => {
           <option value="all">{t("सर्व विभाग (All Depts)", "All Departments")}</option>
           {OFFICIAL_DEPARTMENTS.map((dept) => (
             <option key={dept} value={dept}>
-              {dept}
+              {translateDepartment(dept, lang)}
             </option>
           ))}
         </select>

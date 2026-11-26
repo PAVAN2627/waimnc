@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import FormattedDescription from "@/components/FormattedDescription";
 import WardSelector from "@/components/WardSelector";
-import { isUnknownWard, matchesWard } from "@wmc/types";
+import { isUnknownWard, matchesWard, translateDepartments } from "@wmc/types";
 
 import {
   subscribeToAllComplaints,
@@ -312,7 +312,7 @@ export default function AdminApplications() {
               {userDepts.length > 0 && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400 text-slate-900 text-xs font-black shadow-md border border-amber-300">
                   <Building2 className="w-3.5 h-3.5" />
-                  <span>{t(`आपले विभाग: ${userDepts.join(", ")}`, `Departments: ${userDepts.join(", ")}`)}</span>
+                  <span>{t(`आपले विभाग: ${translateDepartments(userDepts, "mr")}`, `Departments: ${translateDepartments(userDepts, "en")}`)}</span>
                 </span>
               )}
               <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-200 bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-400/30">

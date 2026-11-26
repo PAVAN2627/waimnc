@@ -32,7 +32,7 @@ import {
   type ComplaintAttachment,
 } from "@/lib/complaints";
 import { fetchAdminComplaints, uploadMedia } from "@/lib/api";
-import { MUNICIPAL_WARDS, isUnknownWard, matchesWard } from "@wmc/types";
+import { MUNICIPAL_WARDS, isUnknownWard, matchesWard, translateDepartment, translateDepartments } from "@wmc/types";
 
 const statusColors: Record<ComplaintStatus, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -974,7 +974,7 @@ const AdminComplaints = () => {
               {!isNagarsevak && userDepts.length > 0 && (
                 <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-400 text-slate-900 text-xs font-black shadow-md border border-amber-300">
                   <Building2 className="w-3.5 h-3.5" />
-                  <span>{t(`आपले विभाग: ${userDepts.join(", ")}`, `Departments: ${userDepts.join(", ")}`)}</span>
+                  <span>{t(`आपले विभाग: ${translateDepartments(userDepts, "mr")}`, `Departments: ${translateDepartments(userDepts, "en")}`)}</span>
                 </span>
               )}
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-white text-xs font-bold border border-emerald-400/40 backdrop-blur-sm">
@@ -1119,7 +1119,7 @@ const AdminComplaints = () => {
           <option value="all">{t("सर्व विभाग (All Depts)", "All Departments")}</option>
           {OFFICIAL_DEPARTMENTS.map((dept) => (
             <option key={dept} value={dept}>
-              {dept}
+              {translateDepartment(dept, lang)}
             </option>
           ))}
         </select>

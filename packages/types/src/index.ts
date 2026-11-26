@@ -73,6 +73,52 @@ export function matchesWard(itemWard?: string | null, targetWard?: string | null
   return false;
 }
 
+export const DEPARTMENT_LABEL_MAP: Array<{ mr: string; en: string; keywords: string[] }> = [
+  { mr: "सांडपाणी व गटार व्यवस्था", en: "Drainage & Sewerage Dept.", keywords: ["सांडपाणी", "गटार", "drainage", "sewerage"] },
+  { mr: "पाणी पुरवठा विभाग", en: "Water Supply Dept.", keywords: ["पाणी पुरवठा", "पाणी", "water supply", "नळ"] },
+  { mr: "आरोग्य व स्वच्छता विभाग", en: "Health & Sanitation Dept.", keywords: ["आरोग्य", "स्वच्छता", "health", "sanitation"] },
+  { mr: "ना हरकत प्रमाणपत्र (NOC)", en: "No Objection Certificate (NOC)", keywords: ["ना हरकत", "noc"] },
+  { mr: "रस्ते व बांधकाम विभाग", en: "Roads & Civil Works (PWD)", keywords: ["रस्ते", "बांधकाम", "civil", "pwd", "road"] },
+  { mr: "दिवाबत्ती व विद्युत विभाग", en: "Street Lights & Electrical", keywords: ["दिवाबत्ती", "विद्युत", "electrical", "street light"] },
+  { mr: "कर व मूल्यांकन विभाग", en: "Property Tax & Assessment", keywords: ["कर", "मूल्यांकन", "मालमत्ता", "tax", "property"] },
+  { mr: "नगररचना व नियोजन विभाग", en: "Town Planning Dept.", keywords: ["नगररचना", "नियोजन", "town planning"] },
+  { mr: "संगणक व आयटी विभाग", en: "Computer & IT Dept.", keywords: ["संगणक", "आयटी", "computer", "it"] },
+  { mr: "लोकसेवा हक्क व दाखले कक्ष", en: "Public Service & Certificates", keywords: ["लोकसेवा", "दाखले", "certificate"] },
+  { mr: "जन्म-मृत्यू नोंदणी विभाग", en: "Birth & Death Registration", keywords: ["जन्म", "मृत्यू", "birth", "death"] },
+  { mr: "अतिक्रमण निर्मूलन विभाग", en: "Encroachment Removal Dept.", keywords: ["अतिक्रमण", "encroach"] },
+  { mr: "अग्निशमन विभाग", en: "Fire & Emergency Services", keywords: ["अग्निशमन", "fire"] },
+  { mr: "लेखा व वित्त विभाग", en: "Accounts & Finance", keywords: ["लेखा", "वित्त", "account", "finance"] },
+  { mr: "अभिलेख कक्ष", en: "Records Cell", keywords: ["अभिलेख", "record"] },
+  { mr: "दिव्यांग कल्याण विभाग", en: "Disability Welfare Dept.", keywords: ["दिव्यांग", "अपंग", "disab"] },
+  { mr: "महिला व बालकल्याण विभाग", en: "Women & Child Welfare Dept.", keywords: ["महिला", "बालकल्याण", "women"] },
+  { mr: "निवडणूक विभाग", en: "Election Dept.", keywords: ["निवडणूक", "election"] },
+  { mr: "आस्थापना विभाग", en: "Establishment Dept.", keywords: ["आस्थापना", "establishment"] },
+  { mr: "सभा विभाग", en: "Council Meeting Dept.", keywords: ["सभा", "sabha", "meeting"] },
+  { mr: "सामान्य प्रशासन विभाग", en: "General Administration", keywords: ["सामान्य प्रशासन", "general"] },
+];
+
+export function translateDepartment(dept?: string | null, lang: "mr" | "en" = "mr"): string {
+  if (!dept) return "";
+  const clean = dept.trim();
+  if (lang === "mr") return clean;
+  const lower = clean.toLowerCase();
+  for (const entry of DEPARTMENT_LABEL_MAP) {
+    if (entry.mr.toLowerCase() === lower || entry.en.toLowerCase() === lower) {
+      return entry.en;
+    }
+  }
+  for (const entry of DEPARTMENT_LABEL_MAP) {
+    if (entry.keywords.some((kw) => lower.includes(kw.toLowerCase()))) {
+      return entry.en;
+    }
+  }
+  return clean;
+}
+
+export function translateDepartments(depts: string[], lang: "mr" | "en" = "mr"): string {
+  return depts.map((d) => translateDepartment(d, lang)).join(", ");
+}
+
 export interface Official {
   id: string;
   nameMr: string;

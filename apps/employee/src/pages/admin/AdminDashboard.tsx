@@ -22,7 +22,7 @@ import {
   type ComplaintRecord,
 } from "@/lib/complaints";
 import { Link } from "react-router-dom";
-import { isFakeMobile, isUnknownWard, matchesWard } from "@wmc/types";
+import { isFakeMobile, isUnknownWard, matchesWard, translateDepartment } from "@wmc/types";
 
 const statusColors: Record<"pending" | "in-progress" | "resolved", string> = {
   pending: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
@@ -192,7 +192,7 @@ const AdminDashboard = () => {
                         className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black border border-white/30 text-white"
                       >
                         <Building2 className="w-2.5 h-2.5" />
-                        {d}
+                        {translateDepartment(d, lang)}
                       </span>
                     ))
                   ) : (
@@ -279,7 +279,7 @@ const AdminDashboard = () => {
                     <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-muted-foreground font-mono flex-wrap">
                       <span className="font-bold text-primary">{c.trackingId || `TK-${c.id.slice(-6).toUpperCase()}`}</span>
                       <span>•</span>
-                      <span>{c.department || t("सामान्य", "General")}</span>
+                      <span>{translateDepartment(c.department, lang) || t("सामान्य", "General")}</span>
                       <span>•</span>
                       <span>{formatComplaintDate(c.createdAt, lang)}</span>
                     </div>
