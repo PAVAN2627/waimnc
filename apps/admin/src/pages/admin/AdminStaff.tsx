@@ -260,21 +260,23 @@ export default function AdminStaff() {
     try {
       setSaving(true);
       const isNagarsevak = role === "NAGARSEVAK";
-      const combinedPermissions = Array.from(new Set([...selectedDepts, ...selectedApps]));
+      const scopedDepts = accessScope === "applications" ? [] : selectedDepts;
+      const scopedApps = accessScope === "complaints" ? [] : selectedApps;
+      const combinedPermissions = Array.from(new Set([...scopedDepts, ...scopedApps]));
       const effectiveDepts = role === "SUPER_ADMIN" ? [] : (isNagarsevak ? [] : combinedPermissions);
       const joinedDept = role === "SUPER_ADMIN"
         ? "सर्व विभाग (All)"
         : isNagarsevak
         ? (selectedWard === "माहिती नाही" ? "अज्ञात वॉर्ड कक्ष" : `प्रभाग क्र. ${selectedWard} (नगरसेवक)`)
-        : selectedDepts.join(", ");
+        : scopedDepts.join(", ");
       const effectiveScope = role === "SUPER_ADMIN"
         ? "all"
         : isNagarsevak
         ? "complaints"
         : JSON.stringify({
             scope: accessScope,
-            applications: selectedApps,
-            departments: selectedDepts,
+            applications: scopedApps,
+            departments: scopedDepts,
           });
 
       if (editingStaff) {

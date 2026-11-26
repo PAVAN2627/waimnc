@@ -18,13 +18,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { isUnknownWard } from "@wmc/types";
+import { isUnknownWard, parseEmployeeAccess, translateDepartments } from "@wmc/types";
 
 export function AdminSidebar() {
   const { state, setOpenMobile, isMobile } = useSidebar();
   const isCollapsedDesktop = !isMobile && state === "collapsed";
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { user, logout } = useAuth();
 
   const handleLogout = async () => {
@@ -33,7 +33,7 @@ export function AdminSidebar() {
     navigate("/login");
   };
 
-  const departments = user?.departments || (user?.department ? user.department.split(',').map((d: string) => d.trim()) : []);
+  const { scope, departments } = parseEmployeeAccess(user);
   const isNagarsevak = user?.role === "NAGARSEVAK";
 
   // Dedicated Employee & Corporator Portal Navigation
@@ -45,8 +45,12 @@ export function AdminSidebar() {
       ]
     : [
         { title: t("विभागीय डॅशबोर्ड", "Department Dashboard"), url: "/dashboard", icon: LayoutDashboard },
-        { title: t("नागरी तक्रारी निवारण", "Civic Grievances"), url: "/complaints", icon: MessageSquare },
-        { title: t("दाखले व सेवा अर्ज", "Service Applications"), url: "/applications", icon: FileCheck2 },
+        ...(scope !== "applications"
+          ? [{ title: t("नागरी तक्रारी निवारण", "Civic Grievances"), url: "/complaints", icon: MessageSquare }]
+          : []),
+        ...(scope !== "complaints"
+          ? [{ title: t("दाखले व सेवा अर्ज", "Service Applications"), url: "/applications", icon: FileCheck2 }]
+          : []),
         { title: t("माझे प्रोफाइल", "My Profile"), url: "/settings", icon: Settings },
       ];
 
@@ -77,7 +81,7 @@ export function AdminSidebar() {
             </div>
             {departments.length > 0 && (
               <p className="text-[10px] text-muted-foreground truncate font-medium mt-0.5">
-                {departments.join(", ")}
+                {translateDepartments(departments, lang)}
               </p>
             )}
           </div>

@@ -905,7 +905,7 @@ const AdminComplaints = () => {
     return false;
   };
 
-  const { departments: userDepts } = parseEmployeeAccess(user);
+  const { scope, departments: userDepts } = parseEmployeeAccess(user);
 
   const filtered = complaints.filter((c) => {
     // Nagarsevak Ward Scoping (Frontend reinforcement of backend filtering)
@@ -915,8 +915,9 @@ const AdminComplaints = () => {
       } else if (user?.ward) {
         if (!matchesWard(c.ward, user.ward)) return false;
       }
-    } else if (userDepts.length > 0 && !matchesEmployeeDepartment(c, userDepts)) {
-      return false;
+    } else {
+      if (scope === "applications") return false;
+      if (userDepts.length > 0 && !matchesEmployeeDepartment(c, userDepts)) return false;
     }
     if (tabFilter !== "all" && c.status !== tabFilter) return false;
     if (wardFilter !== "all") {

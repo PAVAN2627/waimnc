@@ -43,7 +43,7 @@ const AdminDashboard = () => {
   }, [user]);
 
   // Extract assigned departments & ticked applications for this staff member
-  const { departments: userDepts, applications: tickedApps, hasExplicitApps } = parseEmployeeAccess(user);
+  const { scope, departments: userDepts, applications: tickedApps, hasExplicitApps } = parseEmployeeAccess(user);
 
   const isNagarsevak = user?.role === "NAGARSEVAK";
   const isUnknownWardDesk = isNagarsevak && isUnknownWard(user?.ward);
@@ -76,12 +76,16 @@ const AdminDashboard = () => {
     );
   };
 
-  const grievances = deptComplaints.filter((c) => !isServiceRecord(c));
-  const applications = hasExplicitApps
-    ? tickedApps.length === 0
+  const grievances =
+    scope === "applications" ? [] : deptComplaints.filter((c) => !isServiceRecord(c));
+  const applications =
+    scope === "complaints"
       ? []
-      : rawList.filter((c) => isServiceRecord(c) && matchesEmployeeDepartment(c, tickedApps))
-    : deptComplaints.filter(isServiceRecord);
+      : hasExplicitApps
+      ? tickedApps.length === 0
+        ? []
+        : rawList.filter((c) => isServiceRecord(c) && matchesEmployeeDepartment(c, tickedApps))
+      : deptComplaints.filter(isServiceRecord);
 
   const totalGrievances = grievances.length;
   const pendingGrievances = grievances.filter((c) => c.status === "pending").length;

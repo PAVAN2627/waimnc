@@ -243,12 +243,14 @@ export default function AdminApplications() {
     { key: "scheme", labelMr: "शासकीय योजना (इतर)", labelEn: "Other Schemes", match: "योजना", deptKeywords: ["योजना", "scheme", "कल्याण", "welfare", "महिला", "दिव्यांग"] },
   ];
 
-  const { departments: parsedDepts, applications: tickedApps, hasExplicitApps } = parseEmployeeAccess(user);
+  const { scope, departments: parsedDepts, applications: tickedApps, hasExplicitApps } = parseEmployeeAccess(user);
   const userDepts = parsedDepts;
   const effectiveAppFilters = hasExplicitApps ? tickedApps : userDepts;
 
   const visibleCategories =
-    !hasExplicitApps && userDepts.length === 0
+    scope === "complaints"
+      ? [SERVICE_CATEGORIES[0]]
+      : !hasExplicitApps && userDepts.length === 0
       ? SERVICE_CATEGORIES
       : SERVICE_CATEGORIES.filter((cat) => {
           if (cat.key === "all") return true;
@@ -260,7 +262,9 @@ export default function AdminApplications() {
         });
 
   const deptApplications =
-    hasExplicitApps
+    scope === "complaints"
+      ? []
+      : hasExplicitApps
       ? tickedApps.length === 0
         ? []
         : applications.filter((c) => matchesEmployeeDepartment(c, tickedApps))
