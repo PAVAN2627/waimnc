@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, CheckCircle2, Clock, AlertCircle, LoaderCircle, ShieldCheck, ExternalLink, Phone, FileText, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, CheckCircle2, Clock, AlertCircle, LoaderCircle, ShieldCheck, ExternalLink, Phone, FileText, CheckCircle, ChevronDown, ChevronUp, Eye, Download, X, Paperclip, ImageIcon } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { getComplaintByTrackingId, getComplaintsByMobile, formatComplaintDate, getAttachmentUrl, type ComplaintRecord } from "@/lib/complaints";
@@ -37,6 +37,29 @@ const TrackApplication = () => {
   const [singleResult, setSingleResult] = useState<ComplaintRecord | null | "not-found">(null);
   const [mobileResults, setMobileResults] = useState<ComplaintRecord[] | null | "not-found">(null);
   const [error, setError] = useState<string | null>(null);
+  const [previewAttachment, setPreviewAttachment] = useState<{
+    url: string;
+    name: string;
+    isImage: boolean;
+  } | null>(null);
+
+  const handleDownloadFile = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Download failed");
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
+    } catch {
+      window.open(url, "_blank");
+    }
+  };
 
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -228,6 +251,61 @@ const TrackApplication = () => {
           </div>
         </div>
 
+        {/* Attached Citizen Documents/Photos */}
+        {record.attachments && record.attachments.length > 0 && (
+          <div className="space-y-2 pt-2 border-t border-border">
+            <span className="text-xs font-black text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+              <Paperclip className="h-4 w-4 text-primary" />
+              {t("संलग्न कागदपत्रे व छायाचित्रे", "Attached Documents & Photos")} ({record.attachments.length})
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {record.attachments.map((att, attIdx) => {
+                const attUrl = getAttachmentUrl(att);
+                const attName = att.name || `Attachment-${attIdx + 1}`;
+                const isImg = att.type === "image" || att.mimeType?.startsWith("image/") || /\.(jpe?g|png|webp|gif|svg)$/i.test(attName);
+                return (
+                  <div
+                    key={attIdx}
+                    className="flex items-center justify-between gap-2 p-2 rounded-xl border border-border bg-muted/30"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      {isImg ? (
+                        <ImageIcon className="h-4 w-4 text-primary flex-shrink-0" />
+                      ) : (
+                        <FileText className="h-4 w-4 text-destructive flex-shrink-0" />
+                      )}
+                      <span className="text-xs font-semibold truncate text-foreground">{attName}</span>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPreviewAttachment({
+                            url: attUrl,
+                            name: attName,
+                            isImage: isImg,
+                          })
+                        }
+                        className="px-2 py-1 text-xs font-bold rounded-lg border border-border bg-card hover:bg-muted text-foreground flex items-center gap-1"
+                      >
+                        <Eye className="w-3 h-3" />
+                        <span>{t("पहा", "View")}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadFile(attUrl, attName)}
+                        className="px-2 py-1 text-xs font-bold rounded-lg border border-border bg-card hover:bg-muted text-foreground flex items-center gap-1"
+                      >
+                        <Download className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Resolution Proof Card (Fetched from Cloudflare R2 / Storage) */}
         {record.status === "resolved" && record.resolutionProof?.url && (
           <div className="p-4 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/30 space-y-3">
@@ -236,17 +314,52 @@ const TrackApplication = () => {
                 <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 {t("काम पूर्ण झाल्याचा अधिकृत पुरावा / छायाचित्र", "Official Work Completion Proof Photo")}
               </span>
-              <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 uppercase">
-                {t("प्रमाणित निराकरण", "Verified Proof")}
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPreviewAttachment({
+                      url: getAttachmentUrl(record.resolutionProof?.url),
+                      name: t("काम पूर्ण झाल्याचा पुरावा (Resolution Proof)", "Resolution Proof Photo"),
+                      isImage: true,
+                    })
+                  }
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg border border-emerald-500/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-500 hover:text-white flex items-center gap-1 transition-colors"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>{t("पहा", "View")}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleDownloadFile(
+                      getAttachmentUrl(record.resolutionProof?.url),
+                      `${record.trackingId || "complaint"}-resolution-proof.jpg`
+                    )
+                  }
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg border border-emerald-500/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-500 hover:text-white flex items-center gap-1 transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{t("डाउनलोड", "Download")}</span>
+                </button>
+                <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 uppercase">
+                  {t("प्रमाणित निराकरण", "Verified Proof")}
+                </span>
+              </div>
             </div>
 
             <div className="bg-card/70 rounded-xl p-2 border border-emerald-500/20 max-w-sm mx-auto text-center">
-              <a
-                href={getAttachmentUrl(record.resolutionProof.url)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block relative group overflow-hidden rounded-lg border border-emerald-500/30 bg-black/5"
+              <button
+                type="button"
+                onClick={() =>
+                  setPreviewAttachment({
+                    url: getAttachmentUrl(record.resolutionProof?.url),
+                    name: t("काम पूर्ण झाल्याचा पुरावा (Resolution Proof)", "Resolution Proof Photo"),
+                    isImage: true,
+                  })
+                }
+                className="block relative group overflow-hidden rounded-lg border border-emerald-500/30 bg-black/5 w-full cursor-pointer focus:outline-none"
+                title={t("मोठ्या आकारात पहा", "View On Same Screen")}
               >
                 <img
                   src={getAttachmentUrl(record.resolutionProof.url)}
@@ -255,17 +368,22 @@ const TrackApplication = () => {
                   onError={(e) => {
                     const img = e.currentTarget;
                     const raw = record.resolutionProof?.url || "";
-                    if (!img.dataset.retried && raw.includes("media.waimunicipalcouncil.org")) {
-                      img.dataset.retried = "true";
-                      img.src = getAttachmentUrl(raw);
+                    if (!img.dataset.fallbackTried && raw) {
+                      img.dataset.fallbackTried = "true";
+                      if (img.src.includes("/storage/file")) {
+                        img.src = raw;
+                      } else {
+                        const cleanPath = raw.replace(/^https?:\/\/media\.waimunicipalcouncil\.org\/?/, "");
+                        img.src = `/api/storage/file?pathname=${encodeURIComponent(cleanPath)}`;
+                      }
                     }
                   }}
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5">
-                  <ExternalLink className="w-4 h-4" />
-                  <span>{t("मोठ्या आकारात पहा", "View Full Size")}</span>
+                  <Eye className="w-4 h-4" />
+                  <span>{t("मोठ्या आकारात पहा", "View On Same Screen")}</span>
                 </div>
-              </a>
+              </button>
             </div>
 
             {record.resolutionProof.notes && (
@@ -503,6 +621,60 @@ const TrackApplication = () => {
 
         </div>
       </div>
+
+      {/* Full-Screen Attachment / Proof Preview Modal on Same Screen */}
+      {previewAttachment && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-card text-card-foreground rounded-3xl max-w-4xl w-full border border-border shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+            {/* Modal Header */}
+            <div className="p-4 px-6 border-b border-border flex items-center justify-between bg-muted/40 gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <Eye className="w-5 h-5 text-primary flex-shrink-0" />
+                <span className="font-extrabold text-sm text-foreground truncate">{previewAttachment.name}</span>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleDownloadFile(
+                      previewAttachment.url,
+                      `${previewAttachment.name.replace(/\s+/g, "_")}.jpg`
+                    )
+                  }
+                  className="gov-gradient text-white px-3 py-1.5 rounded-xl text-xs font-bold gap-1 flex items-center shadow hover:opacity-90 transition-opacity"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{t("डाउनलोड", "Download")}</span>
+                </button>
+                <button
+                  type="button"
+                  className="rounded-full h-8 w-8 hover:bg-muted flex items-center justify-center text-foreground transition-colors"
+                  onClick={() => setPreviewAttachment(null)}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4 flex-1 overflow-auto flex items-center justify-center bg-black/10 dark:bg-black/40">
+              {previewAttachment.isImage ? (
+                <img
+                  src={previewAttachment.url}
+                  alt={previewAttachment.name}
+                  className="max-h-[75vh] w-auto max-w-full object-contain rounded-xl shadow-lg border border-border/40"
+                />
+              ) : (
+                <iframe
+                  src={previewAttachment.url}
+                  title={previewAttachment.name}
+                  className="w-full h-[75vh] rounded-xl border border-border"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

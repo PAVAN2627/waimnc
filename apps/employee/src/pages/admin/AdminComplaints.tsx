@@ -16,6 +16,7 @@ import {
   subscribeToAllComplaints,
   updateComplaintStatus,
   updateComplaintDepartment,
+  updateComplaintWard,
   deleteComplaint,
   formatComplaintDate,
   normalizeAttachment,
@@ -30,6 +31,7 @@ import {
   type ComplaintAttachment,
 } from "@/lib/complaints";
 import { fetchAdminComplaints, uploadMedia } from "@/lib/api";
+import { MUNICIPAL_WARDS, isUnknownWard, matchesWard } from "@wmc/types";
 
 const statusColors: Record<ComplaintStatus, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -82,6 +84,9 @@ const AdminComplaints = () => {
   const { t, lang } = useLanguage();
   const { toast } = useToast();
   const { user } = useAuth();
+  const isNagarsevak = user?.role === "NAGARSEVAK";
+  const isUnknownWardDesk = isNagarsevak && isUnknownWard(user?.ward);
+  const isSpecificWardNagarsevak = isNagarsevak && !isUnknownWard(user?.ward);
   const [complaints, setComplaints] = useState<ComplaintRecord[]>([]);
   const [selected, setSelected] = useState<ComplaintRecord | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -96,6 +101,10 @@ const AdminComplaints = () => {
   const [selectedDept, setSelectedDept] = useState<string>("");
   const [customDept, setCustomDept] = useState<string>("");
   const [shiftingDept, setShiftingDept] = useState(false);
+  const [shiftWardModalOpen, setShiftWardModalOpen] = useState(false);
+  const [targetShiftWardComplaint, setTargetShiftWardComplaint] = useState<ComplaintRecord | null>(null);
+  const [selectedNewWard, setSelectedNewWard] = useState<string>("");
+  const [shiftingWard, setShiftingWard] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [wardFilter, setWardFilter] = useState<string>("all");
@@ -306,6 +315,55 @@ const AdminComplaints = () => {
     }
   };
 
+  const handleOpenShiftWardModal = (c: ComplaintRecord) => {
+    setTargetShiftWardComplaint(c);
+    setSelectedNewWard(c.ward || "माहिती नाही");
+    setShiftWardModalOpen(true);
+  };
+
+  const handleConfirmShiftWard = async () => {
+    if (!targetShiftWardComplaint) return;
+    try {
+      setShiftingWard(true);
+      const finalWard = (selectedNewWard || "माहिती नाही").trim();
+      await updateComplaintWard(targetShiftWardComplaint.id, finalWard);
+
+      setComplaints((prev) =>
+        prev.map((c) =>
+          c.id === targetShiftWardComplaint.id
+            ? { ...c, ward: finalWard, updatedAt: Date.now() }
+            : c
+        )
+      );
+
+      setSelected((prev) =>
+        prev && prev.id === targetShiftWardComplaint.id
+          ? { ...prev, ward: finalWard, updatedAt: Date.now() }
+          : prev
+      );
+
+      toast({
+        title: t("वॉर्ड बदल यशस्वी", "Ward Updated"),
+        description: t(
+          `तक्रारीचा वॉर्ड यशस्वीरित्या "${finalWard}" असा बदलण्यात आला आहे.`,
+          `Complaint ward successfully updated to "${finalWard}".`
+        ),
+      });
+
+      setShiftWardModalOpen(false);
+      setTargetShiftWardComplaint(null);
+    } catch (err: any) {
+      console.error("Shift ward error:", err);
+      toast({
+        title: t("त्रुटी", "Error"),
+        description: err?.message || t("वॉर्ड बदलता आला नाही.", "Failed to update ward."),
+        variant: "destructive",
+      });
+    } finally {
+      setShiftingWard(false);
+    }
+  };
+
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (!confirm(t("ही तक्रार हटवायची आहे का?", "Are you sure you want to delete this complaint?"))) return;
@@ -416,7 +474,24 @@ const AdminComplaints = () => {
         </div>
         <div>
           <span className="text-muted-foreground text-xs font-semibold">{t("वार्ड क्र.", "Ward No.")}:</span>
-          <p className="font-bold text-foreground mt-0.5">{c.ward ? t(`वार्ड ${c.ward}`, `Ward ${c.ward}`) : "—"}</p>
+          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span className="font-bold text-foreground text-sm">
+              {c.ward && !isUnknownWard(c.ward) ? t(`प्रभाग / वॉर्ड क्र. ${c.ward}`, `Ward ${c.ward}`) : t("माहिती नाही / अज्ञात", "Don't know / Unknown")}
+            </span>
+            {(!isNagarsevak || isUnknownWardDesk) && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-6 px-2 text-[11px] font-bold text-blue-700 dark:text-blue-300 border-blue-500/40 hover:bg-blue-500/10 gap-1 rounded-lg shadow-sm"
+                onClick={() => handleOpenShiftWardModal(c)}
+                title={t("तक्रारीचा प्रभाग / वॉर्ड बदला", "Shift complaint to another ward")}
+              >
+                <ArrowRightLeft className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                <span>{t("वॉर्ड बदला", "Shift Ward")}</span>
+              </Button>
+            )}
+          </div>
         </div>
         <div>
           <span className="text-muted-foreground text-xs font-semibold">{t("तारीख", "Date")}:</span>
@@ -578,46 +653,96 @@ const AdminComplaints = () => {
         <div className="space-y-2 pt-2 border-t">
           {c.resolutionProof?.url ? (
             <div className="p-4 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/30 space-y-2.5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <span className="font-bold text-xs md:text-sm text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
                   <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   {t("काम पूर्ण झाल्याचा पुरावा / निराकरण छायाचित्र", "Resolution Proof Photo")}
                 </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-xs font-bold border-emerald-500 text-emerald-700 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
-                  onClick={() => handleOpenResolveModal(c)}
-                >
-                  <ImageIcon className="w-3.5 h-3.5 mr-1" />
-                  {t("फोटो बदला", "Change Photo")}
-                </Button>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-2 text-xs font-bold gap-1 rounded-lg border-emerald-500/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-500 hover:text-white"
+                    onClick={(e) =>
+                      handleViewFile(e, {
+                        name: t("काम पूर्ण झाल्याचा पुरावा (Resolution Proof)", "Resolution Proof Photo"),
+                        url: getAttachmentUrl(c.resolutionProof?.url),
+                        type: "image",
+                        mimeType: "image/jpeg",
+                        base64: "",
+                      })
+                    }
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>{t("पहा", "View")}</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-2 text-xs font-bold gap-1 rounded-lg border-emerald-500/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-500 hover:text-white"
+                    onClick={(e) =>
+                      handleDownloadFile(e, {
+                        name: `${c.trackingId || "complaint"}-resolution-proof.jpg`,
+                        url: getAttachmentUrl(c.resolutionProof?.url),
+                        type: "image",
+                        mimeType: "image/jpeg",
+                        base64: "",
+                      })
+                    }
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>{t("डाउनलोड", "Download")}</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs font-bold border-emerald-500 text-emerald-700 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
+                    onClick={() => handleOpenResolveModal(c)}
+                  >
+                    <ImageIcon className="w-3.5 h-3.5 mr-1" />
+                    {t("फोटो बदला", "Change Photo")}
+                  </Button>
+                </div>
               </div>
               <div className="bg-card/70 rounded-xl p-2 border border-emerald-500/20 max-w-sm mx-auto text-center">
-                <a
-                  href={getAttachmentUrl(c.resolutionProof.url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block relative group overflow-hidden rounded-lg"
+                <button
+                  type="button"
+                  onClick={(e) =>
+                    handleViewFile(e, {
+                      name: t("काम पूर्ण झाल्याचा पुरावा (Resolution Proof)", "Resolution Proof Photo"),
+                      url: getAttachmentUrl(c.resolutionProof?.url),
+                      type: "image",
+                      mimeType: "image/jpeg",
+                      base64: "",
+                    })
+                  }
+                  className="block relative group overflow-hidden rounded-lg w-full cursor-pointer focus:outline-none"
+                  title={t("मोठ्या आकारात पहा", "View On Same Screen")}
                 >
                   <img
                     src={getAttachmentUrl(c.resolutionProof.url)}
-                    alt="Proof"
+                    alt={t("कामाचा पुरावा", "Resolution Proof")}
                     className="max-h-56 w-full object-contain mx-auto group-hover:scale-105 transition-transform"
                     onError={(e) => {
                       const img = e.currentTarget;
                       const raw = c.resolutionProof?.url || "";
-                      if (!img.dataset.retried && raw.includes("media.waimunicipalcouncil.org")) {
-                        img.dataset.retried = "true";
-                        img.src = getAttachmentUrl(raw);
+                      if (!img.dataset.fallbackTried && raw) {
+                        img.dataset.fallbackTried = "true";
+                        if (img.src.includes("/storage/file")) {
+                          img.src = raw;
+                        } else {
+                          img.src = getAttachmentUrl(raw);
+                        }
                       }
                     }}
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>{t("पूर्ण आकारात पहा", "View Full")}</span>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5">
+                    <Eye className="w-4 h-4" />
+                    <span>{t("मोठ्या आकारात पहा", "View On Same Screen")}</span>
                   </div>
-                </a>
+                </button>
               </div>
               {c.resolutionProof.resolvedBy && (
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1">
@@ -652,49 +777,67 @@ const AdminComplaints = () => {
       )}
 
       {/* Status Action Buttons (Sticky Footer) */}
-      <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-5 sm:-mb-5 p-3 px-4 sm:px-5 bg-card/95 backdrop-blur-md border-t border-border flex gap-2 flex-wrap items-center mt-auto shadow-lg z-10">
-        <Button
-          size="sm"
-          variant={c.status === "pending" ? "default" : "outline"}
-          className={c.status === "pending" ? "bg-yellow-500 hover:bg-yellow-600 text-white font-bold" : "border-yellow-400 text-yellow-700 hover:bg-yellow-50"}
-          disabled={updating === c.id}
-          onClick={() => changeStatus(c.id, "pending")}
-        >
-          {updating === c.id && (
-            <LoaderCircle className="h-3 w-3 animate-spin mr-1" />
+      {!isNagarsevak ? (
+        <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-5 sm:-mb-5 p-3 px-4 sm:px-5 bg-card/95 backdrop-blur-md border-t border-border flex gap-2 flex-wrap items-center mt-auto shadow-lg z-10">
+          <Button
+            size="sm"
+            variant={c.status === "pending" ? "default" : "outline"}
+            className={c.status === "pending" ? "bg-yellow-500 hover:bg-yellow-600 text-white font-bold" : "border-yellow-400 text-yellow-700 hover:bg-yellow-50"}
+            disabled={updating === c.id}
+            onClick={() => changeStatus(c.id, "pending")}
+          >
+            {updating === c.id && (
+              <LoaderCircle className="h-3 w-3 animate-spin mr-1" />
+            )}
+            {t("प्रलंबित", "Pending")}
+          </Button>
+          <Button
+            size="sm"
+            variant={c.status === "in-progress" ? "default" : "outline"}
+            className={c.status === "in-progress" ? "bg-blue-600 hover:bg-blue-700 text-white font-bold" : "border-blue-400 text-blue-700 hover:bg-blue-50"}
+            disabled={updating === c.id}
+            onClick={() => changeStatus(c.id, "in-progress")}
+          >
+            {t("कार्यवाही सुरू", "In Progress")}
+          </Button>
+          <Button
+            size="sm"
+            variant={c.status === "resolved" ? "default" : "outline"}
+            className={c.status === "resolved" ? "bg-green-600 hover:bg-green-700 text-white font-bold" : "border-green-500 text-green-700 hover:bg-green-50"}
+            disabled={updating === c.id}
+            onClick={() => handleOpenResolveModal(c)}
+          >
+            <CheckCircle className="h-3.5 w-3.5 mr-1" />
+            {t("निराकरण", "Resolved")}
+          </Button>
+          {user?.role === "SUPER_ADMIN" && (
+            <Button
+              size="sm"
+              variant="destructive"
+              className="ml-auto"
+              disabled={updating === c.id}
+              onClick={(e) => handleDelete(e, c.id)}
+            >
+              <Trash2 className="h-3.5 w-3.5 mr-1" />
+              {t("तक्रार हटवा", "Delete Complaint")}
+            </Button>
           )}
-          {t("प्रलंबित", "Pending")}
-        </Button>
-        <Button
-          size="sm"
-          variant={c.status === "in-progress" ? "default" : "outline"}
-          className={c.status === "in-progress" ? "bg-blue-600 hover:bg-blue-700 text-white font-bold" : "border-blue-400 text-blue-700 hover:bg-blue-50"}
-          disabled={updating === c.id}
-          onClick={() => changeStatus(c.id, "in-progress")}
-        >
-          {t("कार्यवाही सुरू", "In Progress")}
-        </Button>
-        <Button
-          size="sm"
-          variant={c.status === "resolved" ? "default" : "outline"}
-          className={c.status === "resolved" ? "bg-green-600 hover:bg-green-700 text-white font-bold" : "border-green-500 text-green-700 hover:bg-green-50"}
-          disabled={updating === c.id}
-          onClick={() => handleOpenResolveModal(c)}
-        >
-          <CheckCircle className="h-3.5 w-3.5 mr-1" />
-          {t("निराकरण", "Resolved")}
-        </Button>
-        <Button
-          size="sm"
-          variant="destructive"
-          className="ml-auto"
-          disabled={updating === c.id}
-          onClick={(e) => handleDelete(e, c.id)}
-        >
-          <Trash2 className="h-3.5 w-3.5 mr-1" />
-          {t("तक्रार हटवा", "Delete Complaint")}
-        </Button>
-      </div>
+        </div>
+      ) : (
+        <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-5 sm:-mb-5 p-3 px-4 sm:px-5 bg-card/95 backdrop-blur-md border-t border-border flex gap-2 flex-wrap items-center mt-auto shadow-lg z-10">
+          <div className="w-full flex items-center justify-between gap-2 text-xs">
+            <span className="font-bold text-muted-foreground flex items-center gap-1.5">
+              <UserCheck className="w-4 h-4 text-primary" />
+              {isUnknownWardDesk
+                ? t("अज्ञात वॉर्ड कक्ष: तक्रारीचा प्रभाग निश्चित करण्यासाठी वरील 'वॉर्ड बदला' बटण वापरा.", "Unknown Ward Desk: Use 'Shift Ward' above to assign a ward.")
+                : t("नगरसेवक कार्यकक्ष: तक्रार तपशील केवळ वाचन स्वरूपात (Read-Only Mode).", "Nagarsevak Desk: Complaint details are read-only.")}
+            </span>
+            <span className="font-extrabold text-[10px] px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 uppercase">
+              {isUnknownWardDesk ? t("वॉर्ड नियुक्ती कक्ष", "Ward Routing") : t("केवळ वाचन", "Read-Only")}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -734,9 +877,24 @@ const AdminComplaints = () => {
       : [];
 
   const filtered = complaints.filter((c) => {
-    if (userDepts.length > 0 && !matchesEmployeeDepartment(c, userDepts)) return false;
+    // Nagarsevak Ward Scoping (Frontend reinforcement of backend filtering)
+    if (isNagarsevak) {
+      if (isUnknownWardDesk) {
+        if (!isUnknownWard(c.ward)) return false;
+      } else if (user?.ward) {
+        if (!matchesWard(c.ward, user.ward)) return false;
+      }
+    } else if (userDepts.length > 0 && !matchesEmployeeDepartment(c, userDepts)) {
+      return false;
+    }
     if (tabFilter !== "all" && c.status !== tabFilter) return false;
-    if (wardFilter !== "all" && c.ward !== wardFilter) return false;
+    if (wardFilter !== "all") {
+      if (wardFilter === "unknown" || isUnknownWard(wardFilter)) {
+        if (!isUnknownWard(c.ward)) return false;
+      } else {
+        if (!matchesWard(c.ward, wardFilter)) return false;
+      }
+    }
     if (departmentFilter !== "all" && !matchesDepartmentFilter(c, departmentFilter)) return false;
     if (!search.trim()) return true;
     const q = search.trim().toLowerCase();
@@ -768,7 +926,17 @@ const AdminComplaints = () => {
                 <Clock className="w-3.5 h-3.5" />
                 {t("नागरी निवारण कक्ष", "Civic Grievance Redressal")}
               </span>
-              {userDepts.length > 0 && (
+              {isNagarsevak && (
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-400 text-slate-900 text-xs font-black shadow-md border border-amber-300">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>
+                    {isUnknownWardDesk
+                      ? t("🏛️ अज्ञात वॉर्ड कक्ष (तक्रारींना योग्य प्रभाग नियुक्त करा)", "🏛️ Unknown Ward Routing Desk")
+                      : t(`🏛️ नगरसेवक प्रभाग क्र. ${user?.ward || ""} (केवळ वाचन)`, `🏛️ Corporator Ward ${user?.ward || ""} (Read-Only)`)}
+                  </span>
+                </span>
+              )}
+              {!isNagarsevak && userDepts.length > 0 && (
                 <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-400 text-slate-900 text-xs font-black shadow-md border border-amber-300">
                   <Building2 className="w-3.5 h-3.5" />
                   <span>{t(`आपले विभाग: ${userDepts.join(", ")}`, `Departments: ${userDepts.join(", ")}`)}</span>
@@ -907,9 +1075,10 @@ const AdminComplaints = () => {
           className="border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
         >
           <option value="all">{t("सर्व प्रभाग / वार्ड", "All Wards")}</option>
-          {Array.from({ length: 17 }, (_, i) => i + 1).map((w) => (
-            <option key={w} value={String(w)}>
-              {t(`वार्ड ${w}`, `Ward ${w}`)}
+          <option value="unknown">{t("माहिती नाही / अज्ञात वॉर्ड", "Don't know / Unknown Ward")}</option>
+          {MUNICIPAL_WARDS.filter((w) => !isUnknownWard(w.value)).map((w) => (
+            <option key={w.value} value={w.value}>
+              {w.labelMr}
             </option>
           ))}
         </select>
@@ -995,7 +1164,7 @@ const AdminComplaints = () => {
         {/* Desktop Details Panel (Side-by-Side sticky & scrollable) */}
         <div className="hidden md:block">
           {selected ? (
-            <Card className="sticky top-4 lg:top-6 rounded-3xl border border-border shadow-xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)]">
+            <Card className="sticky top-4 lg:top-6 rounded-3xl border border-border shadow-xl overflow-hidden flex flex-col h-[calc(100vh-5rem)] max-h-[calc(100vh-5rem)]">
               <CardHeader className="flex flex-row items-center justify-between pb-3 bg-muted/40 border-b border-border flex-shrink-0">
                 <CardTitle className="text-base font-black flex items-center gap-2">
                   <Eye className="h-5 w-5 text-primary" />
@@ -1010,7 +1179,7 @@ const AdminComplaints = () => {
                   <X className="h-4 w-4" />
                 </Button>
               </CardHeader>
-              <CardContent className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4">
+              <CardContent className="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0 space-y-4">
                 {renderComplaintDetailsContent(selected, false)}
               </CardContent>
             </Card>
@@ -1038,7 +1207,7 @@ const AdminComplaints = () => {
       {/* Mobile Pop-up Modal (Opened on tapping any complaint) */}
       {selected && (
         <div className="md:hidden fixed inset-0 z-[9990] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-card text-card-foreground rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] flex flex-col border border-border shadow-2xl overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
+          <div className="bg-card text-card-foreground rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] h-[90vh] sm:h-auto flex flex-col border border-border shadow-2xl overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="gov-gradient p-4 text-white flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2.5 min-w-0">
@@ -1061,7 +1230,7 @@ const AdminComplaints = () => {
             </div>
 
             {/* Scrollable Content */}
-            <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4">
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0 space-y-4 overscroll-contain">
               {renderComplaintDetailsContent(selected, true)}
             </div>
           </div>
@@ -1214,6 +1383,108 @@ const AdminComplaints = () => {
                     {shiftingDept
                       ? t("वर्ग करत आहे...", "Shifting...")
                       : t("नवीन विभागात वर्ग करा", "Confirm Department Shift")}
+                  </span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shift Ward Modal */}
+      {shiftWardModalOpen && targetShiftWardComplaint && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-card text-card-foreground rounded-3xl max-w-lg w-full border border-border shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="gov-gradient p-4 sm:p-5 text-white flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <ArrowRightLeft className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm sm:text-base">{t("प्रभाग / वॉर्ड बदला", "Shift Complaint Ward")}</h3>
+                  <p className="text-[11px] text-white/80">{t("तक्रारीसाठी योग्य प्रभाग निवडा", "Assign correct municipal ward to complaint")}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShiftWardModalOpen(false)}
+                className="p-1 rounded-full hover:bg-white/20 text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
+              <div className="p-3.5 rounded-2xl bg-muted/60 border border-border text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-muted-foreground">{t("तक्रार क्र.: ", "Tracking ID: ")}</span>
+                  <span className="font-mono font-bold text-primary">{targetShiftWardComplaint.trackingId || targetShiftWardComplaint.id}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-muted-foreground">{t("नागरिकाचे नाव: ", "Citizen Name: ")}</span>
+                  <span className="font-semibold text-foreground">{targetShiftWardComplaint.name}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-muted-foreground">{t("सध्याचा वॉर्ड: ", "Current Ward: ")}</span>
+                  <span className="font-semibold text-foreground">
+                    {targetShiftWardComplaint.ward && !isUnknownWard(targetShiftWardComplaint.ward)
+                      ? `प्रभाग क्र. ${targetShiftWardComplaint.ward}`
+                      : t("माहिती नाही / अज्ञात", "Don't know / Unknown")}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-primary" />
+                  <span>{t("नवीन प्रभाग / वॉर्ड निवडा:", "Select New Ward:")}</span>
+                </label>
+                <select
+                  value={selectedNewWard}
+                  onChange={(e) => setSelectedNewWard(e.target.value)}
+                  className="w-full p-2.5 text-sm rounded-xl border border-input bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+                >
+                  {MUNICIPAL_WARDS.map((w) => (
+                    <option key={w.value} value={w.value}>
+                      {w.labelMr} ({w.labelEn})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-muted-foreground">
+                  {t(
+                    "वॉर्ड बदलल्यानंतर ही तक्रार संबंधित वॉर्डच्या नगरसेवकाच्या डॅशबोर्डमध्ये थेट दिसेल.",
+                    "After changing ward, this complaint will appear in the respective ward Nagarsevak's dashboard."
+                  )}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 text-xs font-bold"
+                  onClick={() => setShiftWardModalOpen(false)}
+                  disabled={shiftingWard}
+                >
+                  {t("रद्द करा", "Cancel")}
+                </Button>
+                <Button
+                  type="button"
+                  className="flex-1 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white gap-1.5 shadow-md"
+                  onClick={handleConfirmShiftWard}
+                  disabled={shiftingWard}
+                >
+                  {shiftingWard ? (
+                    <LoaderCircle className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ArrowRightLeft className="w-4 h-4" />
+                  )}
+                  <span>
+                    {shiftingWard
+                      ? t("बदलत आहे...", "Updating...")
+                      : t("वॉर्ड बदला", "Update Ward")}
                   </span>
                 </Button>
               </div>

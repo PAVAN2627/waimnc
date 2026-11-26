@@ -22,7 +22,7 @@ import {
   type ComplaintRecord,
 } from "@/lib/complaints";
 import { Link } from "react-router-dom";
-import { isFakeMobile } from "@wmc/types";
+import { isFakeMobile, isUnknownWard, matchesWard } from "@wmc/types";
 
 const statusColors: Record<"pending" | "in-progress" | "resolved", string> = {
   pending: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
@@ -50,12 +50,20 @@ const AdminDashboard = () => {
       ? user.department.split(",").map((d: string) => d.trim()).filter(Boolean)
       : [];
 
-  // Filter complaints belonging to employee's assigned departments
+  const isNagarsevak = user?.role === "NAGARSEVAK";
+  const isUnknownWardDesk = isNagarsevak && isUnknownWard(user?.ward);
+
+  // Filter complaints belonging to employee's assigned departments or Nagarsevak's ward
   const rawList = allComplaints.filter((c) => !isFakeMobile(c.mobile));
-  const deptComplaints =
-    userDepts.length > 0
-      ? rawList.filter((c) => matchesEmployeeDepartment(c, userDepts))
-      : rawList;
+  const deptComplaints = isNagarsevak
+    ? isUnknownWardDesk
+      ? rawList.filter((c) => isUnknownWard(c.ward))
+      : user?.ward
+      ? rawList.filter((c) => matchesWard(c.ward, user.ward))
+      : rawList
+    : userDepts.length > 0
+    ? rawList.filter((c) => matchesEmployeeDepartment(c, userDepts))
+    : rawList;
 
   // Separate civic grievances vs service applications
   const isServiceRecord = (c: ComplaintRecord) => {
@@ -141,37 +149,58 @@ const AdminDashboard = () => {
           <div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-2 sm:mb-3 backdrop-blur-sm border border-white/30">
               <Building2 className="w-3.5 h-3.5" />
-              {t("विभागीय कर्मचारी कार्यकक्ष", "Department Staff Workdesk")}
+              {isNagarsevak
+                ? isUnknownWardDesk
+                  ? t("🏛️ अज्ञात वॉर्ड कक्ष", "🏛️ Unknown Ward Desk")
+                  : t(`🏛️ नगरसेवक — प्रभाग क्र. ${user?.ward || ""}`, `🏛️ Corporator — Ward ${user?.ward || ""}`)
+                : t("विभागीय कर्मचारी कार्यकक्ष", "Department Staff Workdesk")}
             </span>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">
-              {t("विभागीय डॅशबोर्ड", "Employee Workdesk")}
+              {isNagarsevak
+                ? isUnknownWardDesk
+                  ? t("अज्ञात वॉर्ड कक्ष डॅशबोर्ड", "Unknown Ward Routing Desk")
+                  : t(`प्रभाग क्र. ${user?.ward || ""} नगरसेवक डॅशबोर्ड`, `Ward ${user?.ward || ""} Corporator Desk`)
+                : t("विभागीय डॅशबोर्ड", "Employee Workdesk")}
             </h1>
             <p className="text-white/80 text-xs sm:text-sm font-medium mt-1">
-              {t(
-                "वाई नगरपरिषद — आपल्या नेमून दिलेल्या विभागातील नागरी तक्रारी व सेवा अर्ज निवारण.",
-                "Grievance redressal & certificate processing for assigned departments."
-              )}
+              {isNagarsevak
+                ? isUnknownWardDesk
+                  ? t("वॉर्ड माहिती नसलेल्या नागरी तक्रारी तपासून योग्य प्रभागात वर्ग करा.", "Review unassigned complaints and route to appropriate wards.")
+                  : t("आपल्या प्रभागातील नागरी तक्रारींची थेट स्थिती (केवळ वाचन / Read-Only).", "Live civic grievances in your assigned ward (Read-Only).")
+                : t(
+                    "वाई नगरपरिषद — आपल्या नेमून दिलेल्या विभागातील नागरी तक्रारी व सेवा अर्ज निवारण.",
+                    "Grievance redressal & certificate processing for assigned departments."
+                  )}
             </p>
 
-            {/* Assigned Departments Badges */}
+            {/* Assigned Departments / Ward Badges */}
             <div className="flex items-center gap-1.5 flex-wrap mt-3">
-              <span className="text-[11px] font-bold text-white/70">
-                {t("नेमून दिलेले विभाग:", "Assigned Departments:")}
-              </span>
-              {userDepts.length > 0 ? (
-                userDepts.map((d: string, idx: number) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black border border-white/30 text-white"
-                  >
-                    <Building2 className="w-2.5 h-2.5" />
-                    {d}
-                  </span>
-                ))
-              ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 text-[11px] font-medium border border-white/30 text-white">
-                  {t("सर्व विभाग (All Departments)", "All Departments")}
+              {isNagarsevak ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[11px] font-black border border-amber-300">
+                  <Building2 className="w-2.5 h-2.5" />
+                  {isUnknownWardDesk ? t("कक्ष: अज्ञात वॉर्ड निवारण", "Desk: Unknown Ward Redressal") : t(`प्रभाग: ${user?.ward}`, `Ward: ${user?.ward}`)}
                 </span>
+              ) : (
+                <>
+                  <span className="text-[11px] font-bold text-white/70">
+                    {t("नेमून दिलेले विभाग:", "Assigned Departments:")}
+                  </span>
+                  {userDepts.length > 0 ? (
+                    userDepts.map((d: string, idx: number) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black border border-white/30 text-white"
+                      >
+                        <Building2 className="w-2.5 h-2.5" />
+                        {d}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 text-[11px] font-medium border border-white/30 text-white">
+                      {t("सर्व विभाग (All Departments)", "All Departments")}
+                    </span>
+                  )}
+                </>
               )}
             </div>
           </div>

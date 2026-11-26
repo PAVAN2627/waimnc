@@ -6,9 +6,10 @@ export interface AdminUser {
   id: string;
   email: string;
   name: string;
-  role?: string; // "SUPER_ADMIN" | "DEPT_OFFICER"
+  role?: string; // "SUPER_ADMIN" | "DEPT_OFFICER" | "NAGARSEVAK"
   department?: string | null;
   departments?: string[];
+  ward?: string | null;
   accessScope?: string | null;
   isActive?: boolean;
   lastLoginAt?: string | null;
@@ -21,6 +22,7 @@ export interface CreateStaffPayload {
   password: string;
   department?: string;
   departments?: string[];
+  ward?: string | null;
   role?: string;
   accessScope?: string;
 }
@@ -29,6 +31,7 @@ export interface UpdateStaffPayload {
   name?: string;
   department?: string;
   departments?: string[];
+  ward?: string | null;
   role?: string;
   accessScope?: string;
   isActive?: boolean;
@@ -259,6 +262,15 @@ export async function updateComplaintDepartment(
   return request<any>(`/complaints/${id}/department`, {
     method: "PATCH",
     body: JSON.stringify({ department }),
+  });
+}
+export async function updateComplaintWard(
+  id: string,
+  ward: string,
+) {
+  return request<any>(`/complaints/${id}/ward`, {
+    method: "PATCH",
+    body: JSON.stringify({ ward }),
   });
 }
 export async function deleteComplaint(id: string) {

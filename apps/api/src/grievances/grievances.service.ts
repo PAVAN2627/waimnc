@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { randomBytes } from 'crypto';
-import { isFakeMobile } from '@wmc/types';
+import { isFakeMobile, isUnknownWard, matchesWard } from '@wmc/types';
 
 function matchesDepartment(c: any, targetDept: string): boolean {
   if (!targetDept || targetDept === 'all' || targetDept === 'सर्व') return true;
@@ -351,6 +351,18 @@ export class GrievancesService {
       }
     }
 
+    // Nagarsevak (Ward Representative) restriction:
+    if (currentUser && currentUser.role === 'NAGARSEVAK') {
+      const userWard = currentUser.ward;
+      if (isUnknownWard(userWard)) {
+        // Unassigned / Don't know ward representative: views complaints with unknown ward to assign them
+        filtered = filtered.filter((c) => isUnknownWard(c.ward));
+      } else {
+        // Regular Nagarsevak: views complaints belonging to their assigned ward
+        filtered = filtered.filter((c) => matchesWard(c.ward, userWard));
+      }
+    }
+
     // Specific Department filter requested from frontend filter dropdown
     if (department && department !== 'all' && department !== 'सर्व') {
       filtered = filtered.filter((c) => matchesDepartment(c, department));
@@ -380,6 +392,11 @@ export class GrievancesService {
 
     const existing = await this.prisma.complaint.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Complaint not found');
+
+    // Nagarsevak role has read-only access to complaints
+    if (currentUser && currentUser.role === 'NAGARSEVAK') {
+      throw new ForbiddenException('नगरसेवकांना तक्रार स्थिती बदलण्याची परवानगी नाही. (Nagarsevaks have read-only access).');
+    }
 
     // IDOR / BOLA Prevention: Verify Department Officer has permission for this complaint's department
     if (currentUser && currentUser.role === 'DEPT_OFFICER') {
@@ -462,6 +479,11 @@ export class GrievancesService {
     const existing = await this.prisma.complaint.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Complaint not found');
 
+    // Nagarsevak role has read-only access to complaints
+    if (currentUser && currentUser.role === 'NAGARSEVAK') {
+      throw new ForbiddenException('नगरसेवकांना तक्रार स्थिती बदलण्याची परवानगी नाही. (Nagarsevaks have read-only access).');
+    }
+
     // IDOR / BOLA Prevention: Verify Department Officer has permission
     if (currentUser && currentUser.role === 'DEPT_OFFICER') {
       let allowedDepts: string[] = [];
@@ -514,6 +536,61 @@ export class GrievancesService {
     };
   }
 
+  async updateWard(
+    id: string,
+    ward: string,
+    currentUser?: any,
+  ) {
+    if (!ward || typeof ward !== 'string' || !ward.trim()) {
+      throw new BadRequestException('वॉर्ड / प्रभाग क्रमांक आवश्यक आहे (Ward is required).');
+    }
+
+    const trimmedWard = ward.trim();
+    const existing = await this.prisma.complaint.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Complaint not found');
+
+    // IDOR / RBAC check:
+    if (currentUser && currentUser.role === 'NAGARSEVAK') {
+      if (!isUnknownWard(currentUser.ward)) {
+        throw new ForbiddenException('केवळ अज्ञात वॉर्ड कक्षाचे प्रतिनिधी किंवा प्रशासकीय अधिकारी वॉर्ड बदलू शकतात.');
+      }
+    }
+
+    const previousWard = existing.ward;
+    const updated = await this.prisma.complaint.update({
+      where: { id },
+      data: {
+        ward: trimmedWard,
+      },
+    });
+
+    const isApp = existing.type === 'service_request' || (existing.description && existing.description.includes('अर्ज'));
+    await this.auditLogsService.logAction({
+      adminId: currentUser?.id,
+      adminEmail: currentUser?.email,
+      adminName: currentUser?.name,
+      action: 'UPDATE_WARD',
+      resource: isApp ? 'APPLICATIONS' : 'COMPLAINTS',
+      resourceId: id,
+      details: {
+        trackingId: existing.trackingId,
+        previousWard,
+        newWard: trimmedWard,
+        citizenName: existing.name,
+      },
+    });
+
+    const attachments = Array.isArray(updated.attachments) ? updated.attachments : [];
+    const resolutionProof = attachments.find((a: any) => a.type === 'resolution_proof') || null;
+    const citizenAttachments = attachments.filter((a: any) => a.type !== 'resolution_proof');
+
+    return {
+      ...updated,
+      attachments: citizenAttachments,
+      resolutionProof,
+    };
+  }
+
   async deleteGrievance(id: string, currentUser?: any) {
     // Only Super Admin can delete complaints / applications permanently
     if (currentUser && currentUser.role !== 'SUPER_ADMIN') {
@@ -522,6 +599,11 @@ export class GrievancesService {
 
     const existing = await this.prisma.complaint.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Complaint not found');
+
+    // Nagarsevak role has read-only access to complaints
+    if (currentUser && currentUser.role === 'NAGARSEVAK') {
+      throw new ForbiddenException('नगरसेवकांना तक्रार स्थिती बदलण्याची परवानगी नाही. (Nagarsevaks have read-only access).');
+    }
 
     const isApp = existing.type === 'service_request' || (existing.description && existing.description.includes('अर्ज'));
     await this.auditLogsService.logAction({

@@ -48,6 +48,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const res = await loginAdmin(email, pass);
     if (res.user.role !== "SUPER_ADMIN") {
       await logoutAdmin();
+      if (res.user.role === "NAGARSEVAK") {
+        throw new Error("हे पोर्टल केवळ मुख्य प्रशासकांसाठी (Super Admin) आहे. नगरसेवकांनी कृपया कर्मचारी / लोकप्रतिनिधी पोर्टलवरून (Employee Portal) लॉगिन करावे.");
+      }
       throw new Error("हे पोर्टल केवळ मुख्य प्रशासकांसाठी (Super Admin) आहे. कर्मचाऱ्यांनी कृपया विभागीय कर्मचारी पोर्टल (Employee Portal) मध्ये लॉगिन करावे.");
     }
     setUser(res.user);

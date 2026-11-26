@@ -16,9 +16,10 @@ model Admin {
   email        String    @unique
   name         String    @default("System Administrator")
   passwordHash String
-  role         String    @default("SUPER_ADMIN") // "SUPER_ADMIN" | "DEPT_OFFICER"
+  role         String    @default("SUPER_ADMIN") // "SUPER_ADMIN" | "DEPT_OFFICER" | "NAGARSEVAK"
   department   String?   // e.g. "पाणी पुरवठा विभाग", "आरोग्य व स्वच्छता विभाग", etc.
   departments  String[]  @default([]) // Support multiple departments per officer
+  ward         String?   // Assigned ward number or "माहिती नाही" / "unknown"
   accessScope  String?   @default("all") // "all" | "complaints" | "applications"
   isActive     Boolean   @default(true)
   lastLoginAt  DateTime?

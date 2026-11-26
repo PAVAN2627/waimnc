@@ -2,8 +2,64 @@ export interface AdminUser {
   id: string;
   name: string;
   email: string;
+  role?: string;
+  department?: string | null;
+  departments?: string[];
+  ward?: string | null;
+  accessScope?: string | null;
+  isActive?: boolean;
   lastLoginAt?: string;
   createdAt: string;
+}
+
+export interface MunicipalWard {
+  value: string;
+  labelMr: string;
+  labelEn: string;
+}
+
+export const MUNICIPAL_WARDS: MunicipalWard[] = [
+  { value: "माहिती नाही", labelMr: "माहिती नाही / अज्ञात प्रभाग (Don't know ward)", labelEn: "Don't know / Unknown Prabhag" },
+  { value: "1", labelMr: "प्रभाग क्र. १", labelEn: "Prabhag / Ward 1" },
+  { value: "2", labelMr: "प्रभाग क्र. २", labelEn: "Prabhag / Ward 2" },
+  { value: "3", labelMr: "प्रभाग क्र. ३", labelEn: "Prabhag / Ward 3" },
+  { value: "4", labelMr: "प्रभाग क्र. ४", labelEn: "Prabhag / Ward 4" },
+  { value: "5", labelMr: "प्रभाग क्र. ५", labelEn: "Prabhag / Ward 5" },
+  { value: "6", labelMr: "प्रभाग क्र. ६", labelEn: "Prabhag / Ward 6" },
+  { value: "7", labelMr: "प्रभाग क्र. ७", labelEn: "Prabhag / Ward 7" },
+  { value: "8", labelMr: "प्रभाग क्र. ८", labelEn: "Prabhag / Ward 8" },
+  { value: "9", labelMr: "प्रभाग क्र. ९", labelEn: "Prabhag / Ward 9" },
+  { value: "10", labelMr: "प्रभाग क्र. १०", labelEn: "Prabhag / Ward 10" },
+  { value: "11", labelMr: "प्रभाग क्र. ११", labelEn: "Prabhag / Ward 11" },
+];
+
+export function isUnknownWard(ward?: string | null): boolean {
+  if (!ward) return true;
+  const w = ward.trim().toLowerCase();
+  return (
+    w === "" ||
+    w === "general" ||
+    w === "none" ||
+    w === "unknown" ||
+    w === "dont_know" ||
+    w === "0" ||
+    w.includes("माहिती नाही") ||
+    w.includes("अज्ञात") ||
+    w.includes("dont know")
+  );
+}
+
+export function matchesWard(itemWard?: string | null, targetWard?: string | null): boolean {
+  if (!itemWard || !targetWard) return false;
+  const w1 = itemWard.trim().toLowerCase();
+  const w2 = targetWard.trim().toLowerCase();
+  if (w1 === w2) return true;
+
+  const d1 = w1.match(/\d+/)?.[0];
+  const d2 = w2.match(/\d+/)?.[0];
+  if (d1 && d2 && d1 === d2) return true;
+
+  return w1.includes(w2) || w2.includes(w1);
 }
 
 export interface Official {

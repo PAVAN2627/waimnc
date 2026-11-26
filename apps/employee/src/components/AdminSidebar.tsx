@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { isUnknownWard } from "@wmc/types";
 
 export function AdminSidebar() {
   const { state, setOpenMobile, isMobile } = useSidebar();
@@ -33,14 +34,21 @@ export function AdminSidebar() {
   };
 
   const departments = user?.departments || (user?.department ? user.department.split(',').map((d: string) => d.trim()) : []);
+  const isNagarsevak = user?.role === "NAGARSEVAK";
 
-  // Dedicated Employee Portal Navigation (Strictly departmental complaints & applications)
-  const menuItems = [
-    { title: t("विभागीय डॅशबोर्ड", "Department Dashboard"), url: "/dashboard", icon: LayoutDashboard },
-    { title: t("नागरी तक्रारी निवारण", "Civic Grievances"), url: "/complaints", icon: MessageSquare },
-    { title: t("दाखले व सेवा अर्ज", "Service Applications"), url: "/applications", icon: FileCheck2 },
-    { title: t("माझे प्रोफाइल", "My Profile"), url: "/settings", icon: Settings },
-  ];
+  // Dedicated Employee & Corporator Portal Navigation
+  const menuItems = isNagarsevak
+    ? [
+        { title: t("नगरसेवक डॅशबोर्ड", "Corporator Dashboard"), url: "/dashboard", icon: LayoutDashboard },
+        { title: t("प्रभाग नागरी तक्रारी", "Ward Grievances"), url: "/complaints", icon: MessageSquare },
+        { title: t("माझे प्रोफाइल", "My Profile"), url: "/settings", icon: Settings },
+      ]
+    : [
+        { title: t("विभागीय डॅशबोर्ड", "Department Dashboard"), url: "/dashboard", icon: LayoutDashboard },
+        { title: t("नागरी तक्रारी निवारण", "Civic Grievances"), url: "/complaints", icon: MessageSquare },
+        { title: t("दाखले व सेवा अर्ज", "Service Applications"), url: "/applications", icon: FileCheck2 },
+        { title: t("माझे प्रोफाइल", "My Profile"), url: "/settings", icon: Settings },
+      ];
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border bg-card/95 backdrop-blur-md shadow-xl">
@@ -58,7 +66,13 @@ export function AdminSidebar() {
             <div className="mt-0.5">
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 dark:text-blue-300 bg-blue-500/15 px-2 py-0.5 rounded-full border border-blue-500/30 truncate max-w-full">
                 <UserCheck className="w-2.5 h-2.5 flex-shrink-0" />
-                <span className="truncate">{user?.name || t("विभागीय कर्मचारी", "Employee Portal")}</span>
+                <span className="truncate">
+                  {isNagarsevak
+                    ? isUnknownWard(user?.ward)
+                      ? t("अज्ञात वॉर्ड कक्ष", "Unknown Ward Desk")
+                      : t(`नगरसेवक - प्रभाग ${user?.ward}`, `Corporator - Ward ${user?.ward}`)
+                    : user?.name || t("विभागीय कर्मचारी", "Employee Portal")}
+                </span>
               </span>
             </div>
             {departments.length > 0 && (

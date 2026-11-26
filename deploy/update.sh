@@ -25,6 +25,7 @@ npm run build:employee
 
 echo "⚡ 3. Building NestJS API..."
 npm --prefix apps/api run build
+npx prisma db push --schema=apps/api/prisma/schema.prisma --skip-generate || true
 
 echo "⚡ 3.5 Ensuring Redis & Persistent Storage..."
 mkdir -p apps/api/data

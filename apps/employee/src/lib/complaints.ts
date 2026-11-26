@@ -21,21 +21,35 @@ export function getAttachmentUrl(attachment: ComplaintAttachment | any): string 
   if (raw.startsWith("data:") || raw.startsWith("blob:")) {
     return raw;
   }
+
   const apiBase = (import.meta.env.VITE_API_URL || "/api").replace(/\/+$/, "");
   const basePath = apiBase.startsWith("http") ? new URL(apiBase).pathname.replace(/\/+$/, "") : apiBase;
 
-  // If the URL points to media.waimunicipalcouncil.org (Cloudflare R2),
-  // stream through the backend proxy /api/storage/file
+  // Route Cloudflare R2 media through /api/storage/file using backend S3 keys
   if (raw.includes("media.waimunicipalcouncil.org")) {
     const cleanPath = raw.replace(/^https?:\/\/media\.waimunicipalcouncil\.org\/?/, "");
     return `${basePath}/storage/file?pathname=${encodeURIComponent(cleanPath)}`;
+  }
+
+  if (raw.includes(".r2.cloudflarestorage.com") || raw.includes(".r2.dev")) {
+    try {
+      const parsed = new URL(raw);
+      const cleanPath = parsed.pathname.replace(/^\/+/, "");
+      return `${basePath}/storage/file?pathname=${encodeURIComponent(cleanPath)}`;
+    } catch {
+      // fallback
+    }
+  }
+
+  if (raw.startsWith("http://") || raw.startsWith("https://")) {
+    return raw;
   }
 
   if (raw.startsWith("/")) {
     return raw;
   }
 
-  return raw;
+  return `${basePath}/storage/file?pathname=${encodeURIComponent(raw)}`;
 }
 
 export function isImageAttachment(attachment: ComplaintAttachment | any): boolean {
@@ -479,6 +493,13 @@ export async function updateComplaintDepartment(
   department: string,
 ): Promise<void> {
   await api.updateComplaintDepartment(id, department);
+}
+
+export async function updateComplaintWard(
+  id: string,
+  ward: string,
+): Promise<void> {
+  await api.updateComplaintWard(id, ward);
 }
 
 export async function deleteComplaint(id: string): Promise<void> {

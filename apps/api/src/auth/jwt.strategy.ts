@@ -13,6 +13,7 @@ export interface AdminEntity {
   role?: string;
   department?: string | null;
   departments?: string[];
+  ward?: string | null;
   accessScope?: string | null;
   isActive?: boolean;
   lastLoginAt?: Date | null;
@@ -66,6 +67,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       role: admin.role || 'SUPER_ADMIN',
       department: admin.department || (adminDepts[0] || null),
       departments: adminDepts,
+      ward: admin.ward || null,
       accessScope: admin.accessScope || 'all',
     };
   }

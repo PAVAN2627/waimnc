@@ -89,6 +89,16 @@ export class GrievancesController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Patch(':id/ward')
+  async updateWard(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: { ward: string },
+  ) {
+    return this.grievancesService.updateWard(id, body?.ward, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Req() req: any, @Param('id') id: string) {
     return this.grievancesService.deleteGrievance(id, req.user);

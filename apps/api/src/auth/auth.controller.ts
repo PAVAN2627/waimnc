@@ -48,6 +48,10 @@ export class CreateStaffDto {
 
   @IsString()
   @IsOptional()
+  ward?: string;
+
+  @IsString()
+  @IsOptional()
   accessScope?: string;
 }
 
@@ -67,6 +71,10 @@ export class UpdateStaffDto {
   @IsString()
   @IsOptional()
   role?: string;
+
+  @IsString()
+  @IsOptional()
+  ward?: string;
 
   @IsString()
   @IsOptional()

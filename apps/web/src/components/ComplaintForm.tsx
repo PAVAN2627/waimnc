@@ -4,11 +4,13 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { createComplaint } from "@/lib/complaints";
 import { validateMobileInput, sanitizeMobileInput } from "@/lib/validation";
+import { MUNICIPAL_WARDS } from "@wmc/types";
 
 const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
   const [submitting, setSubmitting] = useState(false);
   const [trackingId, setTrackingId] = useState<string | null>(null);
   const [mobileValue, setMobileValue] = useState("");
+  const [selectedWard, setSelectedWard] = useState("माहिती नाही");
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -64,6 +66,7 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
     const data = new FormData(form);
     const name = data.get("name") as string;
     const mobile = (data.get("mobile") as string) || mobileValue;
+    const ward = (data.get("ward") as string) || selectedWard || "माहिती नाही";
     const type = data.get("type") as string;
     const department = data.get("department") as string;
     const location = (data.get("location") as string) || "";
@@ -82,6 +85,7 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
       const record = await createComplaint({
         name,
         mobile: mobileCheck.cleaned,
+        ward,
         type,
         department,
         description: combinedDesc,
@@ -91,6 +95,7 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
       setTrackingId(record.trackingId || `WMC-${record.id.slice(0, 6).toUpperCase()}`);
       form.reset();
       setMobileValue("");
+      setSelectedWard("माहिती नाही");
       setFiles([]);
       setDriveLink("");
     } catch (err) {
@@ -260,18 +265,43 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
             </div>
           </div>
 
-          {/* Location / Landmark */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {t("समस्येचे अचूक ठिकाण / रस्ता / लँडमार्क *", "Exact Problem Location / Street / Landmark *")}
-            </label>
-            <input
-              name="location"
-              type="text"
-              required
-              placeholder={t("उदा. मारुती आळी, मारुती मंदिरासमोर, गणपती घाटाजवळ", "e.g. Maruti Ali, opposite Maruti Temple, near Ganpati Ghat")}
-              className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
-            />
+          {/* Row 3: Ward (Optional) + Location */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium">{t("प्रभाग / वॉर्ड क्रमांक", "Ward Number")}</label>
+                <span className="text-[11px] text-muted-foreground font-normal">
+                  ({t("ऐच्छिक / माहिती असल्यास निवडा", "Optional")})
+                </span>
+              </div>
+              <select
+                name="ward"
+                value={selectedWard}
+                onChange={(e) => setSelectedWard(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+              >
+                <option value="माहिती नाही">
+                  {t("माहिती नाही / अज्ञात (Don't know ward)", "Don't know / Unknown Ward")}
+                </option>
+                {MUNICIPAL_WARDS.filter((w) => w.value !== "माहिती नाही").map((w) => (
+                  <option key={w.value} value={w.value}>
+                    {lang === "mr" ? w.labelMr : w.labelEn}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {t("समस्येचे अचूक ठिकाण / रस्ता / लँडमार्क *", "Exact Problem Location / Street / Landmark *")}
+              </label>
+              <input
+                name="location"
+                type="text"
+                required
+                placeholder={t("उदा. मारुती आळी, मारुती मंदिरासमोर, गणपती घाटाजवळ", "e.g. Maruti Ali, opposite Maruti Temple, near Ganpati Ghat")}
+                className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+              />
+            </div>
           </div>
 
           {/* Description */}

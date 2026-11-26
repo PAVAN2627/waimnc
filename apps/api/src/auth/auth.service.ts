@@ -76,6 +76,7 @@ export class AuthService {
       ? admin.departments
       : (admin.department ? admin.department.split(',').map((d: string) => d.trim()).filter(Boolean) : []);
     const department = admin.department || (departments.length > 0 ? departments.join(', ') : null);
+    const ward = admin.ward || null;
     const accessScope = admin.accessScope || 'all';
 
     const payload = {
@@ -85,6 +86,7 @@ export class AuthService {
       role,
       department,
       departments,
+      ward,
       accessScope,
     };
     const accessToken = this.jwtService.sign(payload);
@@ -100,6 +102,7 @@ export class AuthService {
         role,
         department,
         departments,
+        ward,
         accessScope,
         loginTime: new Date().toISOString(),
       },
@@ -115,6 +118,7 @@ export class AuthService {
         role,
         department,
         departments,
+        ward,
         accessScope,
       },
     };
@@ -215,6 +219,7 @@ export class AuthService {
         role: true,
         department: true,
         departments: true,
+        ward: true,
         accessScope: true,
         isActive: true,
         lastLoginAt: true,
@@ -233,6 +238,7 @@ export class AuthService {
       department?: string;
       departments?: string[];
       role?: string;
+      ward?: string;
       accessScope?: string;
     },
     creator?: any,
@@ -263,6 +269,7 @@ export class AuthService {
         department: joinedDept,
         departments: deptList,
         role: data.role || 'DEPT_OFFICER',
+        ward: data.ward ? data.ward.trim() : null,
         accessScope: data.accessScope || 'all',
         isActive: true,
       },
@@ -273,6 +280,7 @@ export class AuthService {
         role: true,
         department: true,
         departments: true,
+        ward: true,
         accessScope: true,
         isActive: true,
         createdAt: true,
@@ -291,6 +299,7 @@ export class AuthService {
         createdStaffName: user.name,
         createdStaffEmail: user.email,
         role: user.role,
+        ward: user.ward,
         departments: deptList,
         department: joinedDept,
         accessScope: user.accessScope,
@@ -308,6 +317,7 @@ export class AuthService {
       department?: string;
       departments?: string[];
       role?: string;
+      ward?: string;
       accessScope?: string;
       isActive?: boolean;
       password?: string;
@@ -330,6 +340,7 @@ export class AuthService {
     }
 
     if (data.role !== undefined) updateData.role = data.role;
+    if (data.ward !== undefined) updateData.ward = data.ward ? data.ward.trim() : null;
     if (data.accessScope !== undefined) updateData.accessScope = data.accessScope;
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
@@ -348,6 +359,7 @@ export class AuthService {
         role: true,
         department: true,
         departments: true,
+        ward: true,
         accessScope: true,
         isActive: true,
         updatedAt: true,

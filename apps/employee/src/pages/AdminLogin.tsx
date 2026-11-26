@@ -61,12 +61,12 @@ const AdminLogin = () => {
             
             <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-extrabold uppercase tracking-wider mb-2 border border-white/30">
               <ShieldCheck className="w-3 h-3 text-blue-200" />
-              {t("कर्मचारी व अधिकारी पोर्टल", "Department Officer Portal")}
+              {t("कर्मचारी व नगरसेवक पोर्टल", "Department Staff & Corporator Portal")}
             </span>
             
-            <h1 className="text-2xl md:text-3xl font-black text-white">{t("विभागीय कर्मचारी लॉगिन", "Employee Login")}</h1>
+            <h1 className="text-2xl md:text-3xl font-black text-white">{t("कर्मचारी व नगरसेवक लॉगिन", "Employee & Corporator Login")}</h1>
             <p className="text-white/80 text-xs font-semibold mt-1">
-              {t("वाई नगरपरिषद - विभागीय तक्रारी व दाखले कक्ष", "Wai Municipal Council Employee Workdesk")}
+              {t("वाई नगरपरिषद - विभागीय तक्रारी व प्रभाग नियंत्रण कक्ष", "Wai Municipal Council Employee & Ward Desk")}
             </p>
           </div>
 

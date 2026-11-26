@@ -26,6 +26,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
+import { MUNICIPAL_WARDS, isUnknownWard } from "@wmc/types";
 import {
   fetchStaffUsers,
   createStaffUser,
@@ -105,7 +106,8 @@ export default function AdminStaff() {
   const [password, setPassword] = useState("");
   const [selectedDepts, setSelectedDepts] = useState<string[]>([MUNICIPAL_DEPARTMENTS[0].value]);
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
-  const [role, setRole] = useState<"DEPT_OFFICER" | "SUPER_ADMIN">("DEPT_OFFICER");
+  const [selectedWard, setSelectedWard] = useState<string>("माहिती नाही");
+  const [role, setRole] = useState<"DEPT_OFFICER" | "SUPER_ADMIN" | "NAGARSEVAK">("DEPT_OFFICER");
   const [accessScope, setAccessScope] = useState<"all" | "complaints" | "applications">("all");
 
   const loadStaff = async () => {
@@ -136,6 +138,7 @@ export default function AdminStaff() {
     setPassword("");
     setSelectedDepts([MUNICIPAL_DEPARTMENTS[0].value]);
     setSelectedApps(MUNICIPAL_APPLICATIONS.map((a) => a.value));
+    setSelectedWard("माहिती नाही");
     setRole("DEPT_OFFICER");
     setAccessScope("all");
     setShowAddForm(true);
@@ -146,6 +149,7 @@ export default function AdminStaff() {
     setName(staff.name);
     setEmail(staff.email);
     setPassword(""); // Leave blank if keeping same
+    setSelectedWard(staff.ward || "माहिती नाही");
 
     let depts: string[] = [];
     if (staff.departments && Array.isArray(staff.departments) && staff.departments.length > 0) {
@@ -250,14 +254,23 @@ export default function AdminStaff() {
 
     try {
       setSaving(true);
+      const isNagarsevak = role === "NAGARSEVAK";
       const combinedPermissions = Array.from(new Set([...selectedDepts, ...selectedApps]));
-      const effectiveDepts = role === "SUPER_ADMIN" ? [] : combinedPermissions;
-      const joinedDept = role === "SUPER_ADMIN" ? "सर्व विभाग (All)" : selectedDepts.join(", ");
-      const effectiveScope = role === "SUPER_ADMIN" ? "all" : JSON.stringify({
-        scope: accessScope,
-        applications: selectedApps,
-        departments: selectedDepts,
-      });
+      const effectiveDepts = role === "SUPER_ADMIN" ? [] : (isNagarsevak ? [] : combinedPermissions);
+      const joinedDept = role === "SUPER_ADMIN"
+        ? "सर्व विभाग (All)"
+        : isNagarsevak
+        ? (selectedWard === "माहिती नाही" ? "अज्ञात वॉर्ड कक्ष" : `प्रभाग क्र. ${selectedWard} (नगरसेवक)`)
+        : selectedDepts.join(", ");
+      const effectiveScope = role === "SUPER_ADMIN"
+        ? "all"
+        : isNagarsevak
+        ? "complaints"
+        : JSON.stringify({
+            scope: accessScope,
+            applications: selectedApps,
+            departments: selectedDepts,
+          });
 
       if (editingStaff) {
         // UPDATE existing staff
@@ -266,6 +279,7 @@ export default function AdminStaff() {
           department: joinedDept,
           departments: effectiveDepts,
           role,
+          ward: isNagarsevak ? selectedWard : null,
           accessScope: effectiveScope,
         };
         if (password.trim().length >= 6) {
@@ -291,6 +305,7 @@ export default function AdminStaff() {
           department: joinedDept,
           departments: effectiveDepts,
           role,
+          ward: isNagarsevak ? selectedWard : null,
           accessScope: effectiveScope,
         };
 
@@ -300,8 +315,8 @@ export default function AdminStaff() {
         toast({
           title: t("अधिकारी खाते तयार झाले ✓", "Staff Account Created ✓"),
           description: t(
-            `${name} यांचे ${joinedDept} साठी खाते तयार करण्यात आले आहे.`,
-            `Account created for ${name} under ${joinedDept}.`
+            `${name} यांचे खाते यशस्वीरित्या तयार करण्यात आले आहे.`,
+            `Account created for ${name}.`
           ),
         });
       }
@@ -546,10 +561,13 @@ export default function AdminStaff() {
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value as any)}
-                    className="w-full border rounded-xl px-3.5 py-2.5 text-sm bg-background focus:ring-2 focus:ring-primary focus:outline-none"
+                    className="w-full border rounded-xl px-3.5 py-2.5 text-sm bg-background font-bold focus:ring-2 focus:ring-primary focus:outline-none"
                   >
                     <option value="DEPT_OFFICER">
                       {t("विभागीय अधिकारी / कर्मचारी (Department Officer - Assigned Departments)", "Department Officer")}
+                    </option>
+                    <option value="NAGARSEVAK">
+                      {t("नगरसेवक / प्रभाग प्रतिनिधी (Nagarsevak - Ward Scoped Inspection)", "Nagarsevak / Corporator")}
                     </option>
                     <option value="SUPER_ADMIN">
                       {t("मुख्य प्रशासक (Super Admin - सर्व अधिकार व विभाग)", "Super Admin - All Access")}
@@ -558,27 +576,78 @@ export default function AdminStaff() {
                 </div>
 
                 {/* Access Scope */}
-                <div>
-                  <label className="block text-xs font-bold mb-1.5 text-foreground">
-                    {t("कार्यक्षेत्र अधिकार (Scope) *", "Access Scope *")}
-                  </label>
-                  <select
-                    value={accessScope}
-                    onChange={(e) => setAccessScope(e.target.value as any)}
-                    className="w-full border rounded-xl px-3.5 py-2.5 text-sm bg-background focus:ring-2 focus:ring-primary focus:outline-none"
-                  >
-                    <option value="all">
-                      {t("तक्रारी व दाखले अर्ज दोन्ही (Both Complaints & Applications)", "Both Complaints & Applications")}
-                    </option>
-                    <option value="complaints">
-                      {t("फक्त नागरी तक्रारी (Complaints Only)", "Complaints Only")}
-                    </option>
-                    <option value="applications">
-                      {t("फक्त दाखले व सेवा अर्ज (Applications Only)", "Applications Only")}
-                    </option>
-                  </select>
-                </div>
+                {role !== "NAGARSEVAK" ? (
+                  <div>
+                    <label className="block text-xs font-bold mb-1.5 text-foreground">
+                      {t("कार्यक्षेत्र अधिकार (Scope) *", "Access Scope *")}
+                    </label>
+                    <select
+                      value={accessScope}
+                      onChange={(e) => setAccessScope(e.target.value as any)}
+                      className="w-full border rounded-xl px-3.5 py-2.5 text-sm bg-background focus:ring-2 focus:ring-primary focus:outline-none"
+                    >
+                      <option value="all">
+                        {t("तक्रारी व दाखले अर्ज दोन्ही (Both Complaints & Applications)", "Both Complaints & Applications")}
+                      </option>
+                      <option value="complaints">
+                        {t("फक्त नागरी तक्रारी (Complaints Only)", "Complaints Only")}
+                      </option>
+                      <option value="applications">
+                        {t("फक्त दाखले व सेवा अर्ज (Applications Only)", "Applications Only")}
+                      </option>
+                    </select>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-xs font-bold mb-1.5 text-foreground">
+                      {t("अधिकार स्वरूप (Permissions)", "Permission Type")}
+                    </label>
+                    <div className="p-2.5 rounded-xl border bg-muted/40 text-xs font-bold text-blue-700 dark:text-blue-300">
+                      {selectedWard === "माहिती नाही"
+                        ? t("⚡ अज्ञात तक्रारींना वॉर्ड वाटप करण्याचे अधिकार", "Assign Wards to Unassigned Complaints")
+                        : t("👁️ केवळ प्रभाग तक्रार निरीक्षण (Read-only Access)", "Ward Grievances Read-only Access")}
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* Row 3 (Nagarsevak): WARD SELECTOR */}
+              {role === "NAGARSEVAK" && (
+                <div className="pt-2 border-t space-y-3">
+                  <div>
+                    <label className="block text-xs font-black text-foreground mb-1.5">
+                      {t("नगरसेवकांचा नियुक्त प्रभाग / वॉर्ड निवडा *", "Select Assigned Ward for Nagarsevak *")}
+                    </label>
+                    <select
+                      value={selectedWard}
+                      onChange={(e) => setSelectedWard(e.target.value)}
+                      className="w-full border rounded-xl px-3.5 py-2.5 text-sm bg-background font-bold focus:ring-2 focus:ring-primary focus:outline-none"
+                    >
+                      {MUNICIPAL_WARDS.map((w) => (
+                        <option key={w.value} value={w.value}>
+                          {lang === "mr" ? w.labelMr : w.labelEn}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1">
+                    <p className="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-amber-600" />
+                      <span>{t("नगरसेवक अधिकार व कार्यकक्षा:", "Nagarsevak Access Scope:")}</span>
+                    </p>
+                    {selectedWard === "माहिती नाही" ? (
+                      <p className="text-muted-foreground text-[11px] leading-relaxed">
+                        ⚡ <strong>{t("अज्ञात वॉर्ड कक्ष:", "Unassigned Ward Officer:")}</strong> {t("या अधिकाऱ्याला नागरिकांनी वॉर्ड न दिलेल्या (अज्ञात) तक्रारी दिसतील आणि त्यांना योग्य वॉर्ड नियुक्त करण्याचे (Assign Ward) अधिकार असतील. वॉर्ड नियुक्त करताच ती तक्रार त्या त्या प्रभागाच्या नगरसेवकांच्या डॅशबोर्डमध्ये दिसेल.", "This official sees unassigned complaints and can assign them to the correct ward. Once assigned, the complaint moves to the respective ward corporator's dashboard.")}
+                      </p>
+                    ) : (
+                      <p className="text-muted-foreground text-[11px] leading-relaxed">
+                        👁️ <strong>{t("केवळ प्रभाग निरीक्षण (Read-only):", "Ward Inspection Only (Read-only):")}</strong> {t(`या नगरसेवकांना केवळ प्रभाग क्र. ${selectedWard} मधील तक्रारी आणि त्यांची सद्यस्थिती (प्रलंबित, सुरू, निराकरण, कामाचा पुरावा फोटो) पाहण्याची परवानगी असेल. ते तक्रार हटवू किंवा स्थिती बदलू शकत नाहीत.`, `This corporator can view live status and resolution proof photos of Ward ${selectedWard} complaints only. They cannot delete or change complaint status.`)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Row 3: MULTI-DEPARTMENT SELECTOR */}
               {role === "DEPT_OFFICER" ? (
@@ -858,6 +927,7 @@ export default function AdminStaff() {
             <div className="divide-y divide-border">
               {filteredStaff.map((staff) => {
                 const isSuper = staff.role === "SUPER_ADMIN";
+                const isNagarsevak = staff.role === "NAGARSEVAK";
                 const isCurrent = staff.id === currentUser?.id;
                 const depts =
                   staff.departments && Array.isArray(staff.departments) && staff.departments.length > 0
@@ -900,6 +970,10 @@ export default function AdminStaff() {
                           <span className="inline-flex items-center gap-1 text-[11px] font-black bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
                             <Shield className="w-3 h-3" />
                             {t("मुख्य प्रशासक (Super Admin)", "Super Admin")}
+                          </span>
+                        ) : isNagarsevak ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-black bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30 px-2.5 py-0.5 rounded-full">
+                            <span>🏛️ {staff.ward && staff.ward !== "माहिती नाही" && !isUnknownWard(staff.ward) ? t(`नगरसेवक (वॉर्ड क्र. ${staff.ward})`, `Corporator (Ward ${staff.ward})`) : t("नगरसेवक (अज्ञात वॉर्ड कक्ष)", "Nagarsevak (Unassigned Ward)")}</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30 px-2.5 py-0.5 rounded-full">
@@ -955,11 +1029,17 @@ export default function AdminStaff() {
                       {/* Assigned Departments Pill Badges */}
                       <div className="flex items-center gap-1.5 flex-wrap pt-1">
                         <span className="text-[11px] font-bold text-muted-foreground mr-1">
-                          {t("नेमून दिलेले विभाग:", "Assigned Vibhag:")}
+                          {isNagarsevak ? t("नियुक्त प्रभाग / कार्यकक्षा:", "Assigned Ward:") : t("नेमून दिलेले विभाग:", "Assigned Vibhag:")}
                         </span>
                         {isSuper ? (
                           <span className="text-[11px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-md border border-amber-500/20">
                             {t("सर्व नागरी विभाग व कारभार", "All Municipal Departments")}
+                          </span>
+                        ) : isNagarsevak ? (
+                          <span className="text-[11px] font-bold bg-blue-500/10 text-blue-800 dark:text-blue-300 px-2.5 py-0.5 rounded-md border border-blue-500/20">
+                            🏛️ {staff.ward && staff.ward !== "माहिती नाही" && !isUnknownWard(staff.ward)
+                              ? t(`प्रभाग / वॉर्ड क्र. ${staff.ward} (नागरी तक्रारी निरीक्षण)`, `Ward ${staff.ward} (Grievance Inspection)`)
+                              : t("अज्ञात वॉर्ड कक्ष (तक्रारींना वॉर्ड वाटप करण्याचे अधिकार)", "Unassigned Ward Officer (Can assign wards)")}
                           </span>
                         ) : displayDepts.length > 0 ? (
                           displayDepts.map((d, idx) => (
@@ -979,7 +1059,7 @@ export default function AdminStaff() {
                       </div>
 
                       {/* Assigned Applications & Schemes Pill Badges */}
-                      {!isSuper && assignedApps.length > 0 && (
+                      {!isSuper && !isNagarsevak && assignedApps.length > 0 && (
                         <div className="flex items-center gap-1.5 flex-wrap pt-1">
                           <span className="text-[11px] font-bold text-muted-foreground mr-1">
                             {t("नेमून दिलेले अर्ज / योजना:", "Assigned Services & Schemes:")}
