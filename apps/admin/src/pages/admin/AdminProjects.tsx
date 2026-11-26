@@ -118,7 +118,10 @@ const AdminProjects = () => {
     } else {
       setDocMode("file");
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => {
+      document.querySelector("main")?.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 50);
   };
 
   const cancelEdit = () => {

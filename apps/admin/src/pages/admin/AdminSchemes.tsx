@@ -125,7 +125,11 @@ const AdminSchemes = () => {
     } else {
       setGrDocMode("file");
     }
-    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    setTimeout(() => {
+      document.querySelector("main")?.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   const cancelEdit = () => { setEditingId(null); setForm(empty); };

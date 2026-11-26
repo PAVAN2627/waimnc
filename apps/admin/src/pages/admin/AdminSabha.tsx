@@ -157,7 +157,11 @@ const AdminSabha = () => {
     } else {
       setPdfMode("file");
     }
-    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    setTimeout(() => {
+      document.querySelector("main")?.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   const cancelEdit = () => {
@@ -257,7 +261,11 @@ const AdminSabha = () => {
           <Button
             onClick={() => {
               cancelEdit();
-              setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+              setTimeout(() => {
+      document.querySelector("main")?.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
             }}
             className="bg-white text-primary hover:bg-white/90 font-bold rounded-xl shadow-lg"
           >

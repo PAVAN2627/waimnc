@@ -72,7 +72,11 @@ const AdminRoutine = () => {
   const startEdit = (item: RoutineRecord) => {
     setEditingId(item.id);
     setForm({ date: item.date, titleMr: item.titleMr, titleEn: item.titleEn, descMr: item.descMr, descEn: item.descEn, imageBase64: item.imageBase64, status: item.status });
-    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    setTimeout(() => {
+      document.querySelector("main")?.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   const cancelEdit = () => { setEditingId(null); setForm(empty); };

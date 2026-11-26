@@ -232,14 +232,14 @@ export default function AdminApplications() {
 
   const SERVICE_CATEGORIES = [
     { key: "all", labelMr: "सर्व अर्ज", labelEn: "All Applications", deptKeywords: [] as string[] },
-    { key: "birth", labelMr: "जन्म दाखला", labelEn: "Birth Certificate", match: "जन्म", deptKeywords: ["जन्म", "मृत्यू", "birth", "death", "आरोग्य", "health"] },
-    { key: "death", labelMr: "मृत्यू दाखला", labelEn: "Death Certificate", match: "मृत्यू", deptKeywords: ["जन्म", "मृत्यू", "birth", "death", "आरोग्य", "health"] },
-    { key: "marriage", labelMr: "विवाह नोंदणी दाखला", labelEn: "Marriage Certificate", match: "विवाह", deptKeywords: ["विवाह", "marriage", "जन्म", "मृत्यू"] },
+    { key: "birth", labelMr: "जन्म दाखला", labelEn: "Birth Certificate", match: "जन्म", deptKeywords: ["जन्म", "birth", "लोकसेवा हक्क", "दाखले"] },
+    { key: "death", labelMr: "मृत्यू दाखला", labelEn: "Death Certificate", match: "मृत्यू", deptKeywords: ["मृत्यू", "death", "लोकसेवा हक्क", "दाखले"] },
+    { key: "marriage", labelMr: "विवाह नोंदणी दाखला", labelEn: "Marriage Certificate", match: "विवाह", deptKeywords: ["विवाह", "marriage", "लोकसेवा हक्क", "दाखले"] },
     { key: "permit", labelMr: "बांधकाम परवानगी", labelEn: "Building Permit", match: "बांधकाम", deptKeywords: ["बांधकाम", "नगररचना", "building", "town", "planning"] },
-    { key: "water", labelMr: "पाणी नळ जोडणी", labelEn: "Water Tap Connection", match: "पाणी", deptKeywords: ["पाणी", "जल", "water"] },
+    { key: "water", labelMr: "पाणी नळ जोडणी", labelEn: "Water Tap Connection", match: "पाणी", deptKeywords: ["पाणी", "जल", "water"], excludeKeywords: ["सांडपाणी", "गटार"] },
     { key: "tax", labelMr: "मालमत्ता कर नोंद", labelEn: "Property Tax", match: "मालमत्ता", deptKeywords: ["कर", "मालमत्ता", "मूल्यांकन", "tax", "property"] },
     { key: "noc", labelMr: "ना हरकत प्रमाणपत्र (NOC)", labelEn: "No Objection Certificate (NOC)", match: "noc", deptKeywords: ["ना हरकत", "noc"] },
-    { key: "pmay", labelMr: "प्रधानमंत्री आवास (PMAY)", labelEn: "PMAY Housing Scheme", match: "pmay", deptKeywords: ["आवास", "pmay", "घरकुल", "योजना", "महिला", "दिव्यांग"] },
+    { key: "pmay", labelMr: "प्रधानमंत्री आवास (PMAY)", labelEn: "PMAY Housing Scheme", match: "pmay", deptKeywords: ["आवास", "pmay", "घरकुल", "महिला", "दिव्यांग"] },
     { key: "scheme", labelMr: "शासकीय योजना (इतर)", labelEn: "Other Schemes", match: "योजना", deptKeywords: ["योजना", "scheme", "कल्याण", "welfare", "महिला", "दिव्यांग"] },
   ];
 
@@ -257,6 +257,7 @@ export default function AdminApplications() {
           if (cat.key === "all") return true;
           return userDepts.some((dept) => {
             const d = dept.toLowerCase();
+            if (cat.excludeKeywords?.some((ex) => d.includes(ex.toLowerCase()))) return false;
             return cat.deptKeywords.some((kw) => d.includes(kw.toLowerCase()));
           });
         });

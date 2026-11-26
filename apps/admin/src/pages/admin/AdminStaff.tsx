@@ -28,6 +28,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { MUNICIPAL_WARDS, isUnknownWard } from "@wmc/types";
 import WardSelector from "@/components/WardSelector";
+import { scrollAdminToTop } from "@/lib/scroll";
 import {
   fetchStaffUsers,
   createStaffUser,
@@ -186,6 +187,7 @@ export default function AdminStaff() {
     setRole((staff.role as any) || "DEPT_OFFICER");
     setAccessScope(parsedScope);
     setShowAddForm(true);
+    scrollAdminToTop();
   };
 
   const toggleDept = (val: string) => {
