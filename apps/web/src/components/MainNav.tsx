@@ -50,6 +50,7 @@ const getMenuItems = (t: (mr: string, en: string) => string): MenuItem[] => [
       { label: t("निवडणूक विभाग", "Election Department"), href: "/departments/election" },
       { label: t("आस्थापना विभाग", "Establishment Department"), href: "/departments/establishment" },
       { label: t("सभा विभाग", "Council Meeting Dept."), href: "/departments/sabha" },
+      { label: t("प्रधानमंत्री आवास (PMAY) विभाग", "PMAY Housing Dept."), href: "/departments/pmay" },
     ],
   },
   {

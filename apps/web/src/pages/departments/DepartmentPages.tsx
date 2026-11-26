@@ -721,6 +721,35 @@ const depts: Record<string, DeptData> = {
     hours: "सकाळी 10:00 - संध्याकाळी 5:45",
     hoursEn: "9:45 AM - 6:15 PM",
   },
+  pmay: {
+    icon: Building2,
+    title: "प्रधानमंत्री आवास योजना (PMAY) विभाग",
+    titleEn: "Pradhan Mantri Awas Yojana (PMAY) Dept.",
+    head: "मुख्याधिकारी / PMAY कक्ष",
+    headEn: "Chief Officer / PMAY Cell",
+    role: "गृहनिर्माण व आवास प्रकल्प समन्वयक",
+    roleEn: "Housing & PMAY Project Coordinator",
+    phone: "02167-220118",
+    email: "waimunicipalcouncil@gmail.com",
+    desc: "प्रधानमंत्री आवास योजना (शहरी) अंतर्गत वाई नगरपरिषद क्षेत्रातील आर्थिकदृष्ट्या दुर्बल व अल्प उत्पन्न गटातील नागरिकांसाठी पक्क्या घरांची नोंदणी, लाभार्थी पडताळणी, अनुदान वितरण आणि घरकुल प्रकल्प अंमलबजावणी.",
+    descEn: "Implementation of Pradhan Mantri Awas Yojana (Urban) in Wai Municipal Council limits, including beneficiary registration, eligibility verification, subsidy disbursement, and affordable housing project monitoring.",
+    services: [
+      "प्रधानमंत्री आवास योजना (PMAY) नवीन अर्ज नोंदणी",
+      "लाभार्थी यादी व पात्रता तपासणी (BLC / AHP / ISSR)",
+      "घरकुल बांधकाम टप्पे निहाय अनुदान हप्ता वितरण",
+      "जिओ-टॅगिंग व प्रगती पडताळणी",
+      "झोपडपट्टी पुनर्वसन व परवडणारी घरे समन्वय",
+    ],
+    servicesEn: [
+      "New PMAY (Urban) housing application registration",
+      "Beneficiary list & eligibility verification (BLC / AHP / ISSR)",
+      "Stage-wise housing construction subsidy disbursement",
+      "Geo-tagging & physical progress verification",
+      "Slum redevelopment & affordable housing coordination",
+    ],
+    hours: "सकाळी 10:00 - संध्याकाळी 5:45",
+    hoursEn: "9:45 AM - 6:15 PM",
+  },
 };
 
 export const GeneralAdmin = () => <DeptPage data={depts["general-admin"]} />;
@@ -740,3 +769,4 @@ export const WomenChild = () => <DeptPage data={depts.women} />;
 export const Election = () => <DeptPage data={depts.election} />;
 export const Establishment = () => <DeptPage data={depts.establishment} />;
 export const SabhaDept = () => <DeptPage data={depts.sabha} />;
+export const PmayDept = () => <DeptPage data={depts.pmay} />;
