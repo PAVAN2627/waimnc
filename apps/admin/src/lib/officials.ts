@@ -97,13 +97,16 @@ export const subscribeToActiveOfficials = (cb: (items: OfficialRecord[]) => void
 export async function createOfficial(record: Omit<OfficialRecord, "id" | "createdAt">): Promise<OfficialRecord> {
   const res = await api.createOfficial({
     nameMr: record.nameMr,
-    nameEn: record.nameEn,
+    nameEn: record.nameEn || record.nameMr,
     designationMr: record.designationMr || "नगरसेवक",
     designationEn: record.designationEn || "Councillor",
-    wardNumber: record.ward,
-    partyMr: record.party,
-    phone: record.phone,
-    photoUrl: record.photoBase64,
+    wardNumber: record.ward || "",
+    addressMr: record.addressMr || "",
+    addressEn: record.addressEn || record.addressMr || "",
+    partyMr: record.party || "",
+    partyEn: record.partyEn || record.party || "",
+    phone: record.phone || "",
+    photoUrl: record.photoBase64 || "",
     displayOrder: record.order,
     isActive: record.status !== "inactive",
   });
@@ -112,14 +115,17 @@ export async function createOfficial(record: Omit<OfficialRecord, "id" | "create
 
 export async function updateOfficial(id: string, updates: Partial<OfficialRecord>): Promise<void> {
   await api.updateOfficial(id, {
-    ...(updates.nameMr ? { nameMr: updates.nameMr } : {}),
-    ...(updates.nameEn ? { nameEn: updates.nameEn } : {}),
-    ...(updates.designationMr ? { designationMr: updates.designationMr } : {}),
-    ...(updates.designationEn ? { designationEn: updates.designationEn } : {}),
-    ...(updates.ward ? { wardNumber: updates.ward } : {}),
-    ...(updates.party ? { partyMr: updates.party } : {}),
-    ...(updates.phone ? { phone: updates.phone } : {}),
-    ...(updates.photoBase64 ? { photoUrl: updates.photoBase64 } : {}),
+    ...(updates.nameMr !== undefined ? { nameMr: updates.nameMr } : {}),
+    ...(updates.nameEn !== undefined ? { nameEn: updates.nameEn } : {}),
+    ...(updates.designationMr !== undefined ? { designationMr: updates.designationMr } : {}),
+    ...(updates.designationEn !== undefined ? { designationEn: updates.designationEn } : {}),
+    ...(updates.ward !== undefined ? { wardNumber: updates.ward } : {}),
+    ...(updates.addressMr !== undefined ? { addressMr: updates.addressMr } : {}),
+    ...(updates.addressEn !== undefined ? { addressEn: updates.addressEn } : {}),
+    ...(updates.party !== undefined ? { partyMr: updates.party } : {}),
+    ...(updates.partyEn !== undefined ? { partyEn: updates.partyEn } : {}),
+    ...(updates.phone !== undefined ? { phone: updates.phone } : {}),
+    ...(updates.photoBase64 !== undefined ? { photoUrl: updates.photoBase64 } : {}),
     ...(updates.order !== undefined ? { displayOrder: updates.order } : {}),
     ...(updates.status !== undefined ? { isActive: updates.status === "active" } : {}),
   });

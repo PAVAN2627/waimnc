@@ -64,7 +64,7 @@ export async function fetchPublicNews() {
 
 // Public Officials
 export async function fetchPublicOfficials() {
-  return request<any[]>("/officials/public");
+  return request<any[]>("/officials/public", { cache: "no-store" });
 }
 
 // Public Sabha Meetings

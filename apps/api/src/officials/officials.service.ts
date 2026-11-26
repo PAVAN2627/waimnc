@@ -41,6 +41,7 @@ export class OfficialsService {
     payload.photoUrl = photoUrl;
 
     const created = await this.prisma.official.create({ data: payload });
+    await this.cacheService.del('officials:public');
     await this.cacheService.delPattern('officials:*');
     return created;
   }
@@ -65,6 +66,7 @@ export class OfficialsService {
       data: updateData,
     });
 
+    await this.cacheService.del('officials:public');
     await this.cacheService.delPattern('officials:*');
     return updated;
   }
@@ -78,6 +80,7 @@ export class OfficialsService {
     }
 
     const deleted = await this.prisma.official.delete({ where: { id } });
+    await this.cacheService.del('officials:public');
     await this.cacheService.delPattern('officials:*');
     return deleted;
   }

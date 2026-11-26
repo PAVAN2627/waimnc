@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { uploadMedia } from "@/lib/api";
 import AutoTranslateButton from "@/components/AutoTranslateButton";
+import WardSelector from "@/components/WardSelector";
 import { subscribeToOfficials, createOfficial, deleteOfficial, updateOfficial, type OfficialRecord } from "@/lib/officials";
 
 function imageToBase64(file: File): Promise<string> {
@@ -30,8 +31,26 @@ function imageToBase64(file: File): Promise<string> {
   });
 }
 
-const WARDS = Array.from({ length: 17 }, (_, i) => String(i + 1));
-const empty = { nameMr: "", nameEn: "", ward: "", party: "", phone: "", photoBase64: "", order: 1, status: "active" as const };
+const empty = {
+  nameMr: "",
+  nameEn: "",
+  designationMr: "नगरसेवक",
+  designationEn: "Corporator",
+  ward: "",
+  addressMr: "",
+  party: "",
+  phone: "",
+  photoBase64: "",
+  order: 1,
+  status: "active" as const,
+};
+
+const DESIGNATION_OPTIONS = [
+  { mr: "नगरसेवक", en: "Corporator" },
+  { mr: "मा. नगराध्यक्ष", en: "Hon. President" },
+  { mr: "मा. उपनगराध्यक्ष", en: "Hon. Vice President" },
+  { mr: "नामनिर्देशित सदस्य", en: "Nominated Member" },
+];
 
 const AdminOfficials = () => {
   const { t } = useLanguage();
@@ -54,8 +73,8 @@ const AdminOfficials = () => {
     try {
       setSaving(true);
       const res = await uploadMedia(file, "officials");
-      setForm((f) => ({ ...f, photoBase64: res.viewUrl }));
-      toast({ title: t("फोटो Vercel Blob वर अपलोड केला", "Photo uploaded to Vercel Blob") });
+      setForm((f) => ({ ...f, photoBase64: res.viewUrl || res.url }));
+      toast({ title: t("फोटो Cloudflare R2 वर अपलोड केला", "Photo uploaded to Cloudflare R2") });
     } catch (err) {
       console.warn("Direct upload fallback:", err);
       const base64 = await imageToBase64(file);
@@ -68,7 +87,19 @@ const AdminOfficials = () => {
 
   const startEdit = (item: OfficialRecord) => {
     setEditingId(item.id);
-    setForm({ nameMr: item.nameMr, nameEn: item.nameEn, ward: item.ward, party: item.party, phone: item.phone, photoBase64: item.photoBase64, order: item.order, status: item.status });
+    setForm({
+      nameMr: item.nameMr,
+      nameEn: item.nameEn,
+      designationMr: item.designationMr || "नगरसेवक",
+      designationEn: item.designationEn || "Corporator",
+      ward: item.ward,
+      addressMr: item.addressMr || "",
+      party: item.party,
+      phone: item.phone,
+      photoBase64: item.photoBase64,
+      order: item.order,
+      status: item.status,
+    });
     setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   };
 
@@ -156,19 +187,48 @@ const AdminOfficials = () => {
               </div>
               <div className="grid md:grid-cols-3 gap-3">
                 <div>
-                  <label className="text-sm font-medium block mb-1">{t("वार्ड क्र.", "Ward No.")}</label>
-                  <select className={inputCls} value={form.ward} onChange={(e) => setForm((f) => ({ ...f, ward: e.target.value }))}>
-                    <option value="">{t("निवडा", "Select")}</option>
-                    {WARDS.map((w) => <option key={w} value={w}>{t(`वार्ड ${w}`, `Ward ${w}`)}</option>)}
+                  <label className="text-sm font-medium block mb-1">{t("पदनाम", "Designation")}</label>
+                  <select
+                    className={inputCls}
+                    value={form.designationMr}
+                    onChange={(e) => {
+                      const opt = DESIGNATION_OPTIONS.find((d) => d.mr === e.target.value);
+                      setForm((f) => ({
+                        ...f,
+                        designationMr: e.target.value,
+                        designationEn: opt?.en || "Corporator",
+                      }));
+                    }}
+                  >
+                    {DESIGNATION_OPTIONS.map((d) => (
+                      <option key={d.mr} value={d.mr}>
+                        {t(d.mr, d.en)}
+                      </option>
+                    ))}
                   </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1">{t("वार्ड क्र.", "Ward No.")}</label>
+                  <WardSelector
+                    value={form.ward}
+                    onChange={(val) => setForm((f) => ({ ...f, ward: val }))}
+                    includeUnknownOption={false}
+                    className="w-full"
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium block mb-1">{t("पक्ष", "Party")}</label>
                   <input className={inputCls} placeholder="NCP / BJP / INC..." value={form.party} onChange={(e) => setForm((f) => ({ ...f, party: e.target.value }))} />
                 </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium block mb-1">{t("मोबाइल", "Phone")}</label>
                   <input className={inputCls} placeholder="98XXXXXXXX" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-1">{t("पत्ता", "Address")}</label>
+                  <input className={inputCls} placeholder={t("उदा. रविवार पेठ, वाई", "e.g. Raviwar Peth, Wai")} value={form.addressMr} onChange={(e) => setForm((f) => ({ ...f, addressMr: e.target.value }))} />
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-3">

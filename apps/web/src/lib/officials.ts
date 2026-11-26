@@ -1,4 +1,5 @@
 import * as api from "./api";
+import { getAttachmentUrl } from "./complaints";
 
 export interface OfficialRecord {
   id: string;
@@ -28,18 +29,23 @@ export interface OfficialRecord {
 export const isFirebaseConfigured = true;
 
 function mapOfficial(item: any): OfficialRecord {
-  const designation = item.designationMr || "";
+  const designation = `${item.designationMr || ""} ${item.designationEn || ""}`.toLowerCase();
+  const wardStr = `${item.wardNumber || ""}`.toLowerCase();
   let category: "president" | "councillor" | "nominated" = "councillor";
   if (
     designation.includes("नगराध्यक्ष") ||
+    designation.includes("उपनगराध्यक्ष") ||
     designation.includes("अध्यक्ष") ||
-    (item.displayOrder !== undefined && item.displayOrder <= 2)
+    designation.includes("mayor") ||
+    designation.includes("president") ||
+    wardStr.includes("नगराध्यक्ष")
   ) {
     category = "president";
   } else if (
     designation.includes("नामनिर्देशित") ||
     designation.includes("स्वीकृत") ||
-    (item.wardNumber && item.wardNumber.includes("नामनिर्देशित"))
+    designation.includes("nominated") ||
+    wardStr.includes("नामनिर्देशित")
   ) {
     category = "nominated";
   }
@@ -51,6 +57,8 @@ function mapOfficial(item: any): OfficialRecord {
   } else if (partyText.includes("ncp") || partyText.includes("राष्ट्रवादी") || partyText.includes("नॅशनलिस्ट")) {
     partyCode = "NCP";
   }
+
+  const resolvedPhoto = item.photoUrl ? getAttachmentUrl(item.photoUrl) : "";
 
   return {
     id: item.id,
@@ -71,7 +79,7 @@ function mapOfficial(item: any): OfficialRecord {
     addressMr: item.addressMr || "",
     addressEn: item.addressEn || item.addressMr || "",
     phone: item.phone || "",
-    photoBase64: item.photoUrl || "",
+    photoBase64: resolvedPhoto,
     order: item.displayOrder !== undefined ? item.displayOrder : 999,
     status: item.isActive === false ? "inactive" : "active",
     createdAt: item.createdAt ? new Date(item.createdAt).getTime() : Date.now(),

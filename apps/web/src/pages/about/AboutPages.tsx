@@ -435,19 +435,33 @@ export const Corporators = () => {
               </span>
             </div>
 
-            <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${partyBadgeStyle}`}>
-              {partyDisplay}
-            </span>
+            {partyDisplay && (
+              <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${partyBadgeStyle}`}>
+                {partyDisplay}
+              </span>
+            )}
           </div>
 
-          {/* Member Names */}
-          <div>
-            <h3 className="font-extrabold text-base md:text-lg text-foreground tracking-tight">
-              {lang === "mr" ? c.nameMr : (c.nameEn || c.nameMr)}
-            </h3>
-            <p className="text-xs text-muted-foreground font-medium">
-              {lang === "mr" ? c.nameEn : c.nameMr}
-            </p>
+          {/* Member Photo & Names */}
+          <div className="flex items-center gap-3">
+            {c.photoBase64 && (
+              <img
+                src={c.photoBase64}
+                alt={c.nameMr}
+                className="w-12 h-12 rounded-full object-cover border-2 border-primary/40 shrink-0 shadow-xs"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
+            )}
+            <div className="min-w-0">
+              <h3 className="font-extrabold text-base md:text-lg text-foreground tracking-tight">
+                {lang === "mr" ? c.nameMr : (c.nameEn || c.nameMr)}
+              </h3>
+              <p className="text-xs text-muted-foreground font-medium">
+                {lang === "mr" ? c.nameEn : c.nameMr}
+              </p>
+            </div>
           </div>
 
           {/* Address */}
