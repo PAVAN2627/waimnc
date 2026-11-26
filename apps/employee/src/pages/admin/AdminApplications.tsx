@@ -11,6 +11,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import FormattedDescription from "@/components/FormattedDescription";
+import WardSelector from "@/components/WardSelector";
+import { isUnknownWard, matchesWard } from "@wmc/types";
 
 import {
   subscribeToAllComplaints,
@@ -229,15 +231,16 @@ export default function AdminApplications() {
   const shortId = (id: string) => `TK-${id.slice(-6).toUpperCase()}`;
 
   const SERVICE_CATEGORIES = [
-    { key: "all", labelMr: "सर्व अर्ज", labelEn: "All Applications" },
-    { key: "birth", labelMr: "जन्म दाखला", labelEn: "Birth Certificate", match: "जन्म" },
-    { key: "death", labelMr: "मृत्यू दाखला", labelEn: "Death Certificate", match: "मृत्यू" },
-    { key: "marriage", labelMr: "विवाह नोंदणी दाखला", labelEn: "Marriage Certificate", match: "विवाह" },
-    { key: "permit", labelMr: "बांधकाम परवानगी", labelEn: "Building Permit", match: "बांधकाम" },
-    { key: "water", labelMr: "पाणी नळ जोडणी", labelEn: "Water Tap Connection", match: "पाणी" },
-    { key: "tax", labelMr: "मालमत्ता कर नोंद", labelEn: "Property Tax", match: "मालमत्ता" },
-    { key: "pmay", labelMr: "प्रधानमंत्री आवास (PMAY)", labelEn: "PMAY Housing Scheme", match: "pmay" },
-    { key: "scheme", labelMr: "शासकीय योजना (इतर)", labelEn: "Other Schemes", match: "योजना" },
+    { key: "all", labelMr: "सर्व अर्ज", labelEn: "All Applications", deptKeywords: [] as string[] },
+    { key: "birth", labelMr: "जन्म दाखला", labelEn: "Birth Certificate", match: "जन्म", deptKeywords: ["जन्म", "मृत्यू", "birth", "death", "आरोग्य", "health"] },
+    { key: "death", labelMr: "मृत्यू दाखला", labelEn: "Death Certificate", match: "मृत्यू", deptKeywords: ["जन्म", "मृत्यू", "birth", "death", "आरोग्य", "health"] },
+    { key: "marriage", labelMr: "विवाह नोंदणी दाखला", labelEn: "Marriage Certificate", match: "विवाह", deptKeywords: ["विवाह", "marriage", "जन्म", "मृत्यू"] },
+    { key: "permit", labelMr: "बांधकाम परवानगी", labelEn: "Building Permit", match: "बांधकाम", deptKeywords: ["बांधकाम", "नगररचना", "building", "town", "planning"] },
+    { key: "water", labelMr: "पाणी नळ जोडणी", labelEn: "Water Tap Connection", match: "पाणी", deptKeywords: ["पाणी", "जल", "water"] },
+    { key: "tax", labelMr: "मालमत्ता कर नोंद", labelEn: "Property Tax", match: "मालमत्ता", deptKeywords: ["कर", "मालमत्ता", "मूल्यांकन", "tax", "property"] },
+    { key: "noc", labelMr: "ना हरकत प्रमाणपत्र (NOC)", labelEn: "No Objection Certificate (NOC)", match: "noc", deptKeywords: ["ना हरकत", "noc"] },
+    { key: "pmay", labelMr: "प्रधानमंत्री आवास (PMAY)", labelEn: "PMAY Housing Scheme", match: "pmay", deptKeywords: ["आवास", "pmay", "घरकुल", "योजना", "महिला", "दिव्यांग"] },
+    { key: "scheme", labelMr: "शासकीय योजना (इतर)", labelEn: "Other Schemes", match: "योजना", deptKeywords: ["योजना", "scheme", "कल्याण", "welfare", "महिला", "दिव्यांग"] },
   ];
 
   const userDepts =
@@ -247,8 +250,23 @@ export default function AdminApplications() {
       ? user.department.split(",").map((d: string) => d.trim()).filter(Boolean)
       : [];
 
-  const filtered = applications.filter((c) => {
-    if (userDepts.length > 0 && !matchesEmployeeDepartment(c, userDepts)) return false;
+  const visibleCategories =
+    userDepts.length === 0
+      ? SERVICE_CATEGORIES
+      : SERVICE_CATEGORIES.filter((cat) => {
+          if (cat.key === "all") return true;
+          return userDepts.some((dept) => {
+            const d = dept.toLowerCase();
+            return cat.deptKeywords.some((kw) => d.includes(kw.toLowerCase()));
+          });
+        });
+
+  const deptApplications =
+    userDepts.length > 0
+      ? applications.filter((c) => matchesEmployeeDepartment(c, userDepts))
+      : applications;
+
+  const filtered = deptApplications.filter((c) => {
     const q = search.toLowerCase();
     const matchesSearch =
       !q ||
@@ -258,7 +276,12 @@ export default function AdminApplications() {
       c.description.toLowerCase().includes(q) ||
       c.type.toLowerCase().includes(q);
 
-    const matchesWard = wardFilter === "all" || c.ward === wardFilter;
+    const matchesWardFilter =
+      wardFilter === "all"
+        ? true
+        : wardFilter === "unknown"
+        ? isUnknownWard(c.ward)
+        : matchesWard(c.ward, wardFilter);
 
     let matchesCategory = true;
     if (serviceTypeFilter !== "all") {
@@ -270,7 +293,7 @@ export default function AdminApplications() {
       }
     }
 
-    return matchesSearch && matchesWard && matchesCategory;
+    return matchesSearch && matchesWardFilter && matchesCategory;
   });
 
   return (
@@ -333,14 +356,14 @@ export default function AdminApplications() {
               <FileCheck2 className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl sm:text-2xl font-black font-mono">{applications.length}</p>
+              <p className="text-xl sm:text-2xl font-black font-mono">{deptApplications.length}</p>
               <p className="text-[11px] sm:text-xs font-bold text-muted-foreground truncate">{t("एकूण प्राप्त अर्ज", "Total Applications")}</p>
             </div>
           </CardContent>
         </Card>
 
         {(["pending", "in-progress", "resolved"] as const).map((status) => {
-          const count = applications.filter((c) => c.status === status).length;
+          const count = deptApplications.filter((c) => c.status === status).length;
           const Icon = statusIcons[status];
           return (
             <Card key={status} className="rounded-2xl border-border shadow-sm">
@@ -368,7 +391,7 @@ export default function AdminApplications() {
 
       {/* Category Pills Bar */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {SERVICE_CATEGORIES.map((cat) => (
+        {visibleCategories.map((cat) => (
           <button
             key={cat.key}
             type="button"
@@ -403,18 +426,13 @@ export default function AdminApplications() {
             </button>
           )}
         </div>
-        <select
+        <WardSelector
           value={wardFilter}
-          onChange={(e) => setWardFilter(e.target.value)}
-          className="border rounded-xl px-3 py-2 text-xs font-bold bg-background focus:ring-2 focus:ring-ring focus:outline-none"
-        >
-          <option value="all">{t("सर्व प्रभाग / वार्ड", "All Wards")}</option>
-          {Array.from({ length: 17 }, (_, i) => i + 1).map((w) => (
-            <option key={w} value={String(w)}>
-              {t(`प्रभाग क्र. ${w}`, `Ward ${w}`)}
-            </option>
-          ))}
-        </select>
+          onChange={setWardFilter}
+          includeAllOption
+          unknownValue="unknown"
+          className="min-w-[180px] rounded-xl text-xs font-bold"
+        />
         {(search || wardFilter !== "all" || serviceTypeFilter !== "all") && (
           <span className="text-xs font-bold text-muted-foreground">
             {filtered.length} {t("अर्ज सापडले", "applications found")}
