@@ -11,6 +11,30 @@ export interface ComplaintAttachment {
   url?: string;
 }
 
+export function getAttachmentUrl(attachment: ComplaintAttachment | any): string {
+  if (!attachment) return "";
+  const raw = String(attachment.url || attachment.base64 || attachment.viewUrl || (typeof attachment === "string" ? attachment : "")).trim();
+  if (!raw) return "";
+  if (raw.startsWith("data:") || raw.startsWith("blob:")) {
+    return raw;
+  }
+  const apiBase = (import.meta.env.VITE_API_URL || "/api").replace(/\/+$/, "");
+  const basePath = apiBase.startsWith("http") ? new URL(apiBase).pathname.replace(/\/+$/, "") : apiBase;
+
+  // If the URL points to media.waimunicipalcouncil.org (Cloudflare R2),
+  // stream through the backend proxy /api/storage/file
+  if (raw.includes("media.waimunicipalcouncil.org")) {
+    const cleanPath = raw.replace(/^https?:\/\/media\.waimunicipalcouncil\.org\/?/, "");
+    return `${basePath}/storage/file?pathname=${encodeURIComponent(cleanPath)}`;
+  }
+
+  if (raw.startsWith("/")) {
+    return raw;
+  }
+
+  return raw;
+}
+
 export function normalizeAttachment(att: any): ComplaintAttachment {
   if (typeof att === "string") {
     const isImg = /\.(jpe?g|png|webp|gif|svg)$/i.test(att) || att.startsWith("data:image/");

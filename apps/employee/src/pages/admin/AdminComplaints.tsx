@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   CheckCircle, Clock, AlertTriangle, Eye, LoaderCircle,
-  Download, FileText, Image as ImageIcon, Paperclip, Search, X, Trash2, RefreshCw, ExternalLink, ZoomIn, FileCheck2, Building2, ArrowRightLeft
+  Download, FileText, Image as ImageIcon, Paperclip, Search, X, Trash2, RefreshCw, ExternalLink, ZoomIn, FileCheck2, Building2, ArrowRightLeft, UserCheck
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -594,14 +594,38 @@ const AdminComplaints = () => {
                 </Button>
               </div>
               <div className="bg-card/70 rounded-xl p-2 border border-emerald-500/20 max-w-sm mx-auto text-center">
-                <a href={c.resolutionProof.url} target="_blank" rel="noopener noreferrer" className="block relative group overflow-hidden rounded-lg">
-                  <img src={c.resolutionProof.url} alt="Proof" className="max-h-56 w-full object-contain mx-auto group-hover:scale-105 transition-transform" />
+                <a
+                  href={getAttachmentUrl(c.resolutionProof.url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block relative group overflow-hidden rounded-lg"
+                >
+                  <img
+                    src={getAttachmentUrl(c.resolutionProof.url)}
+                    alt="Proof"
+                    className="max-h-56 w-full object-contain mx-auto group-hover:scale-105 transition-transform"
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      const raw = c.resolutionProof?.url || "";
+                      if (!img.dataset.retried && raw.includes("media.waimunicipalcouncil.org")) {
+                        img.dataset.retried = "true";
+                        img.src = getAttachmentUrl(raw);
+                      }
+                    }}
+                  />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>{t("पूर्ण आकारात पहा", "View Full")}</span>
                   </div>
                 </a>
               </div>
+              {c.resolutionProof.resolvedBy && (
+                <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{t("निराकरण अधिकारी: ", "Resolved By: ")}</span>
+                  <span className="font-semibold text-foreground">{c.resolutionProof.resolvedBy}</span>
+                </p>
+              )}
               {c.resolutionProof.notes && (
                 <p className="text-xs text-foreground bg-card/60 p-2 rounded-lg italic border border-emerald-500/20">
                   📝 {c.resolutionProof.notes}
@@ -924,6 +948,11 @@ const AdminComplaints = () => {
                     <span className="font-mono text-xs font-black px-2 py-0.5 rounded-lg bg-primary/10 text-primary border border-primary/20">
                       {c.trackingId || shortId(c.id)}
                     </span>
+                    {c.department && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        {c.department}
+                      </span>
+                    )}
                     {c.type && (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent text-accent-foreground">
                         {c.type}
@@ -1314,7 +1343,7 @@ const AdminComplaints = () => {
                 {proofPreview ? (
                   <div className="relative rounded-2xl border-2 border-emerald-500/40 bg-muted/30 p-2 text-center">
                     <img
-                      src={proofPreview}
+                      src={getAttachmentUrl(proofPreview)}
                       alt="Proof Preview"
                       className="max-h-52 w-full object-contain rounded-xl mx-auto"
                     />

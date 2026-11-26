@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Search, CheckCircle2, Clock, AlertCircle, LoaderCircle, ShieldCheck, ExternalLink, Phone, FileText, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
-import { getComplaintByTrackingId, getComplaintsByMobile, formatComplaintDate, type ComplaintRecord } from "@/lib/complaints";
+import { getComplaintByTrackingId, getComplaintsByMobile, formatComplaintDate, getAttachmentUrl, type ComplaintRecord } from "@/lib/complaints";
 import FormattedDescription from "./FormattedDescription";
 import { validateMobileInput, sanitizeMobileInput } from "@/lib/validation";
 
@@ -243,15 +243,23 @@ const TrackApplication = () => {
 
             <div className="bg-card/70 rounded-xl p-2 border border-emerald-500/20 max-w-sm mx-auto text-center">
               <a
-                href={record.resolutionProof.url}
+                href={getAttachmentUrl(record.resolutionProof.url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block relative group overflow-hidden rounded-lg border border-emerald-500/30 bg-black/5"
               >
                 <img
-                  src={record.resolutionProof.url}
+                  src={getAttachmentUrl(record.resolutionProof.url)}
                   alt={t("कामाचा पुरावा", "Work Proof")}
                   className="w-full max-h-64 object-contain group-hover:scale-105 transition-transform duration-300 mx-auto"
+                  onError={(e) => {
+                    const img = e.currentTarget;
+                    const raw = record.resolutionProof?.url || "";
+                    if (!img.dataset.retried && raw.includes("media.waimunicipalcouncil.org")) {
+                      img.dataset.retried = "true";
+                      img.src = getAttachmentUrl(raw);
+                    }
+                  }}
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5">
                   <ExternalLink className="w-4 h-4" />

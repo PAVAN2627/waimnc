@@ -16,14 +16,26 @@ export interface ComplaintAttachment {
 
 export function getAttachmentUrl(attachment: ComplaintAttachment | any): string {
   if (!attachment) return "";
-  const raw = attachment.url || attachment.base64 || attachment.viewUrl || (typeof attachment === "string" ? attachment : "");
+  const raw = String(attachment.url || attachment.base64 || attachment.viewUrl || (typeof attachment === "string" ? attachment : "")).trim();
   if (!raw) return "";
-  if (raw.startsWith("data:") || raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("blob:")) {
+  if (raw.startsWith("data:") || raw.startsWith("blob:")) {
     return raw;
   }
-  const apiBase = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
-  const origin = apiBase.replace(/\/api\/?$/, "");
-  return raw.startsWith("/") ? `${origin}${raw}` : `${origin}/${raw}`;
+  const apiBase = (import.meta.env.VITE_API_URL || "/api").replace(/\/+$/, "");
+  const basePath = apiBase.startsWith("http") ? new URL(apiBase).pathname.replace(/\/+$/, "") : apiBase;
+
+  // If the URL points to media.waimunicipalcouncil.org (Cloudflare R2),
+  // stream through the backend proxy /api/storage/file
+  if (raw.includes("media.waimunicipalcouncil.org")) {
+    const cleanPath = raw.replace(/^https?:\/\/media\.waimunicipalcouncil\.org\/?/, "");
+    return `${basePath}/storage/file?pathname=${encodeURIComponent(cleanPath)}`;
+  }
+
+  if (raw.startsWith("/")) {
+    return raw;
+  }
+
+  return raw;
 }
 
 export function isImageAttachment(attachment: ComplaintAttachment | any): boolean {
