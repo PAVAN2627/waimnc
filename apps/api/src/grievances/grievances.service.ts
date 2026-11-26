@@ -249,7 +249,7 @@ export class GrievancesService {
       data: {
         name: data.name || data.citizenName,
         mobile: data.mobile || data.citizenPhone,
-        ward: data.ward || '1',
+        ward: data.ward || 'माहिती नाही',
         type: data.type || 'general',
         department: data.department || 'General Administration',
         description: data.description,

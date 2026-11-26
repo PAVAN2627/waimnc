@@ -11,6 +11,8 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
   const [trackingId, setTrackingId] = useState<string | null>(null);
   const [mobileValue, setMobileValue] = useState("");
   const [selectedWard, setSelectedWard] = useState("माहिती नाही");
+  const [selectedLandmark, setSelectedLandmark] = useState("");
+  const [customLandmark, setCustomLandmark] = useState("");
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -18,6 +20,19 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
   const [attachMode, setAttachMode] = useState<"file" | "drive">("file");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t, lang } = useLanguage();
+
+  const LANDMARKS = [
+    "गंगापुरी",
+    "मधली आळी / गणपती आळी",
+    "ब्राह्मणशाही",
+    "रामडोह आळी",
+    "रविवार पेठ भाग १",
+    "रविवार पेठ भाग २",
+    "सोनगिरवाडी",
+    "सिद्धनाथवाडी",
+    "फुलेनगर",
+    "धर्मपुरी",
+  ];
 
   const departments = [
     { value: "पाणी पुरवठा विभाग", labelMr: "पाणी पुरवठा विभाग", labelEn: "Water Supply Dept." },
@@ -70,8 +85,12 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
     const type = data.get("type") as string;
     const department = data.get("department") as string;
     const location = (data.get("location") as string) || "";
+    const landmark = selectedLandmark === "इतर" ? customLandmark.trim() : selectedLandmark;
     const description = (data.get("description") as string) || "";
-    const combinedDesc = location ? `[ठिकाण: ${location.trim()}]\n${description.trim()}` : description.trim();
+    const landmarkPrefix = landmark ? `[खूण / परिसर: ${landmark}] ` : "";
+    const combinedDesc = location
+      ? `${landmarkPrefix}[ठिकाण: ${location.trim()}]\n${description.trim()}`
+      : `${landmarkPrefix}${description.trim()}`;
 
     // 10-digit real mobile validation (no fake / repeating numbers like 9999999999)
     const mobileCheck = validateMobileInput(mobile, lang);
@@ -96,6 +115,8 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
       form.reset();
       setMobileValue("");
       setSelectedWard("माहिती नाही");
+      setSelectedLandmark("");
+      setCustomLandmark("");
       setFiles([]);
       setDriveLink("");
     } catch (err) {
@@ -265,7 +286,7 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
             </div>
           </div>
 
-          {/* Row 3: Ward (Optional) + Location */}
+          {/* Row 3: Ward (Optional) + Landmark */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <div className="flex items-center justify-between mb-1">
@@ -280,28 +301,55 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
                 onChange={(e) => setSelectedWard(e.target.value)}
                 className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
               >
-                <option value="माहिती नाही">
-                  {t("माहिती नाही / अज्ञात (Don't know ward)", "Don't know / Unknown Ward")}
-                </option>
                 {MUNICIPAL_WARDS.filter((w) => w.value !== "माहिती नाही").map((w) => (
                   <option key={w.value} value={w.value}>
                     {lang === "mr" ? w.labelMr : w.labelEn}
                   </option>
                 ))}
+                <option value="माहिती नाही">
+                  {t("माहिती नाही / अज्ञात (Don't know ward)", "Don't know / Unknown Ward")}
+                </option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
-                {t("समस्येचे अचूक ठिकाण / रस्ता / लँडमार्क *", "Exact Problem Location / Street / Landmark *")}
+                {t("जवळचा परिसर / खूण (Landmark)", "Nearby Area / Landmark")}
               </label>
-              <input
-                name="location"
-                type="text"
-                required
-                placeholder={t("उदा. मारुती आळी, मारुती मंदिरासमोर, गणपती घाटाजवळ", "e.g. Maruti Ali, opposite Maruti Temple, near Ganpati Ghat")}
+              <select
+                value={selectedLandmark}
+                onChange={(e) => setSelectedLandmark(e.target.value)}
                 className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
-              />
+              >
+                <option value="">{t("निवडा (ऐच्छिक)...", "Select (Optional)...")}</option>
+                {LANDMARKS.map((lm) => (
+                  <option key={lm} value={lm}>{lm}</option>
+                ))}
+                <option value="इतर">{t("इतर (Other)", "Other")}</option>
+              </select>
+              {selectedLandmark === "इतर" && (
+                <input
+                  type="text"
+                  value={customLandmark}
+                  onChange={(e) => setCustomLandmark(e.target.value)}
+                  placeholder={t("परिसराचे नाव लिहा...", "Enter area / landmark name...")}
+                  className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none mt-2"
+                />
+              )}
             </div>
+          </div>
+
+          {/* Row 4: Exact Location */}
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              {t("समस्येचे अचूक ठिकाण / रस्ता *", "Exact Problem Location / Street *")}
+            </label>
+            <input
+              name="location"
+              type="text"
+              required
+              placeholder={t("उदा. मारुती मंदिरासमोर, गणपती घाटाजवळ", "e.g. opposite Maruti Temple, near Ganpati Ghat")}
+              className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+            />
           </div>
 
           {/* Description */}
