@@ -42,6 +42,19 @@ const statusIcons: Record<ComplaintStatus, typeof Clock> = {
   resolved: CheckCircle,
 };
 
+const PRIMARY_COMPLAINT_DEPARTMENTS = [
+  { name: "पाणी पुरवठा विभाग", icon: "💧" },
+  { name: "आरोग्य व स्वच्छता विभाग", icon: "🧹" },
+  { name: "रस्ते व बांधकाम विभाग", icon: "🏗️" },
+  { name: "दिवाबत्ती व विद्युत विभाग", icon: "💡" },
+  { name: "सांडपाणी व गटार व्यवस्था", icon: "🚰" },
+  { name: "कर व मूल्यांकन विभाग", icon: "🏢" },
+  { name: "नगररचना व नियोजन विभाग", icon: "📐" },
+  { name: "अतिक्रमण निर्मूलन विभाग", icon: "🚫" },
+  { name: "अग्निशमन विभाग", icon: "🚒" },
+  { name: "सामान्य प्रशासन विभाग", icon: "🏛️" },
+];
+
 const OFFICIAL_DEPARTMENTS = [
   "आरोग्य व स्वच्छता विभाग",
   "पाणी पुरवठा विभाग",
@@ -461,11 +474,11 @@ const AdminComplaints = () => {
                     key={idx}
                     className="group relative rounded-xl overflow-hidden border border-border bg-muted/40 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
                   >
-                    <div className="w-full h-28 relative overflow-hidden bg-black/5 flex items-center justify-center">
+                    <div className="w-full h-36 sm:h-44 relative overflow-hidden bg-slate-900/5 dark:bg-slate-900/40 flex items-center justify-center p-1.5">
                       <img
                         src={fileUrl}
                         alt={att.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                         onError={(e) => {
                           (e.currentTarget as HTMLElement).style.display = "none";
@@ -613,8 +626,8 @@ const AdminComplaints = () => {
         </div>
       )}
 
-      {/* Status Action Buttons */}
-      <div className="flex gap-2 flex-wrap items-center pt-3 border-t">
+      {/* Status Action Buttons (Sticky Footer) */}
+      <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-5 sm:-mb-5 p-3 px-4 sm:px-5 bg-card/95 backdrop-blur-md border-t border-border flex gap-2 flex-wrap items-center mt-auto shadow-lg z-10">
         <Button
           size="sm"
           variant={c.status === "pending" ? "default" : "outline"}
@@ -941,11 +954,11 @@ const AdminComplaints = () => {
           ))}
         </div>
 
-        {/* Desktop Details Panel (Side-by-Side sticky) */}
+        {/* Desktop Details Panel (Side-by-Side sticky & scrollable) */}
         <div className="hidden md:block">
           {selected ? (
-            <Card className="sticky top-6 rounded-3xl border border-border shadow-xl overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between pb-3 bg-muted/40 border-b border-border">
+            <Card className="sticky top-4 lg:top-6 rounded-3xl border border-border shadow-xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)]">
+              <CardHeader className="flex flex-row items-center justify-between pb-3 bg-muted/40 border-b border-border flex-shrink-0">
                 <CardTitle className="text-base font-black flex items-center gap-2">
                   <Eye className="h-5 w-5 text-primary" />
                   <span>{t("तक्रार तपशील", "Complaint Details")} — {selected.trackingId || shortId(selected.id)}</span>
@@ -959,7 +972,7 @@ const AdminComplaints = () => {
                   <X className="h-4 w-4" />
                 </Button>
               </CardHeader>
-              <CardContent className="p-5 space-y-4">
+              <CardContent className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4">
                 {renderComplaintDetailsContent(selected, false)}
               </CardContent>
             </Card>
@@ -1020,9 +1033,9 @@ const AdminComplaints = () => {
       {/* Department Shift Modal */}
       {shiftDeptModalOpen && targetShiftComplaint && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-card text-card-foreground rounded-3xl max-w-md w-full border border-border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-card text-card-foreground rounded-3xl max-w-md w-full border border-border shadow-2xl overflow-hidden flex flex-col max-h-[88vh] animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="gov-gradient p-5 text-white flex items-center justify-between">
+            <div className="gov-gradient p-4 sm:p-5 text-white flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
                 <ArrowRightLeft className="w-5 h-5 text-amber-300" />
                 <h3 className="font-extrabold text-base md:text-lg">
@@ -1037,7 +1050,7 @@ const AdminComplaints = () => {
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
               <div className="p-3.5 rounded-2xl bg-muted/60 border border-border text-xs space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-muted-foreground">{t("तक्रार क्र.: ", "Tracking ID: ")}</span>
@@ -1063,23 +1076,68 @@ const AdminComplaints = () => {
               </div>
 
               {/* Department Selection */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <Building2 className="w-4 h-4 text-primary" />
-                  <span>{t("नवीन विभाग निवडा (Target Department) *", "Select Target Department *")}</span>
+              <div className="space-y-2.5">
+                <label className="text-xs font-bold text-foreground flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Building2 className="w-4 h-4 text-primary" />
+                    <span>{t("नवीन विभाग निवडा *", "Select Target Department *")}</span>
+                  </span>
+                  {selectedDept && (
+                    <span className="text-[11px] font-bold text-primary truncate max-w-[180px]">
+                      ✓ {selectedDept === "OTHER" ? (customDept || t("इतर", "Custom")) : selectedDept}
+                    </span>
+                  )}
                 </label>
-                <select
-                  value={selectedDept}
-                  onChange={(e) => setSelectedDept(e.target.value)}
-                  className="w-full border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm bg-background text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
-                >
-                  {OFFICIAL_DEPARTMENTS.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                  <option value="OTHER">{t("इतर विभाग प्रविष्ट करा...", "Enter other department...")}</option>
-                </select>
+
+                {/* Quick-Select Primary Departments Grid */}
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 bg-muted/20 rounded-2xl border border-border">
+                  {PRIMARY_COMPLAINT_DEPARTMENTS.map((dept) => {
+                    const isSelected = selectedDept === dept.name;
+                    return (
+                      <button
+                        key={dept.name}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDept(dept.name);
+                          setCustomDept("");
+                        }}
+                        className={`p-2 rounded-xl text-left text-xs font-bold border transition-all flex items-center gap-2 ${
+                          isSelected
+                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                            : "bg-background hover:bg-muted text-foreground border-border"
+                        }`}
+                      >
+                        <span className="text-base flex-shrink-0">{dept.icon}</span>
+                        <span className="truncate leading-tight text-[11px] sm:text-xs">{dept.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Dropdown for Other Administrative Departments */}
+                <div className="pt-1">
+                  <span className="text-[11px] text-muted-foreground font-semibold block mb-1">
+                    {t("किंवा सर्व प्रशासकीय विभागांमधून निवडा:", "Or select from all departments:")}
+                  </span>
+                  <select
+                    value={OFFICIAL_DEPARTMENTS.includes(selectedDept) ? selectedDept : "OTHER"}
+                    onChange={(e) => {
+                      setSelectedDept(e.target.value);
+                      if (e.target.value !== "OTHER") {
+                        setCustomDept("");
+                      }
+                    }}
+                    className="w-full border rounded-xl px-3 py-2 text-xs bg-background text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+                  >
+                    <option value="" disabled>{t("-- विभाग निवडा --", "-- Select Department --")}</option>
+                    {OFFICIAL_DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
+                    <option value="OTHER">{t("इतर विभाग प्रविष्ट करा...", "Enter custom department...")}</option>
+                  </select>
+                </div>
 
                 {selectedDept === "OTHER" && (
                   <Input
