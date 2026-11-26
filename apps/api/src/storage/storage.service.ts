@@ -27,11 +27,12 @@ export class StorageService {
     this.token = this.configService.get<string>('BLOB_READ_WRITE_TOKEN') || '';
     this.access = (this.configService.get<string>('BLOB_ACCESS') as 'private' | 'public') || 'private';
 
-    const r2AccountId = this.configService.get<string>('R2_ACCOUNT_ID');
-    const r2AccessKeyId = this.configService.get<string>('R2_ACCESS_KEY_ID');
-    const r2SecretAccessKey = this.configService.get<string>('R2_SECRET_ACCESS_KEY');
-    this.r2BucketName = this.configService.get<string>('R2_BUCKET_NAME') || 'waimuncipal';
-    this.r2PublicDomain = (this.configService.get<string>('R2_PUBLIC_DOMAIN') || '').replace(/\/+$/, '');
+    const cleanStr = (val?: string) => (val || '').replace(/^["']|["']$/g, '').trim();
+    const r2AccountId = cleanStr(this.configService.get<string>('R2_ACCOUNT_ID'));
+    const r2AccessKeyId = cleanStr(this.configService.get<string>('R2_ACCESS_KEY_ID'));
+    const r2SecretAccessKey = cleanStr(this.configService.get<string>('R2_SECRET_ACCESS_KEY'));
+    this.r2BucketName = cleanStr(this.configService.get<string>('R2_BUCKET_NAME')) || 'waimuncipal';
+    this.r2PublicDomain = cleanStr(this.configService.get<string>('R2_PUBLIC_DOMAIN')).replace(/\/+$/, '');
 
     if (
       r2AccountId &&
@@ -225,26 +226,54 @@ export class StorageService {
 
     // Try Cloudflare R2 first if enabled
     if (this.useR2 && this.s3Client) {
-      try {
-        const s3Obj = await this.s3Client.send(
-          new GetObjectCommand({
-            Bucket: this.r2BucketName,
-            Key: cleanPathname,
-          }),
-        );
+      const bucketCandidates = Array.from(
+        new Set([this.r2BucketName, 'waimuncipal', 'waimunicipal', 'wmc-media', 'wmc-storage'].filter(Boolean))
+      );
 
-        if (s3Obj && s3Obj.Body) {
-          return {
-            blob: {
-              contentType: s3Obj.ContentType || 'application/octet-stream',
-              size: s3Obj.ContentLength || 0,
-            },
-            nodeStream: s3Obj.Body as Readable,
-          };
+      const keyCandidates = [
+        cleanPathname,
+        cleanPathname.replace(/^\/+/, ''),
+        cleanPathname.startsWith('grievances/') ? cleanPathname : `grievances/${cleanPathname}`,
+      ];
+
+      for (const bucket of bucketCandidates) {
+        for (const key of keyCandidates) {
+          try {
+            const s3Obj = await this.s3Client.send(
+              new GetObjectCommand({
+                Bucket: bucket,
+                Key: key,
+              })
+            );
+
+            if (s3Obj && s3Obj.Body) {
+              const ext = key.split('.').pop()?.toLowerCase();
+              const inferredMime =
+                ext === 'png'
+                  ? 'image/png'
+                  : ext === 'jpg' || ext === 'jpeg'
+                  ? 'image/jpeg'
+                  : ext === 'webp'
+                  ? 'image/webp'
+                  : ext === 'pdf'
+                  ? 'application/pdf'
+                  : ext === 'svg'
+                  ? 'image/svg+xml'
+                  : s3Obj.ContentType || 'application/octet-stream';
+              return {
+                blob: {
+                  contentType: inferredMime,
+                  size: s3Obj.ContentLength || 0,
+                },
+                nodeStream: s3Obj.Body as Readable,
+              };
+            }
+          } catch {
+            // try next candidate
+          }
         }
-      } catch (err: any) {
-        this.logger.warn(`File not found in R2 (${cleanPathname}): ${err.message}. Trying Vercel Blob fallback...`);
       }
+      this.logger.warn(`File not found in any R2 candidate buckets (${cleanPathname}). Trying Vercel Blob fallback...`);
     }
 
     if (!this.token) {

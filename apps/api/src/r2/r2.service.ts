@@ -11,12 +11,13 @@ export class R2Service {
   private readonly publicDomain: string;
 
   constructor(private readonly configService: ConfigService) {
-    const accountId = this.configService.get<string>('R2_ACCOUNT_ID') || 'placeholder_account_id';
-    const accessKeyId = this.configService.get<string>('R2_ACCESS_KEY_ID') || 'placeholder_access_key';
-    const secretAccessKey = this.configService.get<string>('R2_SECRET_ACCESS_KEY') || 'placeholder_secret';
+    const cleanStr = (val?: string) => (val || '').replace(/^["']|["']$/g, '').trim();
+    const accountId = cleanStr(this.configService.get<string>('R2_ACCOUNT_ID')) || 'placeholder_account_id';
+    const accessKeyId = cleanStr(this.configService.get<string>('R2_ACCESS_KEY_ID')) || 'placeholder_access_key';
+    const secretAccessKey = cleanStr(this.configService.get<string>('R2_SECRET_ACCESS_KEY')) || 'placeholder_secret';
 
-    this.bucketName = this.configService.get<string>('R2_BUCKET_NAME') || 'wmc-media';
-    this.publicDomain = (this.configService.get<string>('R2_PUBLIC_DOMAIN') || 'https://media.waimunicipalcouncil.org').replace(/\/+$/, '');
+    this.bucketName = cleanStr(this.configService.get<string>('R2_BUCKET_NAME')) || 'waimuncipal';
+    this.publicDomain = cleanStr(this.configService.get<string>('R2_PUBLIC_DOMAIN') || 'https://media.waimunicipalcouncil.org').replace(/\/+$/, '');
 
     this.s3Client = new S3Client({
       region: 'auto',

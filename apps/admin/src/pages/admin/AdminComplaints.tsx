@@ -44,6 +44,60 @@ const statusIcons: Record<ComplaintStatus, typeof Clock> = {
   resolved: CheckCircle,
 };
 
+function ResolutionProofImage({
+  url,
+  onOpenPreview,
+  t,
+}: {
+  url?: string;
+  onOpenPreview: () => void;
+  t: (mr: string, en: string) => string;
+}) {
+  const [hasError, setHasError] = useState(false);
+  const proofUrl = getAttachmentUrl(url);
+
+  if (hasError || !proofUrl) {
+    return (
+      <button
+        type="button"
+        onClick={onOpenPreview}
+        className="w-full p-5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus:outline-none"
+      >
+        <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+          <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <p className="font-bold text-xs text-foreground">
+          {t("काम पूर्ण झाल्याचा अधिकृत पुरावा उपलब्ध आहे", "Official Work Completion Proof Available")}
+        </p>
+        <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 underline flex items-center gap-1">
+          <Eye className="w-3.5 h-3.5" />
+          {t("छायाचित्र मोठ्या आकारात पहा", "Click to view full photo")}
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onOpenPreview}
+      className="block relative group overflow-hidden rounded-lg w-full cursor-pointer focus:outline-none"
+      title={t("मोठ्या आकारात पहा", "View On Same Screen")}
+    >
+      <img
+        src={proofUrl}
+        alt={t("कामाचा पुरावा", "Resolution Proof")}
+        className="max-h-56 w-full object-contain mx-auto group-hover:scale-105 transition-transform"
+        onError={() => setHasError(true)}
+      />
+      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5">
+        <Eye className="w-4 h-4" />
+        <span>{t("मोठ्या आकारात पहा", "View On Same Screen")}</span>
+      </div>
+    </button>
+  );
+}
+
 const PRIMARY_COMPLAINT_DEPARTMENTS = [
   { name: "पाणी पुरवठा विभाग", icon: "💧" },
   { name: "आरोग्य व स्वच्छता विभाग", icon: "🧹" },
@@ -701,9 +755,10 @@ const AdminComplaints = () => {
                 </div>
               </div>
               <div className="bg-card/70 rounded-xl p-2 border border-emerald-500/20 max-w-sm mx-auto text-center">
-                <button
-                  type="button"
-                  onClick={() =>
+                <ResolutionProofImage
+                  key={c.resolutionProof.url}
+                  url={c.resolutionProof.url}
+                  onOpenPreview={() =>
                     setPreviewAttachment({
                       url: getAttachmentUrl(c.resolutionProof?.url),
                       name: t("काम पूर्ण झाल्याचा पुरावा (Resolution Proof)", "Resolution Proof Photo"),
@@ -711,32 +766,8 @@ const AdminComplaints = () => {
                       isPdf: false,
                     })
                   }
-                  className="block relative group overflow-hidden rounded-lg w-full cursor-pointer focus:outline-none"
-                  title={t("मोठ्या आकारात पहा", "View On Same Screen")}
-                >
-                  <img
-                    src={getAttachmentUrl(c.resolutionProof.url)}
-                    alt={t("कामाचा पुरावा", "Resolution Proof")}
-                    className="max-h-56 w-full object-contain mx-auto group-hover:scale-105 transition-transform"
-                    onError={(e) => {
-                      const img = e.currentTarget;
-                      const raw = c.resolutionProof?.url || "";
-                      if (!img.dataset.fallbackTried && raw) {
-                        img.dataset.fallbackTried = "true";
-                        if (img.src.includes("/storage/file")) {
-                          img.src = raw;
-                        } else if (raw.includes("media.waimunicipalcouncil.org")) {
-                          const cleanPath = raw.replace(/^https?:\/\/media\.waimunicipalcouncil\.org\/?/, "");
-                          img.src = `/api/storage/file?pathname=${encodeURIComponent(cleanPath)}`;
-                        }
-                      }
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5">
-                    <Eye className="w-4 h-4" />
-                    <span>{t("मोठ्या आकारात पहा", "View On Same Screen")}</span>
-                  </div>
-                </button>
+                  t={t}
+                />
               </div>
               {c.resolutionProof.resolvedBy && (
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1">

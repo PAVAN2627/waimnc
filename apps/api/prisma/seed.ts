@@ -21,23 +21,63 @@ async function main() {
     });
 
     if (!existingAdmin) {
-      await prisma.admin.create({
+      await (prisma.admin as any).create({
         data: {
           email: adminEmail,
           name: 'Chief Municipal Officer (मुख्याधिकारी)',
           passwordHash,
+          role: 'SUPER_ADMIN',
+          departments: [],
+          accessScope: 'all',
+          isActive: true,
         },
       });
-      console.log(`✅ Administrator created: ${adminEmail}`);
+      console.log(`✅ Super Admin created: ${adminEmail}`);
     } else {
-      await prisma.admin.update({
+      await (prisma.admin as any).update({
         where: { email: adminEmail },
-        data: { passwordHash },
+        data: { passwordHash, role: 'SUPER_ADMIN', isActive: true },
       });
-      console.log(`ℹ️ Administrator updated: ${adminEmail}`);
+      console.log(`ℹ️ Super Admin updated: ${adminEmail}`);
     }
   } else {
     console.log('ℹ️ Preserving existing database administrator.');
+  }
+
+  // ---------------------------------------------------------------------------
+  // 1b. Employee / Department Officer Seeding
+  // ---------------------------------------------------------------------------
+  const employeeEmail = process.env.EMPLOYEE_DEFAULT_EMAIL;
+  const employeePassword = process.env.EMPLOYEE_DEFAULT_PASSWORD;
+
+  if (employeeEmail && employeePassword) {
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(employeePassword, salt);
+
+    const existingEmployee = await (prisma.admin as any).findUnique({
+      where: { email: employeeEmail },
+    });
+
+    if (!existingEmployee) {
+      await (prisma.admin as any).create({
+        data: {
+          email: employeeEmail,
+          name: 'Vijay Maruda',
+          passwordHash,
+          role: 'DEPT_OFFICER',
+          departments: [],
+          accessScope: 'all',
+          isActive: true,
+        },
+      });
+      console.log(`✅ Employee created: ${employeeEmail}`);
+    } else {
+      await (prisma.admin as any).update({
+        where: { email: employeeEmail },
+        data: { passwordHash, role: 'DEPT_OFFICER', isActive: true },
+      });
+      console.log(`ℹ️ Employee updated: ${employeeEmail}`);
+    }
   }
 
   // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { Controller, Post, Patch, Delete, Body, Res, Get, UseGuards, Req, Param, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Patch, Delete, Body, Res, Get, UseGuards, Req, Param, ForbiddenException, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -132,6 +132,8 @@ function extractIp(req: any): string {
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(private readonly authService: AuthService) {}
 
   @Throttle({ default: { limit: 10, ttl: 60000 } })
@@ -141,38 +143,50 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const ipAddress = extractIp(req);
-    const user = await this.authService.validateUser(dto.email, dto.password, ipAddress);
+    try {
+      const ipAddress = extractIp(req);
+      const user = await this.authService.validateUser(dto.email, dto.password, ipAddress);
 
-    // Enforce Portal Role Separation:
-    const portal = (dto.portal || '').toLowerCase();
-    if (portal === 'employee') {
-      if (user.role === 'SUPER_ADMIN') {
-        throw new ForbiddenException(
-          'हे पोर्टल फक्त विभागीय कर्मचारी व अधिकाऱ्यांसाठी आहे. मुख्य प्रशासकांनी कृपया प्रशासन पोर्टल (Admin Portal) मध्ये लॉगिन करावे.'
-        );
+      // Enforce Portal Role Separation:
+      const portal = (dto.portal || '').toLowerCase();
+      if (portal === 'employee') {
+        if (user.role === 'SUPER_ADMIN') {
+          throw new ForbiddenException(
+            'हे पोर्टल फक्त विभागीय कर्मचारी व अधिकाऱ्यांसाठी आहे. मुख्य प्रशासकांनी कृपया प्रशासन पोर्टल (Admin Portal) मध्ये लॉगिन करावे.'
+          );
+        }
+      } else if (portal === 'admin') {
+        if (user.role !== 'SUPER_ADMIN') {
+          throw new ForbiddenException(
+            'हे पोर्टल केवळ मुख्य प्रशासकांसाठी (Super Admin) आहे. कर्मचाऱ्यांनी कृपया विभागीय कर्मचारी पोर्टल (Employee Portal) मध्ये लॉगिन करावे.'
+          );
+        }
       }
-    } else if (portal === 'admin') {
-      if (user.role !== 'SUPER_ADMIN') {
-        throw new ForbiddenException(
-          'हे पोर्टल केवळ मुख्य प्रशासकांसाठी (Super Admin) आहे. कर्मचाऱ्यांनी कृपया विभागीय कर्मचारी पोर्टल (Employee Portal) मध्ये लॉगिन करावे.'
-        );
+
+      const result = await this.authService.login(user, ipAddress);
+
+      const cookieName = portal === 'employee' ? 'wmc_employee_token' : 'wmc_admin_token';
+
+      // Set secure cookie for cross-origin (Vercel <-> Render) and same-origin
+      response.cookie(cookieName, result.accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      return result;
+    } catch (err: any) {
+      if (
+        err instanceof UnauthorizedException ||
+        err instanceof ForbiddenException ||
+        err instanceof BadRequestException
+      ) {
+        throw err;
       }
+      this.logger.error(`Login unhandled error: ${err.message}`, err.stack);
+      throw new UnauthorizedException(err.message || 'लॉगिन अयशस्वी झाले. कृपया ईमेल आणि पासवर्ड तपासा.');
     }
-
-    const result = await this.authService.login(user, ipAddress);
-
-    const cookieName = portal === 'employee' ? 'wmc_employee_token' : 'wmc_admin_token';
-
-    // Set secure cookie for cross-origin (Vercel <-> Render) and same-origin
-    response.cookie(cookieName, result.accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    return result;
   }
 
   @Throttle({ default: { limit: 10, ttl: 60000 } })

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
@@ -6,6 +6,8 @@ import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -14,58 +16,89 @@ export class AuthService {
 
   async validateUser(rawEmail: string, pass: string, ipAddress?: string) {
     const email = (rawEmail || '').trim().toLowerCase();
-    const admin = await (this.prisma.admin as any).findFirst({
-      where: {
-        email: {
-          equals: email,
-          mode: 'insensitive',
+    let admin: any = null;
+
+    try {
+      admin = await (this.prisma.admin as any).findFirst({
+        where: {
+          email: {
+            equals: email,
+            mode: 'insensitive',
+          },
         },
-      },
-    });
+      });
+    } catch (findErr: any) {
+      this.logger.error(`Prisma findFirst admin query failed: ${findErr.message}. Executing schema auto-repair & raw query fallback...`);
+      try {
+        await this.prisma.ensureSchemaIntegrity();
+        const rows: any[] = await this.prisma.$queryRawUnsafe(
+          `SELECT * FROM "admins" WHERE LOWER("email") = LOWER($1) LIMIT 1;`,
+          email,
+        );
+        if (rows && rows.length > 0) {
+          admin = rows[0];
+          this.logger.log(`Successfully recovered admin user via resilient SQL fallback: ${admin.email}`);
+        }
+      } catch (sqlErr: any) {
+        this.logger.error(`Resilient SQL admin query failed: ${sqlErr.message}`, sqlErr.stack);
+        throw new UnauthorizedException('लॉगिन करताना डेटाबेस त्रुटी आली. कृपया पुन्हा प्रयत्न करा.');
+      }
+    }
+
     if (!admin) {
       // Record failed login attempt for security monitoring
-      await this.auditLogsService.logAction({
-        action: 'FAILED_LOGIN',
-        resource: 'AUTH',
-        adminEmail: email,
-        details: { reason: 'User not found' },
-        ipAddress,
-      });
+      try {
+        await this.auditLogsService.logAction({
+          action: 'FAILED_LOGIN',
+          resource: 'AUTH',
+          adminEmail: email,
+          details: { reason: 'User not found' },
+          ipAddress,
+        });
+      } catch { /* audit log failure must never block login */ }
       throw new UnauthorizedException('Invalid credentials');
     }
 
     if (admin.isActive === false) {
-      await this.auditLogsService.logAction({
-        adminId: admin.id,
-        adminEmail: admin.email,
-        adminName: admin.name,
-        action: 'BLOCKED_LOGIN',
-        resource: 'AUTH',
-        details: { reason: 'Account is deactivated' },
-        ipAddress,
-      });
+      try {
+        await this.auditLogsService.logAction({
+          adminId: admin.id,
+          adminEmail: admin.email,
+          adminName: admin.name,
+          action: 'BLOCKED_LOGIN',
+          resource: 'AUTH',
+          details: { reason: 'Account is deactivated' },
+          ipAddress,
+        });
+      } catch { /* audit log failure must never block login */ }
       throw new UnauthorizedException('हे खाते निष्क्रिय (Deactivated) केले आहे. कृपया मुख्य प्रशासकाशी संपर्क साधा.');
     }
 
     const isMatch = await bcrypt.compare(pass, admin.passwordHash);
     if (!isMatch) {
-      await this.auditLogsService.logAction({
-        adminId: admin.id,
-        adminEmail: admin.email,
-        adminName: admin.name,
-        action: 'FAILED_LOGIN',
-        resource: 'AUTH',
-        details: { reason: 'Incorrect password' },
-        ipAddress,
-      });
+      try {
+        await this.auditLogsService.logAction({
+          adminId: admin.id,
+          adminEmail: admin.email,
+          adminName: admin.name,
+          action: 'FAILED_LOGIN',
+          resource: 'AUTH',
+          details: { reason: 'Incorrect password' },
+          ipAddress,
+        });
+      } catch { /* audit log failure must never block login */ }
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Update last login
-    await (this.prisma.admin as any).update({
-      where: { id: admin.id },
-      data: { lastLoginAt: new Date() },
-    });
+    // Update last login safely without crashing login flow
+    try {
+      await (this.prisma.admin as any).update({
+        where: { id: admin.id },
+        data: { lastLoginAt: new Date() },
+      });
+    } catch (updateErr: any) {
+      this.logger.warn(`Could not update lastLoginAt: ${updateErr.message}`);
+    }
 
     return admin;
   }
@@ -92,22 +125,24 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
 
     // Record successful login audit log
-    await this.auditLogsService.logAction({
-      adminId: admin.id,
-      adminEmail: admin.email,
-      adminName: admin.name,
-      action: 'LOGIN',
-      resource: 'AUTH',
-      details: {
-        role,
-        department,
-        departments,
-        ward,
-        accessScope,
-        loginTime: new Date().toISOString(),
-      },
-      ipAddress,
-    });
+    try {
+      await this.auditLogsService.logAction({
+        adminId: admin.id,
+        adminEmail: admin.email,
+        adminName: admin.name,
+        action: 'LOGIN',
+        resource: 'AUTH',
+        details: {
+          role,
+          department,
+          departments,
+          ward,
+          accessScope,
+          loginTime: new Date().toISOString(),
+        },
+        ipAddress,
+      });
+    } catch { /* audit log failure must never block login */ }
 
     return {
       accessToken,
@@ -195,14 +230,16 @@ export class AuthService {
       data: { passwordHash },
     });
 
-    await this.auditLogsService.logAction({
-      adminId: admin.id,
-      adminEmail: admin.email,
-      adminName: admin.name,
-      action: 'CHANGE_PASSWORD',
-      resource: 'AUTH',
-      details: { timestamp: new Date().toISOString() },
-    });
+    try {
+      await this.auditLogsService.logAction({
+        adminId: admin.id,
+        adminEmail: admin.email,
+        adminName: admin.name,
+        action: 'CHANGE_PASSWORD',
+        resource: 'AUTH',
+        details: { timestamp: new Date().toISOString() },
+      });
+    } catch { /* non-critical */ }
 
     return { success: true, message: 'Password updated successfully' };
   }
