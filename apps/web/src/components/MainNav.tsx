@@ -62,6 +62,7 @@ const getMenuItems = (t: (mr: string, en: string) => string): MenuItem[] => [
       { label: t("जन्म दाखला", "Birth Certificate"), href: "/services/birth-certificate" },
       { label: t("मृत्यू दाखला", "Death Certificate"), href: "/services/death-certificate" },
       { label: t("बांधकाम परवानगी", "Construction Permit"), href: "/services/construction-permit" },
+      { label: t("ना हरकत प्रमाणपत्र (NOC)", "NOC Certificate"), href: "/services/noc" },
     ],
   },
   {

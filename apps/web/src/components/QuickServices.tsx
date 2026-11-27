@@ -70,6 +70,16 @@ export const QuickServices = () => {
       to: "/services/construction-permit",
     },
     {
+      icon: ShieldCheck,
+      label: t("ना हरकत प्रमाणपत्र (NOC)", "NOC Application"),
+      desc: t("व्यवसाय, वीज व इतर ना हरकत दाखला अर्ज", "Apply online for Municipal NOC certificate"),
+      category: "permits",
+      color: "text-indigo-500 group-hover:text-indigo-400",
+      accent: "from-indigo-500/10 via-blue-500/5 to-transparent hover:border-indigo-500/40",
+      badge: t("ना हरकत", "NOC"),
+      to: "/services/noc",
+    },
+    {
       icon: FileSearch,
       label: t("अर्ज स्थिती ट्रॅक करा", "Track Application"),
       desc: t("आपल्या अर्जाची सद्यस्थिती तपासा", "Check live progress of submitted requests"),

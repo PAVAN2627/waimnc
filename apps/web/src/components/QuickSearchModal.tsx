@@ -22,6 +22,7 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({ isOpen, onCl
     { label: t("जन्म दाखला", "Birth Certificate"), type: "service", href: "/services/birth-certificate", icon: Baby, keywords: "birth certificate janma dakhla" },
     { label: t("मृत्यू दाखला", "Death Certificate"), type: "service", href: "/services/death-certificate", icon: HeartPulse, keywords: "death certificate mrutyu dakhla" },
     { label: t("बांधकाम परवानगी", "Construction Permit"), type: "service", href: "/services/construction-permit", icon: HardHat, keywords: "building permission bandhkam" },
+    { label: t("ना हरकत प्रमाणपत्र (NOC)", "NOC Certificate / Application"), type: "service", href: "/services/noc", icon: FileText, keywords: "noc no objection certificate na harkat pramanpatra" },
     { label: t("अर्ज ट्रॅक करा", "Track Application Status"), type: "service", href: "/track", icon: FileText, keywords: "track application status arja" },
     { label: t("पर्यटन स्थळे", "Wai Tourism & Ghats"), type: "tourism", href: "/tourism", icon: Landmark, keywords: "tourism kashi vishweshwar ghat menavali vada" },
     { label: t("कायदे व नियम", "Municipal Laws & Rules"), type: "law", href: "/laws", icon: ShieldCheck, keywords: "act law rules kayde nagarparishad" },

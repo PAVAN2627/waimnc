@@ -16,7 +16,7 @@ import { createComplaint } from "@/lib/complaints";
 import { validateMobileInput, sanitizeMobileInput } from "@/lib/validation";
 
 interface ServiceData {
-  key: "property-tax" | "water-bill" | "birth-certificate" | "death-certificate" | "construction-permit";
+  key: "property-tax" | "water-bill" | "birth-certificate" | "death-certificate" | "construction-permit" | "noc";
   icon: LucideIcon;
   title: string; titleEn: string;
   desc: string; descEn: string;
@@ -144,6 +144,17 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
         `अर्जाचा उद्देश: ${formData.get("purpose")}`,
         `मालमत्तेचा प्रकार: ${formData.get("propertyType")}`,
         `मालमत्तेचा सविस्तर पत्ता: ${formData.get("address")}`,
+      ].join("\n");
+    } else if (data.key === "noc") {
+      name = (formData.get("applicantName") as string) || "";
+      mobile = (formData.get("mobile") as string) || "";
+      description = [
+        `[ना हरकत प्रमाणपत्र (NOC) अर्ज]`,
+        `अर्जदाराचे नाव: ${name}`,
+        `NOC प्रकार: ${formData.get("nocType")}`,
+        `मालमत्ता / सी.टी.एस. क्र.: ${formData.get("propertyNo") || "लागू नाही"}`,
+        `उद्देश / सविस्तर कारण: ${formData.get("purpose")}`,
+        `ठिकाणाचा पत्ता: ${formData.get("address")}`,
       ].join("\n");
     }
 
@@ -695,6 +706,71 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
                       </div>
                     )}
 
+                    {data.key === "noc" && (
+                      <div className="space-y-6">
+                        <div className="p-5 rounded-2xl bg-muted/40 border border-border/80 space-y-4">
+                          <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2 border-b border-border/60 pb-2">
+                            <span className="w-6 h-6 rounded-lg gov-gradient text-white flex items-center justify-center text-xs">१</span>
+                            {t("अर्जदार व NOC तपशील", "Applicant & NOC Details")}
+                          </h3>
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("अर्जदाराचे पूर्ण नाव *", "Applicant Full Name *")}</label>
+                              <Input required name="applicantName" placeholder={t("अर्जदाराचे पूर्ण नाव...", "Full name...")} className="rounded-xl" />
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold text-foreground">{t("मोबाइल नंबर *", "Mobile Number *")}</label>
+                                <span className="text-[10px] font-mono text-muted-foreground">{mobileValue.length}/10 {t("अंक", "digits")}</span>
+                              </div>
+                              <Input
+                                required
+                                name="mobile"
+                                type="tel"
+                                inputMode="numeric"
+                                maxLength={10}
+                                value={mobileValue}
+                                onChange={(e) => {
+                                  setMobileValue(sanitizeMobileInput(e.target.value));
+                                  if (error) setError(null);
+                                }}
+                                placeholder="98XXXXXXXX"
+                                className="rounded-xl font-mono"
+                              />
+                              <p className="text-[10px] text-muted-foreground">
+                                {t("१० अंकी खरा नंबर (६ ते ९ ने सुरू; ९९९९९९९९९९ सारखे बनावट नंबर चालणार नाहीत)", "10 real digits (starting 6-9; 9999999999 prohibited)")}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("NOC चा प्रकार *", "NOC Type *")}</label>
+                              <select required name="nocType" className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm">
+                                <option value="व्यवसाय / उद्योग NOC">{t("व्यवसाय / उद्योग NOC", "Business / Trade NOC")}</option>
+                                <option value="नवीन वीज जोडणी (MSEB) NOC">{t("नवीन वीज जोडणी (MSEB) NOC", "Electricity Connection (MSEB) NOC")}</option>
+                                <option value="बांधकाम / जागा वापर NOC">{t("बांधकाम / जागा वापर NOC", "Construction / Land Use NOC")}</option>
+                                <option value="पाणी / जलजोडणी NOC">{t("पाणी / जलजोडणी NOC", "Water Connection NOC")}</option>
+                                <option value="तात्पुरता मंडप / कार्यक्रम NOC">{t("तात्पुरता मंडप / कार्यक्रम NOC", "Temporary Pandal / Event NOC")}</option>
+                                <option value="इतर ना हरकत प्रमाणपत्र (Other NOC)">{t("इतर ना हरकत प्रमाणपत्र (Other NOC)", "Other Municipal NOC")}</option>
+                              </select>
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("मालमत्ता / सी.टी.एस. क्रमांक (असल्यास)", "Property / CTS No. (If any)")}</label>
+                              <Input name="propertyNo" placeholder={t("उदा. घर क्र. / CTS No.", "e.g. House No. / CTS No.")} className="rounded-xl" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("NOC मिळवण्याचा उद्देश / सविस्तर कारण *", "Purpose / Detailed Reason *")}</label>
+                            <Input required name="purpose" placeholder={t("उदा. नवीन दुकान परवान्यासाठी / वीज मीटरसाठी...", "e.g. For new shop / electricity meter...")} className="rounded-xl" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("ठिकाणाचा संपूर्ण पत्ता *", "Full Site / Residential Address *")}</label>
+                            <Textarea required name="address" rows={2} placeholder={t("प्रभाग, पेठ व वाई पत्ता...", "Ward, area & full address...")} className="rounded-xl" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {data.key === "property-tax" && (
                       <div className="space-y-6">
                         {/* Section 1: Owner & Property */}
@@ -926,6 +1002,22 @@ const serviceData: Record<string, ServiceData> = {
     steps: ["प्लॉट व बांधकाम माहिती भरा", "नकाशा व ७/१२ अपलोड करा", "अर्ज सबमिट करा", "जागा तपासणी व मंजुरी"],
     stepsEn: ["Fill plot & proposed specs", "Upload blueprint & land records", "Submit application", "Site inspection & sanction"],
   },
+  "noc": {
+    key: "noc",
+    icon: ShieldCheck,
+    title: "ना हरकत प्रमाणपत्र (NOC)",
+    titleEn: "No Objection Certificate (NOC)",
+    fee: "सेवा प्रकारानुसार (नियमांप्रमाणे)",
+    feeEn: "As per applicable service rules",
+    time: "७ ते १५ कामकाजी दिवस",
+    timeEn: "7 to 15 working days",
+    desc: "व्यवसाय परवाना, नवीन वीज जोडणी, बांधकाम वापर, मंडप किंवा इतर कारणांसाठी नगरपरिषदेचे अधिकृत ना हरकत प्रमाणपत्र (NOC) मिळवण्यासाठी ऑनलाइन अर्ज.",
+    descEn: "Apply online for Municipal No Objection Certificate (NOC) for business, electricity connection, property usage, temporary pandal, or other purposes.",
+    documents: ["अर्जदाराचे आधार कार्ड / ओळखपत्र", "मालमत्ता कर पावती / उतारा", "जागेचा ७/१२ किंवा भाडेकरार (असल्यास)", "अर्जाशी संबंधित इतर कागदपत्रे"],
+    documentsEn: ["Applicant Aadhaar / ID proof", "Latest Property Tax receipt", "7/12 extract or Rent agreement (if applicable)", "Supporting documents"],
+    steps: ["NOC प्रकार व अर्जदार तपशील भरा", "आवश्यक कागदपत्रे अपलोड करा", "अर्ज सादर करा", "पडताळणी व प्रमाणपत्र वितरण"],
+    stepsEn: ["Fill NOC type & applicant details", "Upload required documents", "Submit application", "Verification & NOC issuance"],
+  },
 };
 
 export const PropertyTax = () => <ServicePage data={serviceData["property-tax"]} />;
@@ -933,6 +1025,7 @@ export const WaterBill = () => <ServicePage data={serviceData["water-bill"]} />;
 export const BirthCertificate = () => <ServicePage data={serviceData["birth-certificate"]} />;
 export const DeathCertificate = () => <ServicePage data={serviceData["death-certificate"]} />;
 export const ConstructionPermit = () => <ServicePage data={serviceData["construction-permit"]} />;
+export const NocApplication = () => <ServicePage data={serviceData.noc} />;
 
 // Dedicated Complaint Redressal Page with department selection, complaint types, photo upload, and instant tracking ID
 export const Complaint = () => {
