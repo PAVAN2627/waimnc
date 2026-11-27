@@ -162,7 +162,7 @@ export default function WardSelector({
               {/* Compact Ward Grid */}
               <div>
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                  {t("प्रभाग १ ते ११ (निवडा)", "Wards 1 to 11 (Tap to select)")}
+                  {t("प्रभाग १ ते २३ (निवडा)", "Wards 1 to 23 (Tap to select)")}
                 </p>
                 {filteredWards.length === 0 ? (
                   <p className="text-center text-xs text-muted-foreground py-6">
@@ -185,7 +185,7 @@ export default function WardSelector({
                         >
                           <div className="min-w-0">
                             <span className="text-xs sm:text-sm font-extrabold block truncate">
-                              {w.index}. {lang === "mr" ? w.labelMr : w.labelEn}
+                              {lang === "mr" ? w.labelMr : w.labelEn}
                             </span>
                             <span
                               className={`text-[10px] block truncate ${

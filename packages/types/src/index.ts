@@ -18,30 +18,30 @@ export interface MunicipalWard {
   labelEn: string;
 }
 
+const TO_MR_DIGITS: Record<string, string> = {
+  "0": "०", "1": "१", "2": "२", "3": "३", "4": "४",
+  "5": "५", "6": "६", "7": "७", "8": "८", "9": "९",
+};
+
+const TO_EN_DIGITS: Record<string, string> = {
+  "०": "0", "१": "1", "२": "2", "३": "3", "४": "4",
+  "५": "5", "६": "6", "७": "7", "८": "8", "९": "9",
+};
+
+function toMarathiDigits(n: number): string {
+  return String(n).replace(/[0-9]/g, (d) => TO_MR_DIGITS[d] || d);
+}
+
 export const MUNICIPAL_WARDS: MunicipalWard[] = [
-  { value: "१(अ)", labelMr: "प्रभाग १(अ)", labelEn: "Ward 1(A)" },
-  { value: "१(ब)", labelMr: "प्रभाग १(ब)", labelEn: "Ward 1(B)" },
-  { value: "२(अ)", labelMr: "प्रभाग २(अ)", labelEn: "Ward 2(A)" },
-  { value: "२(ब)", labelMr: "प्रभाग २(ब)", labelEn: "Ward 2(B)" },
-  { value: "३(अ)", labelMr: "प्रभाग ३(अ)", labelEn: "Ward 3(A)" },
-  { value: "३(ब)", labelMr: "प्रभाग ३(ब)", labelEn: "Ward 3(B)" },
-  { value: "४(अ)", labelMr: "प्रभाग ४(अ)", labelEn: "Ward 4(A)" },
-  { value: "४(ब)", labelMr: "प्रभाग ४(ब)", labelEn: "Ward 4(B)" },
-  { value: "५(अ)", labelMr: "प्रभाग ५(अ)", labelEn: "Ward 5(A)" },
-  { value: "५(ब)", labelMr: "प्रभाग ५(ब)", labelEn: "Ward 5(B)" },
-  { value: "६(अ)", labelMr: "प्रभाग ६(अ)", labelEn: "Ward 6(A)" },
-  { value: "६(ब)", labelMr: "प्रभाग ६(ब)", labelEn: "Ward 6(B)" },
-  { value: "७(अ)", labelMr: "प्रभाग ७(अ)", labelEn: "Ward 7(A)" },
-  { value: "७(ब)", labelMr: "प्रभाग ७(ब)", labelEn: "Ward 7(B)" },
-  { value: "८(अ)", labelMr: "प्रभाग ८(अ)", labelEn: "Ward 8(A)" },
-  { value: "८(ब)", labelMr: "प्रभाग ८(ब)", labelEn: "Ward 8(B)" },
-  { value: "९(अ)", labelMr: "प्रभाग ९(अ)", labelEn: "Ward 9(A)" },
-  { value: "९(ब)", labelMr: "प्रभाग ९(ब)", labelEn: "Ward 9(B)" },
-  { value: "१०(अ)", labelMr: "प्रभाग १०(अ)", labelEn: "Ward 10(A)" },
-  { value: "१०(ब)", labelMr: "प्रभाग १०(ब)", labelEn: "Ward 10(B)" },
-  { value: "११(अ)", labelMr: "प्रभाग ११(अ)", labelEn: "Ward 11(A)" },
-  { value: "११(ब)", labelMr: "प्रभाग ११(ब)", labelEn: "Ward 11(B)" },
-  { value: "११(क)", labelMr: "प्रभाग ११(क)", labelEn: "Ward 11(C)" },
+  ...Array.from({ length: 23 }, (_, i) => {
+    const num = i + 1;
+    const mrNum = toMarathiDigits(num);
+    return {
+      value: String(num),
+      labelMr: `प्रभाग ${mrNum}`,
+      labelEn: `Ward ${num}`,
+    };
+  }),
   { value: "माहिती नाही", labelMr: "माहिती नाही / अज्ञात प्रभाग", labelEn: "Don't know / Unknown Ward" },
 ];
 
@@ -61,16 +61,21 @@ export function isUnknownWard(ward?: string | null): boolean {
   );
 }
 
+function normalizeWardToken(ward: string): string {
+  return ward
+    .trim()
+    .toLowerCase()
+    .replace(/[०-९]/g, (d) => TO_EN_DIGITS[d] || d)
+    .replace(/^(प्रभाग\s*क्र\.?\s*|प्रभाग\s*|वॉर्ड\s*क्र\.?\s*|वॉर्ड\s*|वार्ड\s*क्र\.?\s*|वार्ड\s*|ward\s*no\.?\s*|ward\s*)/i, "")
+    .trim();
+}
+
 export function matchesWard(itemWard?: string | null, targetWard?: string | null): boolean {
   if (!itemWard || !targetWard) return false;
-  const w1 = itemWard.trim();
-  const w2 = targetWard.trim();
-  if (w1 === w2) return true;
-  // case-insensitive exact
-  if (w1.toLowerCase() === w2.toLowerCase()) return true;
-  // substring match (e.g. "प्रभाग १(अ)" contains "१(अ)")
-  if (w1.includes(w2) || w2.includes(w1)) return true;
-  return false;
+  const w1 = normalizeWardToken(itemWard);
+  const w2 = normalizeWardToken(targetWard);
+  if (!w1 || !w2) return false;
+  return w1 === w2;
 }
 
 export const DEPARTMENT_LABEL_MAP: Array<{ mr: string; en: string; keywords: string[] }> = [
