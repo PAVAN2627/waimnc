@@ -142,7 +142,7 @@ export default function AdminStaff() {
     setMobile("");
     setPassword("");
     setSelectedDepts([MUNICIPAL_DEPARTMENTS[0].value]);
-    setSelectedApps(MUNICIPAL_APPLICATIONS.map((a) => a.value));
+    setSelectedApps([]);
     setSelectedWard("माहिती नाही");
     setRole("DEPT_OFFICER");
     setAccessScope("all");
@@ -188,7 +188,7 @@ export default function AdminStaff() {
     }
 
     setSelectedDepts(matchedDepts.length > 0 ? matchedDepts : [MUNICIPAL_DEPARTMENTS[0].value]);
-    setSelectedApps(hasExplicitApps ? explicitApps : (matchedApps.length > 0 ? matchedApps : MUNICIPAL_APPLICATIONS.map((a) => a.value)));
+    setSelectedApps(hasExplicitApps ? explicitApps : matchedApps);
     setRole((staff.role as any) || "DEPT_OFFICER");
     setAccessScope(parsedScope);
     setShowAddForm(true);
@@ -247,6 +247,14 @@ export default function AdminStaff() {
     if (!editingStaff && (!password || password.trim().length < 6)) {
       toast({
         title: t("पासवर्ड किमान ६ अक्षरांचा असणे आवश्यक आहे", "Password must be at least 6 characters"),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (role !== "SUPER_ADMIN" && !/^[6-9]\d{9}$/.test(mobile.trim())) {
+      toast({
+        title: t("कृपया १० अंकी वैध मोबाइल नंबर टाका", "Please enter a valid 10-digit Indian mobile number"),
         variant: "destructive",
       });
       return;
@@ -546,17 +554,22 @@ export default function AdminStaff() {
 
                 {/* Mobile Number (For Citizen WhatsApp Notifications) */}
                 <div>
-                  <label className="block text-xs font-bold mb-1.5 text-foreground">
-                    {t("मोबाइल क्र. (WhatsApp सूचनेसाठी)", "Mobile No. (For WhatsApp Updates)")}
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-foreground">
+                      {t("मोबाइल क्र. (WhatsApp साठी)", "Mobile No. (For WhatsApp)")}
+                      {role !== "SUPER_ADMIN" ? " *" : ""}
+                    </label>
+                    <span className="text-[10px] font-mono text-muted-foreground">{mobile.length}/10</span>
+                  </div>
                   <input
                     type="tel"
                     inputMode="numeric"
-                    maxLength={15}
+                    required={role !== "SUPER_ADMIN"}
+                    maxLength={10}
                     value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
+                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, "").slice(0, 10))}
                     placeholder="98XXXXXXXX"
-                    className="w-full border rounded-xl px-3.5 py-2.5 text-sm bg-background focus:ring-2 focus:ring-primary focus:outline-none"
+                    className="w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono bg-background focus:ring-2 focus:ring-primary focus:outline-none"
                   />
                 </div>
 
