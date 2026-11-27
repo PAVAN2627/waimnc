@@ -5,11 +5,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { createComplaint } from "@/lib/complaints";
 import { validateMobileInput, sanitizeMobileInput } from "@/lib/validation";
 import WardSelector from "./WardSelector";
+import DepartmentSelector from "./DepartmentSelector";
 
 const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
   const [submitting, setSubmitting] = useState(false);
   const [trackingId, setTrackingId] = useState<string | null>(null);
   const [mobileValue, setMobileValue] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedWard, setSelectedWard] = useState("माहिती नाही");
   const [selectedLandmark, setSelectedLandmark] = useState("");
   const [customLandmark, setCustomLandmark] = useState("");
@@ -89,7 +91,11 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
     const mobile = (data.get("mobile") as string) || mobileValue;
     const ward = (data.get("ward") as string) || selectedWard || "माहिती नाही";
     const type = data.get("type") as string;
-    const department = data.get("department") as string;
+    const department = (data.get("department") as string) || selectedDepartment;
+    if (!department) {
+      setError(t("कृपया संबंधित विभाग निवडा.", "Please select a department."));
+      return;
+    }
     const location = (data.get("location") as string) || "";
     const landmark = selectedLandmark === "इतर" ? customLandmark.trim() : selectedLandmark;
     const description = (data.get("description") as string) || "";
@@ -120,6 +126,7 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
       setTrackingId(record.trackingId || `WMC-${record.id.slice(0, 6).toUpperCase()}`);
       form.reset();
       setMobileValue("");
+      setSelectedDepartment("");
       setSelectedWard("माहिती नाही");
       setSelectedLandmark("");
       setCustomLandmark("");
@@ -277,18 +284,16 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">{t("विभाग *", "Department *")}</label>
-              <select
+              <DepartmentSelector
                 name="department"
-                required
-                className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
-              >
-                <option value="">{t("निवडा...", "Select...")}</option>
-                {departments.map((d) => (
-                  <option key={d.value} value={d.value}>
-                    {lang === "mr" ? d.labelMr : d.labelEn}
-                  </option>
-                ))}
-              </select>
+                value={selectedDepartment}
+                onChange={(val) => {
+                  setSelectedDepartment(val);
+                  if (error) setError(null);
+                }}
+                options={departments}
+                className="w-full"
+              />
             </div>
           </div>
 
