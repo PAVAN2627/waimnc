@@ -36,20 +36,26 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
 
   const departments = [
     { value: "पाणी पुरवठा विभाग", labelMr: "पाणी पुरवठा विभाग", labelEn: "Water Supply Dept." },
-    { value: "रस्ते व बांधकाम विभाग", labelMr: "रस्ते व बांधकाम विभाग", labelEn: "Roads & Civil Works (PWD)" },
     { value: "आरोग्य व स्वच्छता विभाग", labelMr: "आरोग्य व स्वच्छता विभाग", labelEn: "Health & Sanitation Dept." },
+    { value: "रस्ते व बांधकाम विभाग", labelMr: "रस्ते व बांधकाम विभाग", labelEn: "Roads & Civil Works (PWD)" },
     { value: "दिवाबत्ती व विद्युत विभाग", labelMr: "दिवाबत्ती व विद्युत विभाग", labelEn: "Street Lights & Electrical" },
-    { value: "सांडपाणी व गटार व्यवस्था", labelMr: "सांडपाणी व गटार व्यवस्था", labelEn: "Drainage & Sewerage" },
-    { value: "नगररचना व नियोजन विभाग", labelMr: "नगररचना व नियोजन विभाग", labelEn: "Town Planning Dept." },
+    { value: "सांडपाणी व गटार व्यवस्था", labelMr: "सांडपाणी व गटार व्यवस्था", labelEn: "Drainage & Sewerage Dept." },
     { value: "कर व मूल्यांकन विभाग", labelMr: "कर व मूल्यांकन विभाग", labelEn: "Property Tax & Assessment" },
+    { value: "नगररचना व नियोजन विभाग", labelMr: "नगररचना व नियोजन विभाग", labelEn: "Town Planning Dept." },
     { value: "संगणक व आयटी विभाग", labelMr: "संगणक व आयटी विभाग", labelEn: "Computer & IT Dept." },
-    { value: "अतिक्रमण निर्मूलन विभाग", labelMr: "अतिक्रमण निर्मूलन विभाग", labelEn: "Encroachment Dept." },
+    { value: "लोकसेवा हक्क व दाखले कक्ष", labelMr: "लोकसेवा हक्क व दाखले कक्ष", labelEn: "Public Service & Certificates" },
     { value: "जन्म-मृत्यू नोंदणी विभाग", labelMr: "जन्म-मृत्यू नोंदणी विभाग", labelEn: "Birth & Death Registration" },
-    { value: "अग्निशमन विभाग", labelMr: "अग्निशमन विभाग", labelEn: "Fire & Disaster Management" },
+    { value: "अतिक्रमण निर्मूलन विभाग", labelMr: "अतिक्रमण निर्मूलन विभाग", labelEn: "Encroachment Removal Dept." },
+    { value: "अग्निशमन विभाग", labelMr: "अग्निशमन विभाग", labelEn: "Fire & Emergency Services" },
     { value: "लेखा व वित्त विभाग", labelMr: "लेखा व वित्त विभाग", labelEn: "Accounts & Finance" },
+    { value: "अभिलेख कक्ष", labelMr: "अभिलेख कक्ष", labelEn: "Records Cell" },
     { value: "दिव्यांग कल्याण विभाग", labelMr: "दिव्यांग कल्याण विभाग", labelEn: "Disability Welfare Dept." },
     { value: "महिला व बालकल्याण विभाग", labelMr: "महिला व बालकल्याण विभाग", labelEn: "Women & Child Welfare Dept." },
-    { value: "सामान्य प्रशासन / इतर", labelMr: "सामान्य प्रशासन / इतर", labelEn: "General Administration / Other" },
+    { value: "प्रधानमंत्री आवास योजना (PMAY) विभाग", labelMr: "प्रधानमंत्री आवास योजना (PMAY) विभाग", labelEn: "PMAY Housing Scheme Dept." },
+    { value: "निवडणूक विभाग", labelMr: "निवडणूक विभाग", labelEn: "Election Dept." },
+    { value: "आस्थापना विभाग", labelMr: "आस्थापना विभाग", labelEn: "Establishment Dept." },
+    { value: "सभा विभाग", labelMr: "सभा विभाग", labelEn: "Council Meeting Dept." },
+    { value: "सामान्य प्रशासन विभाग", labelMr: "सामान्य प्रशासन विभाग", labelEn: "General Administration" },
   ];
 
   const complaintTypes = [

@@ -238,7 +238,10 @@ export default function AdminApplications() {
     { key: "permit", labelMr: "बांधकाम परवानगी", labelEn: "Building Permit", match: "बांधकाम", deptKeywords: ["बांधकाम", "नगररचना", "building", "town", "planning"] },
     { key: "water", labelMr: "पाणी नळ जोडणी", labelEn: "Water Tap Connection", match: "पाणी", deptKeywords: ["पाणी", "जल", "water"], excludeKeywords: ["सांडपाणी", "गटार"] },
     { key: "tax", labelMr: "मालमत्ता कर नोंद", labelEn: "Property Tax", match: "मालमत्ता", deptKeywords: ["कर", "मालमत्ता", "मूल्यांकन", "tax", "property"] },
-    { key: "noc", labelMr: "ना हरकत प्रमाणपत्र (NOC)", labelEn: "No Objection Certificate (NOC)", match: "noc", deptKeywords: ["ना हरकत", "noc"] },
+    { key: "noc", labelMr: "ना हरकत प्रमाणपत्र (NOC)", labelEn: "No Objection Certificate (NOC)", match: "noc", deptKeywords: ["ना हरकत", "noc"], excludeKeywords: ["fire", "अग्निशमन"] },
+    { key: "fire-noc", labelMr: "अग्निशमन परवाना (Fire NOC)", labelEn: "Fire NOC", match: "अग्निशमन", deptKeywords: ["अग्निशमन", "fire"] },
+    { key: "trade", labelMr: "व्यवसाय परवाना", labelEn: "Trade License", match: "व्यवसाय", deptKeywords: ["व्यवसाय", "trade"] },
+    { key: "road", labelMr: "रस्ता खोदाई परवानगी", labelEn: "Road Excavation Permit", match: "खोदाई", deptKeywords: ["खोदाई", "रस्ता खोदाई", "excavation"] },
     { key: "pmay", labelMr: "प्रधानमंत्री आवास (PMAY)", labelEn: "PMAY Housing Scheme", match: "pmay", deptKeywords: ["आवास", "pmay", "घरकुल", "महिला", "दिव्यांग"] },
     { key: "scheme", labelMr: "शासकीय योजना (इतर)", labelEn: "Other Schemes", match: "योजना", deptKeywords: ["योजना", "scheme", "कल्याण", "welfare", "महिला", "दिव्यांग"] },
   ];

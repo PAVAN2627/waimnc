@@ -16,7 +16,17 @@ import { createComplaint } from "@/lib/complaints";
 import { validateMobileInput, sanitizeMobileInput } from "@/lib/validation";
 
 interface ServiceData {
-  key: "property-tax" | "water-bill" | "birth-certificate" | "death-certificate" | "construction-permit" | "noc";
+  key:
+    | "property-tax"
+    | "water-bill"
+    | "birth-certificate"
+    | "death-certificate"
+    | "construction-permit"
+    | "noc"
+    | "marriage-certificate"
+    | "trade-license"
+    | "fire-noc"
+    | "road-excavation";
   icon: LucideIcon;
   title: string; titleEn: string;
   desc: string; descEn: string;
@@ -155,6 +165,49 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
         `मालमत्ता / सी.टी.एस. क्र.: ${formData.get("propertyNo") || "लागू नाही"}`,
         `उद्देश / सविस्तर कारण: ${formData.get("purpose")}`,
         `ठिकाणाचा पत्ता: ${formData.get("address")}`,
+      ].join("\n");
+    } else if (data.key === "marriage-certificate") {
+      name = (formData.get("husbandName") as string) || (formData.get("applicantName") as string) || "";
+      mobile = (formData.get("mobile") as string) || "";
+      description = [
+        `[विवाह नोंदणी दाखला अर्ज]`,
+        `वराचे नाव: ${formData.get("husbandName")}`,
+        `वधूचे नाव: ${formData.get("wifeName")}`,
+        `विवाह दिनांक: ${formData.get("marriageDate")}`,
+        `विवाह ठिकाण: ${formData.get("marriagePlace")}`,
+        `सध्याचा पत्ता: ${formData.get("address")}`,
+      ].join("\n");
+    } else if (data.key === "trade-license") {
+      name = (formData.get("applicantName") as string) || "";
+      mobile = (formData.get("mobile") as string) || "";
+      description = [
+        `[व्यवसाय परवाना अर्ज (Trade License)]`,
+        `अर्जदार / मालकाचे नाव: ${name}`,
+        `दुकान / व्यवसायाचे नाव: ${formData.get("businessName")}`,
+        `व्यवसायाचा प्रकार: ${formData.get("businessType")}`,
+        `मालमत्ता / गाळा क्र.: ${formData.get("propertyNo") || "लागू नाही"}`,
+        `व्यवसाय पत्ता: ${formData.get("address")}`,
+      ].join("\n");
+    } else if (data.key === "fire-noc") {
+      name = (formData.get("applicantName") as string) || "";
+      mobile = (formData.get("mobile") as string) || "";
+      description = [
+        `[अग्निशमन परवाना (Fire NOC) अर्ज]`,
+        `अर्जदार / संस्थेचे नाव: ${name}`,
+        `इमारत / प्रकल्पाचे नाव: ${formData.get("buildingName")}`,
+        `बांधकामाचा प्रकार: ${formData.get("buildingType")}`,
+        `एकूण क्षेत्रफळ / मजले: ${formData.get("areaDetails")}`,
+        `जागेचा पत्ता: ${formData.get("address")}`,
+      ].join("\n");
+    } else if (data.key === "road-excavation") {
+      name = (formData.get("applicantName") as string) || "";
+      mobile = (formData.get("mobile") as string) || "";
+      description = [
+        `[रस्ता खोदाई परवानगी अर्ज]`,
+        `अर्जदार / एजन्सीचे नाव: ${name}`,
+        `खोदाईचे कारण: ${formData.get("purpose")}`,
+        `अंदाजे लांबी / आकार: ${formData.get("lengthDetails")}`,
+        `रस्त्याचे नाव / ठिकाण: ${formData.get("address")}`,
       ].join("\n");
     }
 
@@ -771,6 +824,233 @@ const ServicePage = ({ data }: { data: ServiceData }) => {
                       </div>
                     )}
 
+                    {data.key === "marriage-certificate" && (
+                      <div className="space-y-6">
+                        <div className="p-5 rounded-2xl bg-muted/40 border border-border/80 space-y-4">
+                          <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2 border-b border-border/60 pb-2">
+                            <span className="w-6 h-6 rounded-lg gov-gradient text-white flex items-center justify-center text-xs">१</span>
+                            {t("विवाह व पती-पत्नी तपशील", "Marriage & Couple Details")}
+                          </h3>
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("वराचे पूर्ण नाव *", "Husband Full Name *")}</label>
+                              <Input required name="husbandName" placeholder={t("वराचे नाव...", "Husband full name...")} className="rounded-xl" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("वधूचे पूर्ण नाव *", "Wife Full Name *")}</label>
+                              <Input required name="wifeName" placeholder={t("वधूचे नाव...", "Wife full name...")} className="rounded-xl" />
+                            </div>
+                          </div>
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("विवाह दिनांक *", "Marriage Date *")}</label>
+                              <Input required name="marriageDate" type="date" className="rounded-xl" />
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold text-foreground">{t("मोबाइल नंबर *", "Mobile Number *")}</label>
+                                <span className="text-[10px] font-mono text-muted-foreground">{mobileValue.length}/10 {t("अंक", "digits")}</span>
+                              </div>
+                              <Input
+                                required
+                                name="mobile"
+                                type="tel"
+                                inputMode="numeric"
+                                maxLength={10}
+                                value={mobileValue}
+                                onChange={(e) => {
+                                  setMobileValue(sanitizeMobileInput(e.target.value));
+                                  if (error) setError(null);
+                                }}
+                                placeholder="98XXXXXXXX"
+                                className="rounded-xl font-mono"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("विवाह ठिकाण *", "Place of Marriage *")}</label>
+                            <Input required name="marriagePlace" placeholder={t("मंगल कार्यालय / पत्ता...", "Marriage hall / venue...")} className="rounded-xl" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("सध्याचा संपूर्ण पत्ता *", "Current Residential Address *")}</label>
+                            <Textarea required name="address" rows={2} placeholder={t("प्रभाग, पेठ व वाई पत्ता...", "Full residential address...")} className="rounded-xl" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {data.key === "trade-license" && (
+                      <div className="space-y-6">
+                        <div className="p-5 rounded-2xl bg-muted/40 border border-border/80 space-y-4">
+                          <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2 border-b border-border/60 pb-2">
+                            <span className="w-6 h-6 rounded-lg gov-gradient text-white flex items-center justify-center text-xs">१</span>
+                            {t("दुकान व व्यवसाय परवाना तपशील", "Shop & Trade License Details")}
+                          </h3>
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("अर्जदार / मालकाचे पूर्ण नाव *", "Owner Full Name *")}</label>
+                              <Input required name="applicantName" placeholder={t("मालकाचे पूर्ण नाव...", "Owner name...")} className="rounded-xl" />
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold text-foreground">{t("मोबाइल नंबर *", "Mobile Number *")}</label>
+                                <span className="text-[10px] font-mono text-muted-foreground">{mobileValue.length}/10 {t("अंक", "digits")}</span>
+                              </div>
+                              <Input
+                                required
+                                name="mobile"
+                                type="tel"
+                                inputMode="numeric"
+                                maxLength={10}
+                                value={mobileValue}
+                                onChange={(e) => {
+                                  setMobileValue(sanitizeMobileInput(e.target.value));
+                                  if (error) setError(null);
+                                }}
+                                placeholder="98XXXXXXXX"
+                                className="rounded-xl font-mono"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("दुकान / व्यवसायाचे नाव *", "Business / Shop Name *")}</label>
+                              <Input required name="businessName" placeholder={t("उदा. श्री गणेश ट्रेडर्स", "e.g. Ganesh Traders")} className="rounded-xl" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("व्यवसायाचा प्रकार *", "Nature of Business *")}</label>
+                              <Input required name="businessType" placeholder={t("उदा. किराणा / मेडिकल / हॉटेल...", "e.g. Grocery / Medical / Hotel...")} className="rounded-xl" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("मालमत्ता / गाळा क्रमांक (असल्यास)", "Property / Shop No. (If any)")}</label>
+                            <Input name="propertyNo" placeholder={t("उदा. गाळा क्र. ५, रविवार पेठ", "e.g. Shop No. 5")} className="rounded-xl" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("व्यवसायाचा संपूर्ण पत्ता *", "Full Business Address *")}</label>
+                            <Textarea required name="address" rows={2} placeholder={t("प्रभाग, रस्ता व वाई पत्ता...", "Full shop address...")} className="rounded-xl" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {data.key === "fire-noc" && (
+                      <div className="space-y-6">
+                        <div className="p-5 rounded-2xl bg-muted/40 border border-border/80 space-y-4">
+                          <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2 border-b border-border/60 pb-2">
+                            <span className="w-6 h-6 rounded-lg gov-gradient text-white flex items-center justify-center text-xs">१</span>
+                            {t("अग्निशमन परवाना (Fire NOC) तपशील", "Fire Safety NOC Details")}
+                          </h3>
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("अर्जदार / संस्थेचे नाव *", "Applicant / Org Name *")}</label>
+                              <Input required name="applicantName" placeholder={t("अर्जदार / संस्थेचे नाव...", "Applicant name...")} className="rounded-xl" />
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold text-foreground">{t("मोबाइल नंबर *", "Mobile Number *")}</label>
+                                <span className="text-[10px] font-mono text-muted-foreground">{mobileValue.length}/10 {t("अंक", "digits")}</span>
+                              </div>
+                              <Input
+                                required
+                                name="mobile"
+                                type="tel"
+                                inputMode="numeric"
+                                maxLength={10}
+                                value={mobileValue}
+                                onChange={(e) => {
+                                  setMobileValue(sanitizeMobileInput(e.target.value));
+                                  if (error) setError(null);
+                                }}
+                                placeholder="98XXXXXXXX"
+                                className="rounded-xl font-mono"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("इमारत / प्रकल्पाचे नाव *", "Building / Premises Name *")}</label>
+                              <Input required name="buildingName" placeholder={t("इमारत किंवा रुग्णालय / शाळा नाव...", "Building name...")} className="rounded-xl" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("बांधकाम प्रकार *", "Building Category *")}</label>
+                              <select required name="buildingType" className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm">
+                                <option value="व्यावसायिक इमारत (Commercial)">{t("व्यावसायिक इमारत (Commercial)", "Commercial Building")}</option>
+                                <option value="बहुमजली निवासी इमारत">{t("बहुमजली निवासी इमारत", "High-Rise Residential")}</option>
+                                <option value="शाळा / शैक्षणिक संस्था">{t("शाळा / शैक्षणिक संस्था", "School / Educational")}</option>
+                                <option value="रुग्णालय / क्लिनिक">{t("रुग्णालय / क्लिनिक", "Hospital / Clinic")}</option>
+                                <option value="हॉटेल / मंगल कार्यालय">{t("हॉटेल / मंगल कार्यालय", "Hotel / Marriage Hall")}</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("एकूण क्षेत्रफळ व मजले *", "Total Area & Floors *")}</label>
+                            <Input required name="areaDetails" placeholder={t("उदा. ३५०० चौ. फूट, तळ + ३ मजले", "e.g. 3500 Sq.Ft, G+3")} className="rounded-xl" />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("जागेचा संपूर्ण पत्ता *", "Full Site Address *")}</label>
+                            <Textarea required name="address" rows={2} placeholder={t("प्रभाग, पेठ व वाई पत्ता...", "Full address...")} className="rounded-xl" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {data.key === "road-excavation" && (
+                      <div className="space-y-6">
+                        <div className="p-5 rounded-2xl bg-muted/40 border border-border/80 space-y-4">
+                          <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2 border-b border-border/60 pb-2">
+                            <span className="w-6 h-6 rounded-lg gov-gradient text-white flex items-center justify-center text-xs">१</span>
+                            {t("रस्ता खोदाई परवानगी तपशील", "Road Excavation Permit Details")}
+                          </h3>
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("अर्जदार / एजन्सीचे पूर्ण नाव *", "Applicant / Agency Name *")}</label>
+                              <Input required name="applicantName" placeholder={t("नाव किंवा कंपनीचे नाव...", "Applicant or agency name...")} className="rounded-xl" />
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold text-foreground">{t("मोबाइल नंबर *", "Mobile Number *")}</label>
+                                <span className="text-[10px] font-mono text-muted-foreground">{mobileValue.length}/10 {t("अंक", "digits")}</span>
+                              </div>
+                              <Input
+                                required
+                                name="mobile"
+                                type="tel"
+                                inputMode="numeric"
+                                maxLength={10}
+                                value={mobileValue}
+                                onChange={(e) => {
+                                  setMobileValue(sanitizeMobileInput(e.target.value));
+                                  if (error) setError(null);
+                                }}
+                                placeholder="98XXXXXXXX"
+                                className="rounded-xl font-mono"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("खोदाईचे कारण *", "Excavation Purpose *")}</label>
+                              <select required name="purpose" className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm">
+                                <option value="पाणी नळ जोडणीसाठी">{t("पाणी नळ जोडणीसाठी", "For Water Tap Connection")}</option>
+                                <option value="ड्रेनेज / गटार जोडणीसाठी">{t("ड्रेनेज / गटार जोडणीसाठी", "For Drainage Connection")}</option>
+                                <option value="भूमिगत केबल / फायबर कामासाठी">{t("भूमिगत केबल / फायबर कामासाठी", "Underground Cable / Fiber")}</option>
+                                <option value="इतर दुरुस्ती काम">{t("इतर दुरुस्ती काम", "Other Utility Work")}</option>
+                              </select>
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-foreground">{t("अंदाजे लांबी / आकार *", "Approx. Length / Size *")}</label>
+                              <Input required name="lengthDetails" placeholder={t("उदा. ५ मीटर लांब, १ फूट रुंद", "e.g. 5 meters length")} className="rounded-xl" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground">{t("रस्त्याचे नाव व ठिकाणाचा पत्ता *", "Road Name & Exact Location *")}</label>
+                            <Textarea required name="address" rows={2} placeholder={t("प्रभाग, रस्ता व जवळची खूण...", "Road name, ward & landmark...")} className="rounded-xl" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {data.key === "property-tax" && (
                       <div className="space-y-6">
                         {/* Section 1: Owner & Property */}
@@ -1018,6 +1298,70 @@ const serviceData: Record<string, ServiceData> = {
     steps: ["NOC प्रकार व अर्जदार तपशील भरा", "आवश्यक कागदपत्रे अपलोड करा", "अर्ज सादर करा", "पडताळणी व प्रमाणपत्र वितरण"],
     stepsEn: ["Fill NOC type & applicant details", "Upload required documents", "Submit application", "Verification & NOC issuance"],
   },
+  "marriage-certificate": {
+    key: "marriage-certificate",
+    icon: FileText,
+    title: "विवाह नोंदणी दाखला",
+    titleEn: "Marriage Registration Certificate",
+    fee: "नियमानुसार नोंदणी शुल्क",
+    feeEn: "As per govt. registration fee",
+    time: "७ ते १५ कामकाजी दिवस",
+    timeEn: "7 to 15 working days",
+    desc: "विवाह नोंदणी प्रमाणपत्रासाठी ऑनलाइन अर्ज करा. आवश्यक कागदपत्रे व साक्षीदार तपशिलाच्या पडताळणीनंतर अधिकृत दाखला दिला जाईल.",
+    descEn: "Apply online for official Marriage Registration Certificate upon document and witness verification.",
+    documents: ["वर व वधूचे आधार कार्ड / वयाचा दाखला", "विवाह निमंत्रण पत्रिका व छायाचित्र", "रहिवासी पुरावा", "दोन साक्षीदारांची ओळखपत्रे"],
+    documentsEn: ["Aadhaar & age proof of bride and groom", "Wedding card & marriage photo", "Address proof", "ID proof of 2 witnesses"],
+    steps: ["वर-वधू व विवाह तपशील भरा", "कागदपत्रे अपलोड करा", "अर्ज सादर करा", "नोंदणी व प्रमाणपत्र प्राप्त करा"],
+    stepsEn: ["Fill couple & marriage details", "Upload documents", "Submit application", "Verification & certificate"],
+  },
+  "trade-license": {
+    key: "trade-license",
+    icon: Home,
+    title: "व्यवसाय परवाना अर्ज (Trade License)",
+    titleEn: "Shop & Trade License",
+    fee: "व्यवसाय प्रकार व क्षेत्रफळानुसार",
+    feeEn: "As per trade category & area",
+    time: "७ ते १५ कामकाजी दिवस",
+    timeEn: "7 to 15 working days",
+    desc: "वाई नगरपरिषद क्षेत्रातील नवीन दुकान, उद्योग किंवा व्यावसायिक आस्थापनेसाठी अधिकृत व्यवसाय परवाना (Trade License) ऑनलाइन अर्ज.",
+    descEn: "Apply online for Municipal Trade License for shops, commercial establishments, and local businesses.",
+    documents: ["अर्जदाराचे आधार कार्ड व पॅन कार्ड", "दुकान मालकीचा उतारा किंवा भाडेकरार", "मालमत्ता कर पावती", "दुकानाचा बाहेरील फोटो"],
+    documentsEn: ["Applicant Aadhaar & PAN", "Shop ownership proof / Rent agreement", "Property tax receipt", "Shop exterior photo"],
+    steps: ["व्यवसाय व मालक माहिती भरा", "कागदपत्रे अपलोड करा", "अर्ज सादर करा", "तपासणी व परवाना वितरण"],
+    stepsEn: ["Fill business & owner details", "Upload documents", "Submit application", "Inspection & license issuance"],
+  },
+  "fire-noc": {
+    key: "fire-noc",
+    icon: ShieldCheck,
+    title: "अग्निशमन परवाना (Fire NOC)",
+    titleEn: "Fire Safety No Objection Certificate",
+    fee: "इमारत क्षेत्रफळ व नियमांनुसार",
+    feeEn: "As per building area norms",
+    time: "१५ कामकाजी दिवस",
+    timeEn: "15 working days",
+    desc: "व्यावसायिक संकुल, बहुमजली इमारती, रुग्णालये, शाळा व मंगल कार्यालयांसाठी अग्निशमन विभागाचे ना हरकत प्रमाणपत्र (Fire NOC) अर्ज.",
+    descEn: "Apply online for Municipal Fire Department NOC for commercial buildings, hospitals, schools, and high-rises.",
+    documents: ["इमारत मंजूर नकाशा व ७/१२ उतारा", "अग्निशमन यंत्रणा तपशील (Fire Plan)", "मालकी हक्क दस्तऐवज", "अर्जदार ओळखपत्र"],
+    documentsEn: ["Sanctioned building plan & 7/12", "Fire safety equipment plan", "Ownership documents", "Applicant ID proof"],
+    steps: ["इमारत व क्षेत्रफळ माहिती भरा", "दस्तऐवज अपलोड करा", "अर्ज सादर करा", "अग्निशमन तपासणी व NOC"],
+    stepsEn: ["Fill building & area details", "Upload documents", "Submit application", "Fire inspection & NOC"],
+  },
+  "road-excavation": {
+    key: "road-excavation",
+    icon: HardHat,
+    title: "रस्ता खोदाई परवानगी अर्ज",
+    titleEn: "Road Excavation Permission",
+    fee: "रस्ता प्रकार व लांबीनुसार ठेव/शुल्क",
+    feeEn: "Deposit & fee as per road length",
+    time: "७ कामकाजी दिवस",
+    timeEn: "7 working days",
+    desc: "पाणी नळ जोडणी, गटार जोडणी किंवा भूमिगत केबल कामासाठी नगरपरिषद रस्त्यावर खोदाई करण्याची अधिकृत पूर्वपरवानगी अर्ज.",
+    descEn: "Apply online for official permission to excavate municipal roads for water, drainage, or underground cable lines.",
+    documents: ["अर्जदाराचे ओळखपत्र", "नळ/गटार किंवा सेवा जोडणी मंजुरी प्रत", "खोदाई ठिकाणाचा नकाशा/फोटो"],
+    documentsEn: ["Applicant ID proof", "Water/drainage connection approval copy", "Site sketch or photo"],
+    steps: ["खोदाईचे कारण व लांबी भरा", "कागदपत्रे अपलोड करा", "अर्ज सादर करा", "बांधकाम विभाग मंजुरी"],
+    stepsEn: ["Fill excavation purpose & length", "Upload documents", "Submit application", "PWD approval"],
+  },
 };
 
 export const PropertyTax = () => <ServicePage data={serviceData["property-tax"]} />;
@@ -1026,6 +1370,10 @@ export const BirthCertificate = () => <ServicePage data={serviceData["birth-cert
 export const DeathCertificate = () => <ServicePage data={serviceData["death-certificate"]} />;
 export const ConstructionPermit = () => <ServicePage data={serviceData["construction-permit"]} />;
 export const NocApplication = () => <ServicePage data={serviceData.noc} />;
+export const MarriageCertificate = () => <ServicePage data={serviceData["marriage-certificate"]} />;
+export const TradeLicense = () => <ServicePage data={serviceData["trade-license"]} />;
+export const FireNoc = () => <ServicePage data={serviceData["fire-noc"]} />;
+export const RoadExcavation = () => <ServicePage data={serviceData["road-excavation"]} />;
 
 // Dedicated Complaint Redressal Page with department selection, complaint types, photo upload, and instant tracking ID
 export const Complaint = () => {

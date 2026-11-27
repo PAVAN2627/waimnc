@@ -61,8 +61,12 @@ const getMenuItems = (t: (mr: string, en: string) => string): MenuItem[] => [
       { label: t("तक्रार नोंदवा", "Register Complaint"), href: "/services/complaint" },
       { label: t("जन्म दाखला", "Birth Certificate"), href: "/services/birth-certificate" },
       { label: t("मृत्यू दाखला", "Death Certificate"), href: "/services/death-certificate" },
+      { label: t("विवाह नोंदणी दाखला", "Marriage Certificate"), href: "/services/marriage-certificate" },
       { label: t("बांधकाम परवानगी", "Construction Permit"), href: "/services/construction-permit" },
+      { label: t("व्यवसाय परवाना अर्ज", "Trade License"), href: "/services/trade-license" },
       { label: t("ना हरकत प्रमाणपत्र (NOC)", "NOC Certificate"), href: "/services/noc" },
+      { label: t("अग्निशमन परवाना (Fire NOC)", "Fire NOC"), href: "/services/fire-noc" },
+      { label: t("रस्ता खोदाई परवानगी", "Road Excavation Permit"), href: "/services/road-excavation" },
     ],
   },
   {

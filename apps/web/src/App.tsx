@@ -12,7 +12,7 @@ import PublicLayout from "@/components/PublicLayout";
 import Index from "./pages/Index";
 import { Introduction, History, Structure, Mayor, ChiefOfficer, Corporators } from "./pages/about/AboutPages";
 import { GeneralAdmin, Health, Water, Civil, Planning, Tax, Electrical, Computer, Fire, BirthDeath, Accounts, Records, Disabled, WomenChild, Election, Establishment, SabhaDept, PmayDept } from "./pages/departments/DepartmentPages";
-import { PropertyTax, WaterBill, Complaint, BirthCertificate, DeathCertificate, ConstructionPermit, NocApplication } from "./pages/services/ServicePages";
+import { PropertyTax, WaterBill, Complaint, BirthCertificate, DeathCertificate, ConstructionPermit, NocApplication, MarriageCertificate, TradeLicense, FireNoc, RoadExcavation } from "./pages/services/ServicePages";
 import {
   CentralSchemes,
   StateSchemes,
@@ -94,6 +94,10 @@ const App = () => (
                 <Route path="/services/death-certificate" element={<DeathCertificate />} />
                 <Route path="/services/construction-permit" element={<ConstructionPermit />} />
                 <Route path="/services/noc" element={<NocApplication />} />
+                <Route path="/services/marriage-certificate" element={<MarriageCertificate />} />
+                <Route path="/services/trade-license" element={<TradeLicense />} />
+                <Route path="/services/fire-noc" element={<FireNoc />} />
+                <Route path="/services/road-excavation" element={<RoadExcavation />} />
 
                 {/* Schemes */}
                 <Route path="/schemes/central" element={<CentralSchemes />} />
