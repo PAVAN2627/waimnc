@@ -106,6 +106,7 @@ export default function AdminStaff() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [selectedDepts, setSelectedDepts] = useState<string[]>([MUNICIPAL_DEPARTMENTS[0].value]);
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
@@ -138,6 +139,7 @@ export default function AdminStaff() {
     setEditingStaff(null);
     setName("");
     setEmail("");
+    setMobile("");
     setPassword("");
     setSelectedDepts([MUNICIPAL_DEPARTMENTS[0].value]);
     setSelectedApps(MUNICIPAL_APPLICATIONS.map((a) => a.value));
@@ -151,6 +153,7 @@ export default function AdminStaff() {
     setEditingStaff(staff);
     setName(staff.name);
     setEmail(staff.email);
+    setMobile(staff.mobile || "");
     setPassword(""); // Leave blank if keeping same
     setSelectedWard(staff.ward || "माहिती नाही");
 
@@ -283,6 +286,7 @@ export default function AdminStaff() {
         // UPDATE existing staff
         const updatePayload: any = {
           name: name.trim(),
+          mobile: mobile.trim() || null,
           department: joinedDept,
           departments: effectiveDepts,
           role,
@@ -309,6 +313,7 @@ export default function AdminStaff() {
           name: name.trim(),
           email: email.trim().toLowerCase(),
           password: password.trim(),
+          mobile: mobile.trim() || null,
           department: joinedDept,
           departments: effectiveDepts,
           role,
@@ -501,8 +506,8 @@ export default function AdminStaff() {
 
           <CardContent className="p-6 md:p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Row 1: Name, Email, Password */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* Row 1: Name, Email, Mobile, Password */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 {/* Officer Name */}
                 <div>
                   <label className="block text-xs font-bold mb-1.5 text-foreground">
@@ -537,6 +542,22 @@ export default function AdminStaff() {
                       {t("ईमेल आयडी बदलता येत नाही.", "Email cannot be changed.")}
                     </span>
                   )}
+                </div>
+
+                {/* Mobile Number (For Citizen WhatsApp Notifications) */}
+                <div>
+                  <label className="block text-xs font-bold mb-1.5 text-foreground">
+                    {t("मोबाइल क्र. (WhatsApp सूचनेसाठी)", "Mobile No. (For WhatsApp Updates)")}
+                  </label>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={15}
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value)}
+                    placeholder="98XXXXXXXX"
+                    className="w-full border rounded-xl px-3.5 py-2.5 text-sm bg-background focus:ring-2 focus:ring-primary focus:outline-none"
+                  />
                 </div>
 
                 {/* Password */}
@@ -1006,6 +1027,12 @@ export default function AdminStaff() {
                           <Mail className="w-3.5 h-3.5 text-primary" />
                           {staff.email}
                         </span>
+
+                        {staff.mobile && (
+                          <span className="inline-flex items-center gap-1 font-mono font-semibold text-foreground">
+                            📱 {staff.mobile}
+                          </span>
+                        )}
 
                         <span className="inline-flex items-center gap-1 font-medium">
                           <Layers className="w-3.5 h-3.5 text-primary" />

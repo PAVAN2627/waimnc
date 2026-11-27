@@ -21,6 +21,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       await this.$executeRawUnsafe(`ALTER TABLE "admins" ADD COLUMN IF NOT EXISTS "department" TEXT;`).catch(() => {});
       await this.$executeRawUnsafe(`ALTER TABLE "admins" ADD COLUMN IF NOT EXISTS "departments" TEXT[] DEFAULT ARRAY[]::TEXT[];`).catch(() => {});
       await this.$executeRawUnsafe(`ALTER TABLE "admins" ADD COLUMN IF NOT EXISTS "ward" TEXT;`).catch(() => {});
+      await this.$executeRawUnsafe(`ALTER TABLE "admins" ADD COLUMN IF NOT EXISTS "mobile" TEXT;`).catch(() => {});
       await this.$executeRawUnsafe(`ALTER TABLE "admins" ADD COLUMN IF NOT EXISTS "accessScope" TEXT DEFAULT 'all';`).catch(() => {});
       await this.$executeRawUnsafe(`ALTER TABLE "admins" ADD COLUMN IF NOT EXISTS "isActive" BOOLEAN DEFAULT true;`).catch(() => {});
       await this.$executeRawUnsafe(`ALTER TABLE "admins" ADD COLUMN IF NOT EXISTS "lastLoginAt" TIMESTAMP(3);`).catch(() => {});

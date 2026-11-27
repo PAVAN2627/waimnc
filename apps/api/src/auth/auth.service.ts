@@ -116,6 +116,7 @@ export class AuthService {
       sub: admin.id,
       email: admin.email,
       name: admin.name,
+      mobile: admin.mobile || null,
       role,
       department,
       departments,
@@ -150,6 +151,7 @@ export class AuthService {
         id: admin.id,
         email: admin.email,
         name: admin.name,
+        mobile: admin.mobile || null,
         role,
         department,
         departments,
@@ -253,6 +255,7 @@ export class AuthService {
         id: true,
         name: true,
         email: true,
+        mobile: true,
         role: true,
         department: true,
         departments: true,
@@ -272,6 +275,7 @@ export class AuthService {
       name: string;
       email: string;
       password: string;
+      mobile?: string;
       department?: string;
       departments?: string[];
       role?: string;
@@ -302,6 +306,7 @@ export class AuthService {
       data: {
         name: data.name.trim(),
         email: data.email.trim().toLowerCase(),
+        mobile: data.mobile ? data.mobile.trim() : null,
         passwordHash,
         department: joinedDept,
         departments: deptList,
@@ -314,6 +319,7 @@ export class AuthService {
         id: true,
         name: true,
         email: true,
+        mobile: true,
         role: true,
         department: true,
         departments: true,
@@ -353,6 +359,7 @@ export class AuthService {
     id: string,
     data: {
       name?: string;
+      mobile?: string;
       department?: string;
       departments?: string[];
       role?: string;
@@ -369,6 +376,7 @@ export class AuthService {
 
     const updateData: any = {};
     if (data.name !== undefined) updateData.name = data.name.trim();
+    if (data.mobile !== undefined) updateData.mobile = data.mobile ? data.mobile.trim() : null;
 
     if (data.departments !== undefined && Array.isArray(data.departments)) {
       updateData.departments = data.departments.filter(Boolean).map((d) => d.trim());
@@ -395,6 +403,7 @@ export class AuthService {
         id: true,
         name: true,
         email: true,
+        mobile: true,
         role: true,
         department: true,
         departments: true,

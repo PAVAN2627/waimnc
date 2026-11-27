@@ -20,6 +20,7 @@ export interface CreateStaffPayload {
   name: string;
   email: string;
   password: string;
+  mobile?: string | null;
   department?: string;
   departments?: string[];
   ward?: string | null;
@@ -29,6 +30,7 @@ export interface CreateStaffPayload {
 
 export interface UpdateStaffPayload {
   name?: string;
+  mobile?: string | null;
   department?: string;
   departments?: string[];
   ward?: string | null;

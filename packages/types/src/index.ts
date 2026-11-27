@@ -2,6 +2,7 @@ export interface AdminUser {
   id: string;
   name: string;
   email: string;
+  mobile?: string | null;
   role?: string;
   department?: string | null;
   departments?: string[];

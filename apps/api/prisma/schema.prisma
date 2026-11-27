@@ -15,6 +15,7 @@ model Admin {
   id           String    @id @default(uuid())
   email        String    @unique
   name         String    @default("System Administrator")
+  mobile       String?   // Officer mobile number (used in citizen WhatsApp notifications)
   passwordHash String
   role         String    @default("SUPER_ADMIN") // "SUPER_ADMIN" | "DEPT_OFFICER" | "NAGARSEVAK"
   department   String?   // e.g. "पाणी पुरवठा विभाग", "आरोग्य व स्वच्छता विभाग", etc.

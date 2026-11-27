@@ -9,6 +9,7 @@ export interface AdminEntity {
   id: string;
   email: string;
   name: string;
+  mobile?: string | null;
   passwordHash: string;
   role?: string;
   department?: string | null;
@@ -64,6 +65,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       id: admin.id,
       email: admin.email,
       name: admin.name,
+      mobile: admin.mobile || null,
       role: admin.role || 'SUPER_ADMIN',
       department: admin.department || (adminDepts[0] || null),
       departments: adminDepts,
