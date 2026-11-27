@@ -340,27 +340,16 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
             </div>
           </div>
 
-          {/* Row 4: Exact Location */}
+          {/* Description & Location */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              {t("समस्येचे अचूक ठिकाण / रस्ता *", "Exact Problem Location / Street *")}
+              {t("तक्रारीचा सविस्तर तपशील, ठिकाण टाकावे *", "Detailed Complaint Description & Location *")}
             </label>
-            <input
-              name="location"
-              type="text"
-              required
-              placeholder={t("उदा. मारुती मंदिरासमोर, गणपती घाटाजवळ", "e.g. opposite Maruti Temple, near Ganpati Ghat")}
-              className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none"
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium mb-1">{t("तक्रारीचे वर्णन *", "Complaint Description *")}</label>
             <textarea
               name="description"
               required
               rows={4}
+              placeholder={t("तक्रारीचा सविस्तर तपशील व नेमके ठिकाण / रस्ता नमूद करा...", "Enter detailed complaint description and exact location / street...")}
               className="w-full border rounded-lg px-3 py-2 text-sm bg-background focus:ring-2 focus:ring-ring focus:outline-none resize-none"
             />
           </div>
