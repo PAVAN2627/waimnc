@@ -478,16 +478,6 @@ export default function AdminApplications() {
                       <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold border ${statusColors[c.status]}`}>
                         {statusLabel[c.status]}
                       </span>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7 text-muted-foreground hover:text-destructive rounded-lg"
-                        title={t("अर्ज हटवा", "Delete")}
-                        disabled={updating === c.id}
-                        onClick={(e) => handleDelete(e, c.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
                     </div>
                   </div>
 
@@ -709,16 +699,6 @@ export default function AdminApplications() {
                 >
                   <CheckCircle className="h-3.5 w-3.5 mr-1" />
                   {t("मंजूर / पूर्ण", "Approve / Resolve")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  className="ml-auto rounded-xl"
-                  disabled={updating === selected.id}
-                  onClick={(e) => handleDelete(e, selected.id)}
-                >
-                  <Trash2 className="h-3.5 w-3.5 mr-1" />
-                  {t("हटवा", "Delete")}
                 </Button>
               </div>
             </CardContent>

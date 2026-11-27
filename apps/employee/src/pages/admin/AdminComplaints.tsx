@@ -844,18 +844,6 @@ const AdminComplaints = () => {
             <CheckCircle className="h-3.5 w-3.5 mr-1" />
             {t("निराकरण", "Resolved")}
           </Button>
-          {user?.role === "SUPER_ADMIN" && (
-            <Button
-              size="sm"
-              variant="destructive"
-              className="ml-auto"
-              disabled={updating === c.id}
-              onClick={(e) => handleDelete(e, c.id)}
-            >
-              <Trash2 className="h-3.5 w-3.5 mr-1" />
-              {t("तक्रार हटवा", "Delete Complaint")}
-            </Button>
-          )}
         </div>
       ) : (
         <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-5 sm:-mb-5 p-3 px-4 sm:px-5 bg-card/95 backdrop-blur-md border-t border-border flex gap-2 flex-wrap items-center mt-auto shadow-lg z-10">
@@ -1160,16 +1148,6 @@ const AdminComplaints = () => {
                     >
                       {statusLabel[c.status]}
                     </span>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
-                      title={t("तक्रार हटवा", "Delete Complaint")}
-                      disabled={updating === c.id}
-                      onClick={(e) => handleDelete(e, c.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
                   </div>
                 </div>
                 <p className="font-medium text-sm line-clamp-2">{c.description}</p>
