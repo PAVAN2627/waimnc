@@ -212,12 +212,13 @@ export class GrievancesService {
   ) {}
 
   /**
-   * Sends a WhatsApp notification via Fast2SMS when a complaint moves to "in-progress" (कार्यवाही सुरू).
-   * Template variables: {{1}}=Citizen Name, {{2}}=Tracking ID, {{3}}=Officer Name, {{4}}=Officer Mobile
+   * Shared Fast2SMS WhatsApp sender. Validates API key and 10-digit Indian mobile.
    */
-  private async sendInProgressWhatsAppNotification(
-    complaint: { id: string; trackingId?: string | null; name: string; mobile: string; department?: string | null },
-    currentUser?: any,
+  private async sendFast2SmsWhatsApp(
+    rawMobile: string,
+    messageId: string,
+    variables: string[],
+    trackingId: string,
   ): Promise<void> {
     try {
       const apiKey = (this.configService.get<string>('FAST2SMS_API_KEY') || process.env.FAST2SMS_API_KEY || '').replace(/^["']|["']$/g, '').trim();
@@ -226,55 +227,85 @@ export class GrievancesService {
         return;
       }
 
-      const rawDigits = String(complaint.mobile || '').replace(/\D/g, '');
+      const rawDigits = String(rawMobile || '').replace(/\D/g, '');
       const phone10 = rawDigits.length >= 10 ? rawDigits.slice(-10) : '';
       if (!/^[6-9]\d{9}$/.test(phone10)) {
-        this.logger.warn(`Skipping WhatsApp notification: invalid citizen mobile "${complaint.mobile}"`);
+        this.logger.warn(`Skipping WhatsApp notification: invalid citizen mobile "${rawMobile}"`);
         return;
       }
 
-      const messageId = (this.configService.get<string>('FAST2SMS_WHATSAPP_MESSAGE_ID') || process.env.FAST2SMS_WHATSAPP_MESSAGE_ID || '48046').trim();
-      const trackingId = complaint.trackingId || `WMC-${complaint.id.slice(0, 8).toUpperCase()}`;
-      const citizenName = (complaint.name || 'नागरिक').replace(/\|/g, ' ').trim();
-
-      let officerName = (currentUser?.name || '').trim();
-      let officerMobile = (currentUser?.mobile || '').trim();
-
-      if (!officerMobile && currentUser?.id) {
-        try {
-          const officerRecord = await (this.prisma.admin as any).findUnique({
-            where: { id: currentUser.id },
-            select: { name: true, mobile: true },
-          });
-          if (officerRecord) {
-            officerName = officerName || officerRecord.name || '';
-            officerMobile = officerRecord.mobile || '';
-          }
-        } catch {
-          // ignore lookup failure
-        }
-      }
-
-      const safeOfficerName = (officerName || 'विभागीय अधिकारी').replace(/\|/g, ' ').trim();
-      const safeOfficerMobile = (officerMobile || '02167-220022').replace(/\|/g, ' ').trim();
-
+      const safeVars = variables.map((v) => String(v || '').replace(/\|/g, ' ').trim()).join('|');
       const qs = new URLSearchParams({
         authorization: apiKey,
         message_id: messageId,
         numbers: phone10,
-        variables_values: `${citizenName}|${trackingId}|${safeOfficerName}|${safeOfficerMobile}`,
+        variables_values: safeVars,
       });
 
       const response = await fetch(`https://www.fast2sms.com/dev/whatsapp?${qs.toString()}`);
       const bodyText = await response.text();
       if (!response.ok) {
-        this.logger.warn(`Fast2SMS WhatsApp API returned ${response.status}: ${bodyText}`);
+        this.logger.warn(`Fast2SMS WhatsApp API (msg ${messageId}) returned ${response.status}: ${bodyText}`);
       } else {
-        this.logger.log(`Fast2SMS WhatsApp notification sent for ${trackingId} to ${phone10}: ${bodyText}`);
+        this.logger.log(`Fast2SMS WhatsApp notification (msg ${messageId}) sent for ${trackingId} to ${phone10}: ${bodyText}`);
       }
     } catch (err: any) {
-      this.logger.warn(`Failed to send Fast2SMS WhatsApp notification: ${err?.message || err}`);
+      this.logger.warn(`Failed to send Fast2SMS WhatsApp notification (msg ${messageId}): ${err?.message || err}`);
     }
+  }
+
+  /**
+   * Sends a WhatsApp confirmation via Fast2SMS when a complaint/application is submitted.
+   * Template variables (48292): {{1}}=Citizen Name, {{2}}=Tracking ID
+   */
+  private async sendSubmissionWhatsAppNotification(
+    complaint: { id: string; trackingId?: string | null; name: string; mobile: string },
+  ): Promise<void> {
+    const messageId = (this.configService.get<string>('FAST2SMS_WHATSAPP_SUBMIT_MESSAGE_ID') || process.env.FAST2SMS_WHATSAPP_SUBMIT_MESSAGE_ID || '48292').trim();
+    const trackingId = complaint.trackingId || `WMC-${complaint.id.slice(0, 8).toUpperCase()}`;
+    const citizenName = complaint.name || 'नागरिक';
+    await this.sendFast2SmsWhatsApp(complaint.mobile, messageId, [citizenName, trackingId], trackingId);
+  }
+
+  /**
+   * Sends a WhatsApp notification via Fast2SMS when a complaint moves to "in-progress" (कार्यवाही सुरू).
+   * Template variables (48046): {{1}}=Citizen Name, {{2}}=Tracking ID, {{3}}=Officer Name, {{4}}=Officer Mobile
+   */
+  private async sendInProgressWhatsAppNotification(
+    complaint: { id: string; trackingId?: string | null; name: string; mobile: string; department?: string | null },
+    currentUser?: any,
+  ): Promise<void> {
+    const messageId = (this.configService.get<string>('FAST2SMS_WHATSAPP_MESSAGE_ID') || process.env.FAST2SMS_WHATSAPP_MESSAGE_ID || '48046').trim();
+    const trackingId = complaint.trackingId || `WMC-${complaint.id.slice(0, 8).toUpperCase()}`;
+    const citizenName = complaint.name || 'नागरिक';
+
+    let officerName = (currentUser?.name || '').trim();
+    let officerMobile = (currentUser?.mobile || '').trim();
+
+    if (!officerMobile && currentUser?.id) {
+      try {
+        const officerRecord = await (this.prisma.admin as any).findUnique({
+          where: { id: currentUser.id },
+          select: { name: true, mobile: true },
+        });
+        if (officerRecord) {
+          officerName = officerName || officerRecord.name || '';
+          officerMobile = officerRecord.mobile || '';
+        }
+      } catch {
+        // ignore lookup failure
+      }
+    }
+
+    const safeOfficerName = officerName || 'विभागीय अधिकारी';
+    const safeOfficerMobile = officerMobile || '02167-220022';
+
+    await this.sendFast2SmsWhatsApp(
+      complaint.mobile,
+      messageId,
+      [citizenName, trackingId, safeOfficerName, safeOfficerMobile],
+      trackingId,
+    );
   }
 
   private generateTrackingId(): string {
@@ -328,7 +359,7 @@ export class GrievancesService {
       attachments = data.photoUrls.map((u: string) => ({ url: u, name: 'photo' }));
     }
 
-    return this.prisma.complaint.create({
+    const created = await this.prisma.complaint.create({
       data: {
         name: data.name || data.citizenName,
         mobile: data.mobile || data.citizenPhone,
@@ -341,6 +372,9 @@ export class GrievancesService {
         attachments,
       },
     });
+
+    void this.sendSubmissionWhatsAppNotification(created);
+    return created;
   }
 
   async trackByToken(trackingId: string, mobile?: string) {
