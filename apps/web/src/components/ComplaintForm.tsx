@@ -315,7 +315,7 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
-                {t("जवळचा परिसर / खूण (Landmark)", "Nearby Area / Landmark")}
+                {t("आपली समस्या कोणत्या भागात आहे?", "Which area is your issue in?")}
               </label>
               <select
                 value={selectedLandmark}
