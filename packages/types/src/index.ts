@@ -34,7 +34,7 @@ function toMarathiDigits(n: number): string {
 }
 
 export const MUNICIPAL_WARDS: MunicipalWard[] = [
-  ...Array.from({ length: 23 }, (_, i) => {
+  ...Array.from({ length: 11 }, (_, i) => {
     const num = i + 1;
     const mrNum = toMarathiDigits(num);
     return {

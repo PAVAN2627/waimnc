@@ -12,7 +12,7 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
   const [trackingId, setTrackingId] = useState<string | null>(null);
   const [mobileValue, setMobileValue] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
-  const [selectedWard, setSelectedWard] = useState("माहिती नाही");
+  const [selectedWard, setSelectedWard] = useState("");
   const [selectedLandmark, setSelectedLandmark] = useState("");
   const [customLandmark, setCustomLandmark] = useState("");
   const [copied, setCopied] = useState(false);
@@ -127,7 +127,7 @@ const ComplaintForm = ({ standalone = false }: { standalone?: boolean }) => {
       form.reset();
       setMobileValue("");
       setSelectedDepartment("");
-      setSelectedWard("माहिती नाही");
+      setSelectedWard("");
       setSelectedLandmark("");
       setCustomLandmark("");
       setFiles([]);

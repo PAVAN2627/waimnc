@@ -56,6 +56,9 @@ export default function WardSelector({
   }, [numberedWards, query]);
 
   const displayLabel = useMemo(() => {
+    if (!value) {
+      return t("प्रभाग निवडा...", "Select Ward...");
+    }
     if (includeAllOption && value === "all") {
       return t("सर्व प्रभाग / वार्ड", "All Wards");
     }
@@ -66,7 +69,7 @@ export default function WardSelector({
     if (found) {
       return lang === "mr" ? found.labelMr : `${found.labelEn} (${found.labelMr})`;
     }
-    return value ? `${t("प्रभाग", "Ward")} ${value}` : t("प्रभाग निवडा", "Select Ward");
+    return `${t("प्रभाग", "Ward")} ${value}`;
   }, [value, includeAllOption, unknownValue, lang, t]);
 
   const handleSelect = (nextVal: string) => {
@@ -162,7 +165,7 @@ export default function WardSelector({
               {/* Compact Ward Grid */}
               <div>
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                  {t("प्रभाग १ ते २३ (निवडा)", "Wards 1 to 23 (Tap to select)")}
+                  {t("प्रभाग १ ते ११ (निवडा)", "Wards 1 to 11 (Tap to select)")}
                 </p>
                 {filteredWards.length === 0 ? (
                   <p className="text-center text-xs text-muted-foreground py-6">
@@ -210,13 +213,13 @@ export default function WardSelector({
                     type="button"
                     onClick={() => handleSelect(unknownValue)}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-xs font-bold transition-all ${
-                      value === unknownValue || (unknownValue === "माहिती नाही" && isUnknownWard(value))
+                      value !== "" && (value === unknownValue || (unknownValue === "माहिती नाही" && isUnknownWard(value)))
                         ? "bg-amber-600 text-white border-amber-600 shadow-sm"
                         : "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-800 dark:text-amber-300"
                     }`}
                   >
                     <span>{t("माहिती नाही / अज्ञात प्रभाग", "Don't know / Unknown Ward")}</span>
-                    {(value === unknownValue || (unknownValue === "माहिती नाही" && isUnknownWard(value))) && (
+                    {value !== "" && (value === unknownValue || (unknownValue === "माहिती नाही" && isUnknownWard(value))) && (
                       <Check className="w-4 h-4 shrink-0" />
                     )}
                   </button>
